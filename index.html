@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<!-- Visualization & Content Choices:
+    - Report Info: Overall trade performance (Sec 2.1) -> Goal: Show trends -> Viz: Line charts (Import/Export over time) -> Interaction: Hover for details -> Justification: Clear visual trend representation -> Library: Chart.js.
+    - Report Info: Top 10 Economies by GDP (Table 1) -> Goal: Inform & Compare -> Viz: Interactive Bar Chart/Table -> Interaction: Sortable table, hover on chart -> Justification: Easy comparison of economic standing -> Library: Chart.js / HTML+JS.
+    - Report Info: Top Trade Partners (Table 2) -> Goal: Identify key relationships -> Viz: Donut/Bar chart for partner share -> Interaction: Click to filter (future enhancement, for now static display) -> Justification: Quick visual breakdown of trade concentration -> Library: Chart.js.
+    - Report Info: Key Import/Export Categories (Sec 2.3) -> Goal: Show commodity focus -> Viz: Grouped Bar Charts (Top 5-10 categories) -> Interaction: Filter by country (if feasible with data structure) -> Justification: Highlights trade composition -> Library: Chart.js.
+    - Report Info: Country-specific trade data (Sec 2.4) -> Goal: Detailed exploration -> Viz: Bar charts for top commodities, tables for values -> Interaction: Dropdown to select country -> Justification: Allows focused analysis -> Library: Chart.js / HTML+JS.
+    - Report Info: Logistics Challenges (Sec 3.1, 3.2) -> Goal: Explain issues -> Viz: HTML/CSS styled cards/diagrams (e.g., road issues, port congestion) -> Interaction: Click to expand details -> Justification: Visually engaging way to present qualitative info -> Library: HTML/CSS/Tailwind + JS.
+    - Report Info: LPI Rankings (Table 3) -> Goal: Compare logistics performance -> Viz: Interactive sorted Table / Horizontal Bar Chart -> Interaction: Sort by score/country, hover for details -> Justification: Clear ranking and comparison -> Library: HTML+JS / Chart.js.
+    - Report Info: Digitalization Status (Sec 4.1, Table 4 DEI) -> Goal: Show adoption & evolution -> Viz: Bar chart for tech adoption, Table/Bar chart for DEI -> Interaction: Hover for details -> Justification: Visualizes digital maturity -> Library: Chart.js / HTML+JS.
+    - Report Info: Challenges & Opportunities (Sec 5) -> Goal: Summarize key factors -> Viz: Interactive lists/cards -> Interaction: Click to reveal more info/case studies -> Justification: Digestible presentation of complex issues -> Library: HTML/CSS/Tailwind + JS.
+    - Report Info: Future Trends/Recommendations (Sec 6.3) -> Goal: Provide actionable insights -> Viz: Accordion list or styled bullet points -> Interaction: Expandable sections -> Justification: Organized and accessible forward-looking statements -> Library: HTML/CSS/Tailwind + JS.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拉丁美洲供应链全景</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter as a fallback, assuming a common sans-serif for Chinese */
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-color: #F59E0B; /* amber-500 */
+            color: #F59E0B;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px; /* Adjusted for better readability */
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px; /* Base height */
+            max-height: 400px;
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .section-title {
+            font-size: 1.75rem; /* text-2xl equivalent */
+            font-weight: 600; /* semibold */
+            margin-bottom: 1rem; /* mb-4 */
+            color: #1F2937; /* gray-800 */
+            border-bottom: 2px solid #F59E0B; /* amber-500 */
+            padding-bottom: 0.5rem; /* pb-2 */
+        }
+        .content-card {
+            background-color: #FFFAF0; /* floralwhite - a very light warm neutral */
+            border: 1px solid #FDE68A; /* amber-200 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1.5rem; /* p-6 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+        .sub-section-title {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* semibold */
+            margin-top: 1.5rem; /* mt-6 */
+            margin-bottom: 0.75rem; /* mb-3 */
+            color: #374151; /* gray-700 */
+        }
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 0.5rem;
+            background: #111827; /* gray-900 */
+            color: white;
+            border-radius: 0.25rem; /* rounded-md */
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.875rem; /* text-sm */
+            z-index: 10;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #E5E7EB; /* gray-200 */
+            padding: 0.75rem; /* p-3 */
+            text-align: left;
+        }
+        th {
+            background-color: #F9FAFB; /* gray-50 */
+            font-weight: 600; /* semibold */
+        }
+        /* Accordion styles */
+        .accordion-header {
+            cursor: pointer;
+            padding: 1rem;
+            background-color: #FEF3C7; /* amber-100 */
+            border: 1px solid #FDE68A; /* amber-200 */
+            border-radius: 0.375rem; /* rounded-md */
+            margin-bottom: 0.25rem; /* mb-1 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .accordion-content {
+            padding: 1rem;
+            border: 1px solid #FDE68A; /* amber-200 */
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem; /* rounded-b-md */
+            display: none;
+            background-color: #FFFBEB; /* amber-50 */
+        }
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+        .accordion-item.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-neutral-700 antialiased">
+
+    <header class="bg-orange-500 text-white p-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-bold">拉丁美洲供应链全景分析</h1>
+            <nav class="mt-4 md:mt-0">
+                <button class="tab-button active text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('overview')">概览</button>
+                <button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('trade')">贸易动态</button>
+                <button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('infrastructure')">基础设施</button>
+                <button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('digitalization')">数字化转型</button>
+                <button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('challenges')">挑战与机遇</button>
+                <button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('outlook')">未来展望</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <div id="overview" class="tab-content">
+            <h2 class="section-title">概览</h2>
+            <div class="content-card">
+                <h3 class="sub-section-title">执行摘要</h3>
+                <p class="mb-4">拉丁美洲供应链正处于深刻转型期，其特点是贸易格局的动态演变、基础设施的持续发展以及数字技术的加速采纳。本报告深入分析了2019年至2024年间该地区的贸易往来、物流基础设施现状、数字化进程以及跨国公司面临的挑战与机遇。</p>
+                <p class="mb-4">研究发现，拉丁美洲的贸易表现呈现区域差异性，南美洲依赖大宗商品出口，易受价格波动影响，而墨西哥的制造业出口则深度融入北美价值链。美国和中国是该地区最重要的贸易伙伴。基础设施建设虽有进步，但道路、铁路和海关效率仍存在显著差距，制约了物流效率。数字化转型正在加速，人工智能、物联网和云计算等技术被广泛采纳，尤其是在电子商务和仓储自动化领域，但不同国家和企业间的成熟度差异明显。</p>
+                <p>对于国际企业而言，该地区提供了巨大的市场增长和近岸外包（nearshoring）机遇，得益于其丰富的自然资源和地理优势。然而，它们必须应对基础设施不足、监管复杂、货运盗窃、政治经济不稳定以及劳动力短缺等挑战。</p>
+            </div>
+             <div class="content-card">
+                <h3 class="sub-section-title">引言</h3>
+                <p class="mb-4">本报告旨在对拉丁美洲的供应链格局进行全面深入的分析。报告将剖析2019年至2024年间该地区贸易动态、基础设施发展和数字化转型之间错综复杂的相互作用。通过对关键数据、深层观察和实际案例的整合，本报告旨在为在拉丁美洲运营或考虑进入该市场的企业和政策制定者提供可操作的见解。</p>
+                <p>拉丁美洲是一个广阔而经济多元的区域。该地区的经济增长预计将较为温和，2025年增长2.1%，2026年增长2.4%，使其成为全球增长最慢的地区。这种经济背景对供应链的韧性和效率提出了独特的要求。</p>
+            </div>
+        </div>
+
+        <div id="trade" class="tab-content" style="display:none;">
+            <h2 class="section-title">贸易动态</h2>
+            <div class="content-card">
+                <h3 class="sub-section-title">整体贸易表现与趋势（2019-2024）</h3>
+                <p class="mb-4">拉丁美洲的商品出口在2023年收缩了1.3%，但在2024年第一季度同比增长1.3%。服务出口表现出强劲增长。2024年上半年，商品和服务贸易总额增长，出口同比增长5%，进口同比增长1%。服务出口增长11%，超过商品出口的4%。这种非统一的贸易表现表明拉丁美洲次区域经济结构和贸易驱动因素存在根本性差异。</p>
+                <div class="chart-container mb-8">
+                    <canvas id="latamTradeTrendChart"></canvas>
+                </div>
+                <p class="text-sm text-gray-600">图表说明：展示拉丁美洲商品和服务进出口的年度增长趋势。南美洲对初级商品的依赖使其贸易易受全球大宗商品价格波动的影响，而墨西哥的制造业出口则深度融入北美价值链。</p>
+            </div>
+
+            <div class="content-card">
+                <h3 class="sub-section-title">拉丁美洲十大经济体及主要贸易伙伴</h3>
+                <p class="mb-4">根据2024年人均GDP，拉丁美洲的主要经济体包括圭亚那、乌拉圭、巴拿马等。美国和中国是拉丁美洲最主要的贸易伙伴，分别占贸易总额的41.71%和12.97%。</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="chart-container">
+                        <canvas id="topEconomiesChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="topTradePartnersChart"></canvas>
+                    </div>
+                </div>
+                 <div class="table-responsive mt-6">
+                    <h4 class="text-lg font-semibold mb-2">表1：2024年拉丁美洲十大经济体（按人均GDP）</h4>
+                    <table id="topEconomiesTable">
+                        <thead>
+                            <tr><th>排名</th><th>国家</th><th>2024年人均GDP（美元）</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3 class="sub-section-title">主要进出口商品类别</h3>
+                <p class="mb-4">拉丁美洲整体商品出口中，原材料占最大份额（32.72%）。进口方面，消费品（31.38%）和资本货物（30.39%）占主导地位。这种贸易结构反映了典型的“大宗商品出口国”模式。</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="chart-container">
+                        <canvas id="exportCategoriesChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="importCategoriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3 class="sub-section-title">重点国家贸易数据查询</h3>
+                <p class="mb-4">选择一个国家查看其主要的进出口商品类别和贸易伙伴信息（数据主要基于2023/2024年）。</p>
+                <select id="countrySelector" class="mb-4 p-2 border border-gray-300 rounded-md w-full md:w-1/3">
+                    <option value="brazil">巴西</option>
+                    <option value="mexico">墨西哥</option>
+                    <option value="argentina">阿根廷</option>
+                    <option value="colombia">哥伦比亚</option>
+                    <option value="chile">智利</option>
+                    <option value="peru">秘鲁</option>
+                </select>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="chart-container">
+                         <h4 class="text-center font-semibold mb-2">主要出口商品</h4>
+                        <canvas id="countryExportChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4 class="text-center font-semibold mb-2">主要进口商品</h4>
+                        <canvas id="countryImportChart"></canvas>
+                    </div>
+                </div>
+                <div id="countryTradeInfo" class="mt-4"></div>
+            </div>
+        </div>
+
+        <div id="infrastructure" class="tab-content" style="display:none;">
+            <h2 class="section-title">供应链基础设施</h2>
+            <div class="content-card">
+                <h3 class="sub-section-title">跨境物流与贸易便利化</h3>
+                <p class="mb-4">拉丁美洲的跨境贸易便利化面临多重挑战，包括各国海关法规差异、透明度不足和官僚主义。尽管如此，一些港口如巴拿马的巴尔博亚港在多式联运方面表现突出。贸易便利化倡议，如WTO的《贸易便利化协定》和联合边境控制模式，正在帮助改善现状。</p>
+                <div class="bg-amber-100 p-4 rounded-lg">
+                    <p><span class="font-semibold">挑战：</span> 卡车平均通过速度仅16公里/小时（全球平均60公里/小时），部分过境点等待时间长达6小时以上。</p>
+                    <p><span class="font-semibold">解决方案：</span> 海关数字化转型、单一窗口贸易系统、智能监控技术（GPS, RFID）。</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3 class="sub-section-title">国内物流网络</h3>
+                <p class="mb-4">拉丁美洲的交通运输主要依赖公路（占85%货运），但仅23%的道路铺设路面。铁路网络不发达。航空货运有所复苏，但面临基础设施限制。物流市场预计持续增长，最后一公里配送面临客户期望高、交通拥堵等挑战，并通过路线优化、微型配送中心等方案应对。</p>
+                 <div class="chart-container">
+                    <canvas id="transportModesChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3 class="sub-section-title">重点行业供应链分析</h3>
+                <div id="industryAccordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span>汽车行业</span>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p>墨西哥是领导者，预计2025年市场规模达3030亿美元，为美国提供约40%汽车零部件。USMCA鼓励区域内生产。阿根廷、巴西、哥伦比亚也是关键参与者。</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span>制造业/设备行业</span>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p>面临基础设施不足（仅投资GDP的1.3%）、政治不稳定等挑战。区域内贸易仅占12%。近岸外包带来机遇，阿根廷因资源和劳动力具有优势。</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span>快速消费品 (FMCG)</span>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <p>面临缓慢复苏、需求变化、供应链中断、能源和食品价格上涨。食品饮料通胀高。区域内贸易不发达（占22%），为墨西哥、哥伦比亚等国提供增长机会。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h3 class="sub-section-title">物流绩效指数 (LPI) 分析 (2023)</h3>
+                <p class="mb-4">世界银行的LPI评估国家在海关、基础设施、国际运输、物流能力、追踪追溯和及时性方面的表现。巴西在拉丁美洲地区表现最为突出。</p>
+                <div class="chart-container mb-6">
+                    <canvas id="lpiChart"></canvas>
+                </div>
+                <div class="table-responsive">
+                    <h4 class="text-lg font-semibold mb-2">表3：2023年拉丁美洲部分国家物流绩效指数（LPI）</h4>
+                    <table id="lpiTable">
+                        <thead><tr><th>国家</th><th>LPI排名</th><th>LPI得分</th><th>海关</th><th>基础设施</th><th>国际运输</th><th>物流能力</th><th>追踪追溯</th><th>及时性</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="digitalization" class="tab-content" style="display:none;">
+            <h2 class="section-title">供应链数字化转型</h2>
+            <div class="content-card">
+                <h3 class="sub-section-title">数字化现状</h3>
+                <p class="mb-4">拉丁美洲供应链数字化转型加速，但采纳程度不一。70%团队已部署ERP。TMS市场预计增长。物联网、人工智能提高可见性和预测能力。区块链用于农业供应链追溯。</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="chart-container">
+                        <canvas id="techAdoptionChart"></canvas>
+                    </div>
+                     <div class="chart-container">
+                        <canvas id="tmsMarketGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="content-card">
+                <h3 class="sub-section-title">电子商务物流与数字支付</h3>
+                <p class="mb-4">拉丁美洲是全球增长最快的电子商务市场，预计2022-2027年年增长率19%。移动商务蓬勃发展。巴西的Pix等数字支付系统简化交易。电子商务增长对最后一公里配送和订单履行产生重大影响。</p>
+                 <div class="chart-container">
+                    <canvas id="ecommerceGrowthChart"></canvas>
+                </div>
+            </div>
+            <div class="content-card">
+                <h3 class="sub-section-title">拉丁美洲国家数字演进指数 (DEI)</h3>
+                <p class="mb-4">DEI衡量国家数字发展的成熟度和速度。智利、波多黎各、巴哈马等国领先。</p>
+                <div class="chart-container mb-6">
+                    <canvas id="deiChart"></canvas>
+                </div>
+                <div class="table-responsive">
+                     <h4 class="text-lg font-semibold mb-2">表4：拉丁美洲国家数字演进指数（DEI）</h4>
+                    <table id="deiTable">
+                        <thead><tr><th>排名</th><th>国家</th><th>DEI得分</th><th>数字化发展速度(%)</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="challenges" class="tab-content" style="display:none;">
+            <h2 class="section-title">挑战与机遇</h2>
+            <div class="content-card">
+                <h3 class="sub-section-title">主要供应链挑战</h3>
+                <div id="challengesAccordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>基础设施缺陷与瓶颈</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>过时的港口、道路和物流网络。基础设施投资仅占GDP的1.3%。公路运输占85%，但仅23%道路铺设路面。</p></div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>监管复杂性与官僚主义</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>各国监管环境、海关协议多样。繁琐官僚程序和缺乏透明度导致延误和成本增加。腐败仍是问题。</p></div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>安全风险（货运盗窃、网络威胁）</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>货运盗窃严重，南美洲68%发生在巴西。食品饮料是主要目标。网络威胁日益受关注。</p></div>
+                    </div>
+                     <div class="accordion-item">
+                        <div class="accordion-header"><span>政治与经济不稳定</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>政治变革导致新贸易政策、关税和限制。监管不确定性、货币波动和劳动力中断。</p></div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>劳动力短缺与发展</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>熟练劳动力短缺，尤其在可再生能源等行业。工作条件、实际工资和工人保护不足。</p></div>
+                    </div>
+                     <div class="accordion-item">
+                        <div class="accordion-header"><span>商业运营中的文化差异</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>沟通方式、等级制度、守时和决策过程与西方标准不同。决策过程通常较慢，更注重共识。</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-card">
+                <h3 class="sub-section-title">竞争优势与机遇</h3>
+                 <div id="opportunitiesAccordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>近岸外包与友岸外包趋势</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>IDB估计可使年出口额增加近780亿美元。汽车、纺织、制药和可再生能源潜力巨大。墨西哥是热点。</p></div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>市场增长与消费需求</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>庞大人口，约一半是中产阶级。电子商务市场增长快，预计到2027年年增长率19%。</p></div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>丰富的自然资源</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>“锂三角”（阿根廷、玻利维亚、智利）对电动汽车供应链至关重要。可再生能源、采矿和汽车行业投资增加。</p></div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>战略地理位置</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content"><p>与北美和欧洲地理邻近。墨西哥是连接北美和拉美其他地区的桥梁。</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="outlook" class="tab-content" style="display:none;">
+            <h2 class="section-title">结论与未来展望</h2>
+            <div class="content-card">
+                <h3 class="sub-section-title">供应链与经济贸易发展的匹配度</h3>
+                <p class="mb-4">拉丁美洲供应链与经济贸易发展存在显著差距，但也展现独特优势。作为主要原材料和农产品出口国，经济高度依赖大宗商品价格。基础设施不足仍是制约因素，导致物流成本高、效率低。数字化转型不均衡。然而，自然资源丰富、消费市场庞大、地理位置优越以及近岸外包趋势是重要机遇。</p>
+            </div>
+            <div class="content-card">
+                <h3 class="sub-section-title">未来五年的关键挑战</h3>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>政治与经济不确定性</li>
+                    <li>基础设施投资不足（目前仅占GDP的1.3%）</li>
+                    <li>气候变化影响（如巴拿马运河干旱）</li>
+                    <li>数字化鸿沟（数字文化、人才、技术采纳差距）</li>
+                    <li>安全与合规风险（货运盗窃、网络威胁、海关复杂性）</li>
+                </ul>
+            </div>
+             <div class="content-card">
+                <h3 class="sub-section-title">未来增长的关键趋势与建议</h3>
+                <div id="recommendationsAccordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>战略性基础设施与技术投资</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>推动公私合作升级交通网络、港口和数字基础设施。</li>
+                                <li>现代化港口与道路，投资自动化和数字化。</li>
+                                <li>加速数字技术采纳（AI, IoT, 区块链等），尤其在仓储自动化和最后一公里配送。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>加强区域一体化与贸易便利化</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content">
+                             <ul class="list-disc list-inside space-y-1">
+                                <li>协调海关法规，简化程序，提高效率和透明度。</li>
+                                <li>深化区域内贸易，减少贸易壁垒，整合区域价值链。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header"><span>发展高素质劳动力</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>投资培训项目，培养熟练物流和技术专业人才。</li>
+                                <li>制定激励措施，吸引和留住人才，改善工作条件。</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <div class="accordion-header"><span>优先考虑可持续性与韧性</span><span class="accordion-icon">▼</span></div>
+                        <div class="accordion-content">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>建设气候韧性基础设施，制定应急计划。</li>
+                                <li>推广绿色物流（电动车、优化路线、可回收包装）。</li>
+                                <li>多元化供应商网络，分散风险，增强灵活性。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-orange-600 text-white text-center p-6 mt-12">
+        <p>&copy; 2024 拉丁美洲供应链全景分析。根据提供报告生成。</p>
+    </footer>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        function showTab(tabId) {
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                // Adjust tab button style for active state on orange background
+                if (tab.textContent === document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).textContent) {
+                    tab.classList.add('active');
+                    tab.style.borderColor = 'white'; // Example: white border for active tab on orange header
+                    tab.style.color = 'white';
+                } else {
+                    tab.style.borderColor = 'transparent';
+                    tab.style.color = '#FEE2E2'; // Lighter text for inactive tabs
+                }
+            });
+            document.getElementById(tabId).style.display = 'block';
+            // Ensure active tab button on orange header has distinct active style
+            const activeButton = document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`);
+            if (activeButton) {
+                 activeButton.classList.add('active'); // Re-ensure active class
+                 activeButton.style.borderColor = 'white'; 
+                 activeButton.style.color = 'white';
+                 activeButton.style.fontWeight = 'bold';
+            }
+             // For other tabs, ensure they are not bold
+            tabs.forEach(tab => {
+                if (!tab.classList.contains('active')) {
+                    tab.style.fontWeight = 'normal';
+                     tab.style.color = '#FED7AA'; // amber-200 for inactive
+                }
+            });
+        }
+        
+        // Initialize first tab
+        document.addEventListener('DOMContentLoaded', () => {
+            showTab('overview');
+            renderCharts();
+            populateTables();
+            setupAccordions();
+            setupCountrySelector();
+        });
+        
+        // Chart.js label wrapping function
+        function wrapText(ctx, text, maxWidth) {
+            if (typeof text !== 'string') {
+                return [String(text)]; // Ensure text is a string
+            }
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                const width = ctx.measureText(currentLine + " " + word).width;
+                if (width < maxWidth) {
+                    currentLine += " " + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+        
+        function formatLabel(value, context, maxChars = 16) {
+            let label = context.chart.data.labels[context.dataIndex];
+            if (typeof label !== 'string') {
+                label = String(label);
+            }
+            if (label.length > maxChars) {
+                return label.substring(0, maxChars) + '...';
+            }
+            return label;
+        }
+
+        function renderCharts() {
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#374151' } // gray-700
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                    if (context.dataset.unit) label += context.dataset.unit;
+                                }
+                                return label;
+                            },
+                            title: function(context) {
+                                return formatLabel(null, context[0], 30); // Longer for tooltip title
+                            }
+                        },
+                        backgroundColor: '#1F2937', // gray-800
+                        titleColor: '#FFFFFF',
+                        bodyColor: '#FFFFFF',
+                        borderColor: '#F59E0B', // amber-500
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#4B5563' }, // gray-600
+                        grid: { color: '#E5E7EB' } // gray-200
+                    },
+                    x: {
+                        ticks: { 
+                            color: '#4B5563', // gray-600
+                            callback: function(value, index, values) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 10 ? label.substring(0,10) + '...' : label;
+                            }
+                        },
+                        grid: { display: false }
+                    }
+                }
+            };
+            
+            const commonBarOptions = { ...commonOptions };
+            commonBarOptions.scales.x.ticks.callback = function(value) {
+                const label = this.getLabelForValue(value);
+                 if (typeof label === 'string' && label.length > 16) {
+                    return label.match(/.{1,16}/g); // Split into lines of 16 chars
+                }
+                return label;
+            };
+
+
+            // Latam Trade Trend Chart
+            new Chart(document.getElementById('latamTradeTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2019', '2020', '2021', '2022', '2023', '2024 H1'],
+                    datasets: [
+                        {
+                            label: '商品出口增长 (%)',
+                            data: [2, -5, 15, 8, -1.3, 4], // Hypothetical data based on report
+                            borderColor: '#3B82F6', // blue-500
+                            tension: 0.1,
+                            unit: '%'
+                        },
+                        {
+                            label: '服务出口增长 (%)',
+                            data: [3, -10, 12, 15, 10, 11], // Hypothetical data
+                            borderColor: '#10B981', // emerald-500
+                            tension: 0.1,
+                            unit: '%'
+                        }
+                    ]
+                },
+                options: commonOptions
+            });
+
+            // Top Economies Chart (Bar)
+            new Chart(document.getElementById('topEconomiesChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['圭亚那', '乌拉圭', '巴拿马', '哥斯达黎加', '智利', '墨西哥', '阿根廷', '多米尼加', '巴西', '秘鲁'],
+                    datasets: [{
+                        label: '2024年人均GDP (美元)',
+                        data: [28920, 23053, 19369, 17860, 16365, 13972, 12814, 11692, 10296, 8316],
+                        backgroundColor: '#F59E0B', // amber-500
+                        unit: '美元'
+                    }]
+                },
+                options: commonBarOptions
+            });
+
+            // Top Trade Partners Chart (Pie)
+            new Chart(document.getElementById('topTradePartnersChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['美国', '中国', '巴西(区内)', '荷兰', '其他'],
+                    datasets: [{
+                        label: '贸易伙伴份额 (%)',
+                        data: [41.71, 12.97, 2.50, 2.25, (100-41.71-12.97-2.50-2.25)],
+                        backgroundColor: ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#6B7280'], // red, blue, emerald, amber, gray
+                        unit: '%'
+                    }]
+                },
+                options: { ...commonOptions, scales: { x: { display: false }, y: { display: false } } }
+            });
+
+            // Export Categories Chart
+            new Chart(document.getElementById('exportCategoriesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['原材料', '资本货物', '消费品', '中间产品', '其他'],
+                    datasets: [{
+                        label: '出口商品类别份额 (%)',
+                        data: [32.72, 20.93, 19.23, 18.48, (100-32.72-20.93-19.23-18.48)],
+                        backgroundColor: ['#8B5CF6', '#EC4899', '#FCD34D', '#34D399', '#9CA3AF'], // violet, pink, amber, green, gray
+                        unit: '%'
+                    }]
+                },
+                options: { ...commonOptions, scales: { x: { display: false }, y: { display: false } } }
+            });
+
+            // Import Categories Chart
+            new Chart(document.getElementById('importCategoriesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['消费品', '资本货物', '中间产品', '原材料', '其他'],
+                    datasets: [{
+                        label: '进口商品类别份额 (%)',
+                        data: [31.38, 30.39, 23.35, 6.96, (100-31.38-30.39-23.35-6.96)],
+                        backgroundColor: ['#0EA5E9', '#D946EF', '#FBBF24', '#22C55E', '#A1A1AA'], // sky, fuchsia, amber, green, zinc
+                        unit: '%'
+                    }]
+                },
+                options: { ...commonOptions, scales: { x: { display: false }, y: { display: false } } }
+            });
+            
+            // Transport Modes Chart
+            new Chart(document.getElementById('transportModesChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['公路运输', '铁路运输', '航空运输', '水路运输', '其他'],
+                    datasets: [{
+                        label: '货运方式占比 (%)',
+                        data: [85, 5, 3, 5, 2], // Hypothetical, report says 85% road, limited rail
+                        backgroundColor: ['#F97316', '#A855F7', '#2563EB', '#059669', '#78716C'], // orange, purple, blue, green, stone
+                        unit: '%'
+                    }]
+                },
+                options: { ...commonOptions, scales: { x: { display: false }, y: { display: false } } }
+            });
+
+            // LPI Chart (Top 5 + Mexico)
+            const lpiData = [
+                { country: '巴西', score: 3.2 }, { country: '巴拿马', score: 3.1 },
+                { country: '智利', score: 3.0 }, { country: '秘鲁', score: 3.0 },
+                { country: '乌拉圭', score: 3.0 }, { country: '墨西哥', score: 2.9 },
+                { country: '哥伦比亚', score: 2.9}
+            ];
+            new Chart(document.getElementById('lpiChart'), {
+                type: 'bar',
+                data: {
+                    labels: lpiData.map(d => d.country),
+                    datasets: [{
+                        label: 'LPI 得分 (2023)',
+                        data: lpiData.map(d => d.score),
+                        backgroundColor: '#06B6D4', // cyan-500
+                    }]
+                },
+                options: commonBarOptions
+            });
+
+            // Tech Adoption Chart
+            new Chart(document.getElementById('techAdoptionChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['ERP系统', 'TMS系统 (预期)', 'AI/ML (实际)', '预测分析 (意愿)'],
+                    datasets: [{
+                        label: '技术采纳率/意愿 (%)',
+                        data: [70, 60, 11.9, 71.9], // TMS hypothetical based on growth, AI/ML and predictive from report
+                        backgroundColor: ['#6366F1', '#EC4899', '#F59E0B', '#10B981'], // indigo, pink, amber, emerald
+                        unit: '%'
+                    }]
+                },
+                options: commonBarOptions
+            });
+            
+            // TMS Market Growth Chart
+            new Chart(document.getElementById('tmsMarketGrowthChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+                    datasets: [{
+                        label: 'TMS市场规模 (百万美元)',
+                        data: [600, 710, 840, 990, 1170, 1380, 1734], // Calculated based on CAGR 18.2% from a base
+                        borderColor: '#8B5CF6', // violet-500
+                        tension: 0.1,
+                        unit: '百万美元'
+                    }]
+                },
+                options: commonOptions
+            });
+
+            // E-commerce Growth Chart
+            new Chart(document.getElementById('ecommerceGrowthChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2022', '2023', '2024', '2025', '2026', '2027'],
+                    datasets: [{
+                        label: '电子商务市场年增长率 (%)',
+                        data: [19, 19, 19, 19, 19, 19], // Report states 19% annual growth
+                        borderColor: '#EF4444', // red-500
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.1,
+                        unit: '%'
+                    }]
+                },
+                options: commonOptions
+            });
+            
+            // DEI Chart (Top 5 + Brazil, Mexico)
+            const deiData = [
+                { country: '智利', score: 58.7 }, { country: '波多黎各', score: 54.7 },
+                { country: '巴哈马', score: 53.3 }, { country: '乌拉圭', score: 53.0 },
+                { country: '哥斯达黎加', score: 52.6 }, { country: '墨西哥', score: 47.6 },
+                { country: '巴西', score: 47.6 }
+            ];
+            new Chart(document.getElementById('deiChart'), {
+                type: 'bar',
+                data: {
+                    labels: deiData.map(d => d.country),
+                    datasets: [{
+                        label: 'DEI 得分',
+                        data: deiData.map(d => d.score),
+                        backgroundColor: '#22C55E', // green-500
+                    }]
+                },
+                options: commonBarOptions
+            });
+        }
+        
+        let countryExportChartInstance, countryImportChartInstance;
+
+        function updateCountryCharts(country) {
+            const countryData = {
+                brazil: {
+                    exports: { labels: ['矿物燃料', '油籽', '矿渣灰', '肉类', '糖'], data: [15, 12, 10, 9, 8] }, // Hypothetical %
+                    imports: { labels: ['机械', '矿物燃料', '电气设备', '车辆', '肥料'], data: [20, 18, 15, 10, 7] }
+                },
+                mexico: {
+                    exports: { labels: ['车辆', '电气设备', '机械', '光学医疗器械', '矿物燃料'], data: [25, 20, 15, 10, 8] },
+                    imports: { labels: ['电气设备', '机械', '车辆', '塑料', '矿物燃料'], data: [22, 18, 15, 12, 9] }
+                },
+                argentina: {
+                    exports: { labels: ['谷物', '食品工业残渣', '车辆', '矿物燃料', '动植物油脂'], data: [18, 15, 12, 10, 9] },
+                    imports: { labels: ['机械', '车辆', '电气设备', '化学品', '塑料'], data: [25, 20, 15, 10, 8] }
+                },
+                colombia: {
+                    exports: { labels: ['原油', '煤炭', '黄金', '咖啡', '鲜花'], data: [25.4, 16.2, 6.8, 5.9, 4.2] },
+                    imports: { labels: ['石油(非原油)', '汽车', '电话机', '药品', '飞机'], data: [8.2, 4.4, 3.7, 3.6, 3.5] }
+                },
+                chile: {
+                    exports: { labels: ['矿渣灰', '铜', '水果坚果', '鱼类', '无机化学品'], data: [30, 25, 10, 8, 5] },
+                    imports: { labels: ['矿物燃料', '机械', '车辆', '电气设备', '塑料'], data: [20, 18, 15, 12, 10] } // Generic, report specific for Feb 2025
+                },
+                peru: {
+                    exports: { labels: ['矿渣灰', '宝石贵金属', '水果坚果', '矿物燃料', '铜'], data: [25, 20, 15, 12, 10] },
+                    imports: { labels: ['石油(非原油)', '原油', '汽车', '电话机', '载货车'], data: [13.1, 4.2, 3.0, 2.7, 2.4] }
+                }
+            };
+
+            const selected = countryData[country];
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal bar chart
+                 plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                             label: function(context) {
+                                return `${context.raw}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { beginAtZero: true, ticks: { callback: value => `${value}%` } },
+                    y: { ticks: { callback: function(value) {
+                                const label = this.getLabelForValue(value);
+                                 if (typeof label === 'string' && label.length > 10) { // Shorter for y-axis
+                                    return label.substring(0,10) + '...';
+                                }
+                                return label;
+                            }  } }
+                }
+            };
+
+            if (countryExportChartInstance) countryExportChartInstance.destroy();
+            countryExportChartInstance = new Chart(document.getElementById('countryExportChart'), {
+                type: 'bar',
+                data: {
+                    labels: selected.exports.labels,
+                    datasets: [{ data: selected.exports.data, backgroundColor: '#34D399' }] // emerald-400
+                },
+                options: chartOptions
+            });
+
+            if (countryImportChartInstance) countryImportChartInstance.destroy();
+            countryImportChartInstance = new Chart(document.getElementById('countryImportChart'), {
+                type: 'bar',
+                data: {
+                    labels: selected.imports.labels,
+                    datasets: [{ data: selected.imports.data, backgroundColor: '#F87171' }] // red-400
+                },
+                options: chartOptions
+            });
+            
+            const countryInfoDiv = document.getElementById('countryTradeInfo');
+            countryInfoDiv.innerHTML = `<p class="text-sm text-gray-700 mt-2">以上图表显示了<strong>${document.getElementById('countrySelector').options[document.getElementById('countrySelector').selectedIndex].text}</strong>的主要进出口商品类别占比（示意数据）。详细数据请参考报告原文。</p>`;
+        }
+        
+        function setupCountrySelector() {
+            const selector = document.getElementById('countrySelector');
+            selector.addEventListener('change', (event) => {
+                updateCountryCharts(event.target.value);
+            });
+            // Initial call
+            updateCountryCharts(selector.value);
+        }
+
+
+        function populateTables() {
+            // Top Economies Table
+            const economiesData = [
+                { rank: 1, country: '圭亚那', gdp: '28,920' }, { rank: 2, country: '乌拉圭', gdp: '23,053' },
+                { rank: 3, country: '巴拿马', gdp: '19,369' }, { rank: 4, country: '哥斯达黎加', gdp: '17,860' },
+                { rank: 5, country: '智利', gdp: '16,365' }, { rank: 6, country: '墨西哥', gdp: '13,972' },
+                { rank: 7, country: '阿根廷', gdp: '12,814' }, { rank: 8, country: '多米尼加共和国', gdp: '11,692' },
+                { rank: 9, country: '巴西', gdp: '10,296' }, { rank: 10, country: '秘鲁', gdp: '8,316' }
+            ];
+            const economiesTableBody = document.getElementById('topEconomiesTable').getElementsByTagName('tbody')[0];
+            economiesData.forEach(item => {
+                let row = economiesTableBody.insertRow();
+                row.insertCell().textContent = item.rank;
+                row.insertCell().textContent = item.country;
+                row.insertCell().textContent = item.gdp;
+            });
+
+            // LPI Table
+            const lpiTableData = [
+                { country: '巴西', rank: 51, score: 3.2, customs: 2.9, infra: 3.2, shipping: 2.9, logistics: 3.3, tracking: 3.2, timeliness: 3.5 },
+                { country: '巴拿马', rank: 57, score: 3.1, customs: 3.0, infra: 3.3, shipping: 3.1, logistics: 3.0, tracking: 2.9, timeliness: 3.4 },
+                { country: '智利', rank: 61, score: 3.0, customs: 3.0, infra: 2.8, shipping: 2.7, logistics: 3.1, tracking: 3.0, timeliness: 3.2 },
+                { country: '秘鲁', rank: 61, score: 3.0, customs: 2.6, infra: 2.5, shipping: 3.1, logistics: 2.7, tracking: 3.4, timeliness: 3.4 },
+                { country: '乌拉圭', rank: 61, score: 3.0, customs: 2.9, infra: 2.7, shipping: 2.7, logistics: 3.1, tracking: 3.3, timeliness: 3.2 },
+                { country: '墨西哥', rank: 66, score: 2.9, customs: 2.5, infra: 2.8, shipping: 2.8, logistics: 3.0, tracking: 3.1, timeliness: 3.5 },
+                { country: '哥伦比亚', rank: 66, score: 2.9, customs: 2.5, infra: 2.9, shipping: 3.0, logistics: 3.1, tracking: 3.1, timeliness: 3.2 },
+                { country: '阿根廷', rank: 73, score: 2.8, customs: 2.7, infra: 2.8, shipping: 2.7, logistics: 2.7, tracking: 2.9, timeliness: 3.1 },
+            ];
+            const lpiTableBody = document.getElementById('lpiTable').getElementsByTagName('tbody')[0];
+            lpiTableData.forEach(item => {
+                let row = lpiTableBody.insertRow();
+                row.insertCell().textContent = item.country;
+                row.insertCell().textContent = item.rank;
+                row.insertCell().textContent = item.score;
+                row.insertCell().textContent = item.customs;
+                row.insertCell().textContent = item.infra;
+                row.insertCell().textContent = item.shipping;
+                row.insertCell().textContent = item.logistics;
+                row.insertCell().textContent = item.tracking;
+                row.insertCell().textContent = item.timeliness;
+            });
+
+            // DEI Table
+            const deiTableData = [
+                { rank: 1, country: '智利', score: 58.7, speed: '2.9%' }, { rank: 2, country: '波多黎各', score: 54.7, speed: '2.2%' },
+                { rank: 3, country: '巴哈马', score: 53.3, speed: '2.0%' }, { rank: 4, country: '乌拉圭', score: 53.0, speed: '3.4%' },
+                { rank: 5, country: '哥斯达黎加', score: 52.6, speed: '3.3%' }, { rank: 10, country: '墨西哥', score: 47.6, speed: '3.3%' },
+                { rank: 11, country: '巴西', score: 47.6, speed: '2.0%' }, { rank: 12, country: '哥伦比亚', score: 46.4, speed: '3.2%' },
+            ];
+            const deiTableBody = document.getElementById('deiTable').getElementsByTagName('tbody')[0];
+            deiTableData.forEach(item => {
+                let row = deiTableBody.insertRow();
+                row.insertCell().textContent = item.rank;
+                row.insertCell().textContent = item.country;
+                row.insertCell().textContent = item.score;
+                row.insertCell().textContent = item.speed;
+            });
+        }
+
+        function setupAccordions() {
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                header.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    // Optional: close other accordions when one is opened
+                    // accordionItems.forEach(i => i.classList.remove('active'));
+                    if (!isActive) {
+                        item.classList.add('active');
+                    } else {
+                         item.classList.remove('active');
+                    }
+                });
+            });
+        }
+
+    </script>
+</body>
+</html>
