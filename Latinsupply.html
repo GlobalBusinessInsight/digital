@@ -1,0 +1,976 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;!-- Visualization &amp; Content Choices:</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Overall trade performance (Sec 2.1) -&gt; Goal: Show trends -&gt; Viz: Line charts (Import/Export over time) -&gt; Interaction: Hover for details -&gt; Justification: Clear visual trend representation -&gt; Library: Chart.js.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Top 10 Economies by GDP (Table 1) -&gt; Goal: Inform &amp; Compare -&gt; Viz: Interactive Bar Chart/Table -&gt; Interaction: Sortable table, hover on chart -&gt; Justification: Easy comparison of economic standing -&gt; Library: Chart.js / HTML+JS.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Top Trade Partners (Table 2) -&gt; Goal: Identify key relationships -&gt; Viz: Donut/Bar chart for partner share -&gt; Interaction: Click to filter (future enhancement, for now static display) -&gt; Justification: Quick visual breakdown of trade concentration -&gt; Library: Chart.js.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Key Import/Export Categories (Sec 2.3) -&gt; Goal: Show commodity focus -&gt; Viz: Grouped Bar Charts (Top 5-10 categories) -&gt; Interaction: Filter by country (if feasible with data structure) -&gt; Justification: Highlights trade composition -&gt; Library: Chart.js.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Country-specific trade data (Sec 2.4) -&gt; Goal: Detailed exploration -&gt; Viz: Bar charts for top commodities, tables for values -&gt; Interaction: Dropdown to select country -&gt; Justification: Allows focused analysis -&gt; Library: Chart.js / HTML+JS.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Logistics Challenges (Sec 3.1, 3.2) -&gt; Goal: Explain issues -&gt; Viz: HTML/CSS styled cards/diagrams (e.g., road issues, port congestion) -&gt; Interaction: Click to expand details -&gt; Justification: Visually engaging way to present qualitative info -&gt; Library: HTML/CSS/Tailwind + JS.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: LPI Rankings (Table 3) -&gt; Goal: Compare logistics performance -&gt; Viz: Interactive sorted Table / Horizontal Bar Chart -&gt; Interaction: Sort by score/country, hover for details -&gt; Justification: Clear ranking and comparison -&gt; Library: HTML+JS / Chart.js.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Digitalization Status (Sec 4.1, Table 4 DEI) -&gt; Goal: Show adoption &amp; evolution -&gt; Viz: Bar chart for tech adoption, Table/Bar chart for DEI -&gt; Interaction: Hover for details -&gt; Justification: Visualizes digital maturity -&gt; Library: Chart.js / HTML+JS.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Challenges &amp; Opportunities (Sec 5) -&gt; Goal: Summarize key factors -&gt; Viz: Interactive lists/cards -&gt; Interaction: Click to reveal more info/case studies -&gt; Justification: Digestible presentation of complex issues -&gt; Library: HTML/CSS/Tailwind + JS.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>- Report Info: Future Trends/Recommendations (Sec 6.3) -&gt; Goal: Provide actionable insights -&gt; Viz: Accordion list or styled bullet points -&gt; Interaction: Expandable sections -&gt; Justification: Organized and accessible forward-looking statements -&gt; Library: HTML/CSS/Tailwind + JS.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. --&gt;</p>
+<p class="p1">&lt;html lang="zh-CN"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;拉丁美洲供应链全景&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/chart.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Inter', sans-serif; /* Using Inter as a fallback, assuming a common sans-serif for Chinese */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tab-button {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s ease;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tab-button.active {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-color: #F59E0B; /* amber-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #F59E0B;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chart-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-width: 700px; /* Adjusted for better readability */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-left: auto;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-right: auto;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 350px; /* Base height */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-height: 400px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@media (min-width: 768px) { /* md breakpoint */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>.chart-container {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>height: 400px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.section-title {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.75rem; /* text-2xl equivalent */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600; /* semibold */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 1rem; /* mb-4 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #1F2937; /* gray-800 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-bottom: 2px solid #F59E0B; /* amber-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding-bottom: 0.5rem; /* pb-2 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.content-card {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #FFFAF0; /* floralwhite - a very light warm neutral */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #FDE68A; /* amber-200 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.5rem; /* rounded-lg */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 1.5rem; /* p-6 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 1.5rem; /* mb-6 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.sub-section-title {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.25rem; /* text-xl */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600; /* semibold */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 1.5rem; /* mt-6 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 0.75rem; /* mb-3 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #374151; /* gray-700 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.tooltip {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #111827; /* gray-900 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.25rem; /* rounded-md */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: opacity 0.3s;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.875rem; /* text-sm */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 10;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.table-responsive {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow-x: auto;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>table {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-collapse: collapse;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>th, td {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #E5E7EB; /* gray-200 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0.75rem; /* p-3 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: left;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>th {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #F9FAFB; /* gray-50 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600; /* semibold */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Accordion styles */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.accordion-header {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 1rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #FEF3C7; /* amber-100 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #FDE68A; /* amber-200 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.375rem; /* rounded-md */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 0.25rem; /* mb-1 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-between;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.accordion-content {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 1rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #FDE68A; /* amber-200 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-top: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0 0 0.375rem 0.375rem; /* rounded-b-md */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #FFFBEB; /* amber-50 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.accordion-item.active .accordion-content {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.accordion-item.active .accordion-icon {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: rotate(180deg);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.accordion-icon {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: transform 0.3s ease;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-amber-50 text-neutral-700 antialiased"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;header class="bg-orange-500 text-white p-6 shadow-lg sticky top-0 z-50"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="container mx-auto flex flex-col md:flex-row justify-between items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h1 class="text-3xl font-bold"&gt;拉丁美洲供应链全景分析&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;nav class="mt-4 md:mt-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-button active text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('overview')"&gt;概览&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('trade')"&gt;贸易动态&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('infrastructure')"&gt;基础设施&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('digitalization')"&gt;数字化转型&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('challenges')"&gt;挑战与机遇&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-button text-sm md:text-base py-2 px-3 md:px-4 border-b-2 border-transparent hover:border-white" onclick="showTab('outlook')"&gt;未来展望&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/nav&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;main class="container mx-auto p-4 md:p-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="overview" class="tab-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="section-title"&gt;概览&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;执行摘要&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;拉丁美洲供应链正处于深刻转型期，其特点是贸易格局的动态演变、基础设施的持续发展以及数字技术的加速采纳。本报告深入分析了2019年至2024年间该地区的贸易往来、物流基础设施现状、数字化进程以及跨国公司面临的挑战与机遇。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;研究发现，拉丁美洲的贸易表现呈现区域差异性，南美洲依赖大宗商品出口，易受价格波动影响，而墨西哥的制造业出口则深度融入北美价值链。美国和中国是该地区最重要的贸易伙伴。基础设施建设虽有进步，但道路、铁路和海关效率仍存在显著差距，制约了物流效率。数字化转型正在加速，人工智能、物联网和云计算等技术被广泛采纳，尤其是在电子商务和仓储自动化领域，但不同国家和企业间的成熟度差异明显。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p&gt;对于国际企业而言，该地区提供了巨大的市场增长和近岸外包（nearshoring）机遇，得益于其丰富的自然资源和地理优势。然而，它们必须应对基础设施不足、监管复杂、货运盗窃、政治经济不稳定以及劳动力短缺等挑战。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;引言&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;本报告旨在对拉丁美洲的供应链格局进行全面深入的分析。报告将剖析2019年至2024年间该地区贸易动态、基础设施发展和数字化转型之间错综复杂的相互作用。通过对关键数据、深层观察和实际案例的整合，本报告旨在为在拉丁美洲运营或考虑进入该市场的企业和政策制定者提供可操作的见解。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p&gt;拉丁美洲是一个广阔而经济多元的区域。该地区的经济增长预计将较为温和，2025年增长2.1%，2026年增长2.4%，使其成为全球增长最慢的地区。这种经济背景对供应链的韧性和效率提出了独特的要求。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="trade" class="tab-content" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="section-title"&gt;贸易动态&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;整体贸易表现与趋势（2019-2024）&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;拉丁美洲的商品出口在2023年收缩了1.3%，但在2024年第一季度同比增长1.3%。服务出口表现出强劲增长。2024年上半年，商品和服务贸易总额增长，出口同比增长5%，进口同比增长1%。服务出口增长11%，超过商品出口的4%。这种非统一的贸易表现表明拉丁美洲次区域经济结构和贸易驱动因素存在根本性差异。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="chart-container mb-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;canvas id="latamTradeTrendChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-sm text-gray-600"&gt;图表说明：展示拉丁美洲商品和服务进出口的年度增长趋势。南美洲对初级商品的依赖使其贸易易受全球大宗商品价格波动的影响，而墨西哥的制造业出口则深度融入北美价值链。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;拉丁美洲十大经济体及主要贸易伙伴&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;根据2024年人均GDP，拉丁美洲的主要经济体包括圭亚那、乌拉圭、巴拿马等。美国和中国是拉丁美洲最主要的贸易伙伴，分别占贸易总额的41.71%和12.97%。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="grid md:grid-cols-2 gap-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="topEconomiesChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="topTradePartnersChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div class="table-responsive mt-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h4 class="text-lg font-semibold mb-2"&gt;表1：2024年拉丁美洲十大经济体（按人均GDP）&lt;/h4&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;table id="topEconomiesTable"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;tr&gt;&lt;th&gt;排名&lt;/th&gt;&lt;th&gt;国家&lt;/th&gt;&lt;th&gt;2024年人均GDP（美元）&lt;/th&gt;&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;tbody&gt;&lt;/tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;主要进出口商品类别&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;拉丁美洲整体商品出口中，原材料占最大份额（32.72%）。进口方面，消费品（31.38%）和资本货物（30.39%）占主导地位。这种贸易结构反映了典型的“大宗商品出口国”模式。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="grid md:grid-cols-2 gap-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="exportCategoriesChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="importCategoriesChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;重点国家贸易数据查询&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;选择一个国家查看其主要的进出口商品类别和贸易伙伴信息（数据主要基于2023/2024年）。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;select id="countrySelector" class="mb-4 p-2 border border-gray-300 rounded-md w-full md:w-1/3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;option value="brazil"&gt;巴西&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;option value="mexico"&gt;墨西哥&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;option value="argentina"&gt;阿根廷&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;option value="colombia"&gt;哥伦比亚&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;option value="chile"&gt;智利&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;option value="peru"&gt;秘鲁&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="grid md:grid-cols-2 gap-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>&lt;h4 class="text-center font-semibold mb-2"&gt;主要出口商品&lt;/h4&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="countryExportChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h4 class="text-center font-semibold mb-2"&gt;主要进口商品&lt;/h4&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="countryImportChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="countryTradeInfo" class="mt-4"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="infrastructure" class="tab-content" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="section-title"&gt;供应链基础设施&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;跨境物流与贸易便利化&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;拉丁美洲的跨境贸易便利化面临多重挑战，包括各国海关法规差异、透明度不足和官僚主义。尽管如此，一些港口如巴拿马的巴尔博亚港在多式联运方面表现突出。贸易便利化倡议，如WTO的《贸易便利化协定》和联合边境控制模式，正在帮助改善现状。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="bg-amber-100 p-4 rounded-lg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p&gt;&lt;span class="font-semibold"&gt;挑战：&lt;/span&gt; 卡车平均通过速度仅16公里/小时（全球平均60公里/小时），部分过境点等待时间长达6小时以上。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p&gt;&lt;span class="font-semibold"&gt;解决方案：&lt;/span&gt; 海关数字化转型、单一窗口贸易系统、智能监控技术（GPS, RFID）。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;国内物流网络&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;拉丁美洲的交通运输主要依赖公路（占85%货运），但仅23%的道路铺设路面。铁路网络不发达。航空货运有所复苏，但面临基础设施限制。物流市场预计持续增长，最后一公里配送面临客户期望高、交通拥堵等挑战，并通过路线优化、微型配送中心等方案应对。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;canvas id="transportModesChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;重点行业供应链分析&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="industryAccordion"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;span&gt;汽车行业&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p&gt;墨西哥是领导者，预计2025年市场规模达3030亿美元，为美国提供约40%汽车零部件。USMCA鼓励区域内生产。阿根廷、巴西、哥伦比亚也是关键参与者。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;span&gt;制造业/设备行业&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p&gt;面临基础设施不足（仅投资GDP的1.3%）、政治不稳定等挑战。区域内贸易仅占12%。近岸外包带来机遇，阿根廷因资源和劳动力具有优势。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;span&gt;快速消费品 (FMCG)&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p&gt;面临缓慢复苏、需求变化、供应链中断、能源和食品价格上涨。食品饮料通胀高。区域内贸易不发达（占22%），为墨西哥、哥伦比亚等国提供增长机会。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;物流绩效指数 (LPI) 分析 (2023)&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;世界银行的LPI评估国家在海关、基础设施、国际运输、物流能力、追踪追溯和及时性方面的表现。巴西在拉丁美洲地区表现最为突出。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="chart-container mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;canvas id="lpiChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="table-responsive"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h4 class="text-lg font-semibold mb-2"&gt;表3：2023年拉丁美洲部分国家物流绩效指数（LPI）&lt;/h4&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;table id="lpiTable"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;thead&gt;&lt;tr&gt;&lt;th&gt;国家&lt;/th&gt;&lt;th&gt;LPI排名&lt;/th&gt;&lt;th&gt;LPI得分&lt;/th&gt;&lt;th&gt;海关&lt;/th&gt;&lt;th&gt;基础设施&lt;/th&gt;&lt;th&gt;国际运输&lt;/th&gt;&lt;th&gt;物流能力&lt;/th&gt;&lt;th&gt;追踪追溯&lt;/th&gt;&lt;th&gt;及时性&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;tbody&gt;&lt;/tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="digitalization" class="tab-content" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="section-title"&gt;供应链数字化转型&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;数字化现状&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;拉丁美洲供应链数字化转型加速，但采纳程度不一。70%团队已部署ERP。TMS市场预计增长。物联网、人工智能提高可见性和预测能力。区块链用于农业供应链追溯。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="grid md:grid-cols-2 gap-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="techAdoptionChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;canvas id="tmsMarketGrowthChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;电子商务物流与数字支付&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;拉丁美洲是全球增长最快的电子商务市场，预计2022-2027年年增长率19%。移动商务蓬勃发展。巴西的Pix等数字支付系统简化交易。电子商务增长对最后一公里配送和订单履行产生重大影响。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div class="chart-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;canvas id="ecommerceGrowthChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;拉丁美洲国家数字演进指数 (DEI)&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;DEI衡量国家数字发展的成熟度和速度。智利、波多黎各、巴哈马等国领先。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="chart-container mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;canvas id="deiChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="table-responsive"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;h4 class="text-lg font-semibold mb-2"&gt;表4：拉丁美洲国家数字演进指数（DEI）&lt;/h4&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;table id="deiTable"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;thead&gt;&lt;tr&gt;&lt;th&gt;排名&lt;/th&gt;&lt;th&gt;国家&lt;/th&gt;&lt;th&gt;DEI得分&lt;/th&gt;&lt;th&gt;数字化发展速度(%)&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;tbody&gt;&lt;/tbody&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="challenges" class="tab-content" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="section-title"&gt;挑战与机遇&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;主要供应链挑战&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="challengesAccordion"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;基础设施缺陷与瓶颈&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;过时的港口、道路和物流网络。基础设施投资仅占GDP的1.3%。公路运输占85%，但仅23%道路铺设路面。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;监管复杂性与官僚主义&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;各国监管环境、海关协议多样。繁琐官僚程序和缺乏透明度导致延误和成本增加。腐败仍是问题。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;安全风险（货运盗窃、网络威胁）&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;货运盗窃严重，南美洲68%发生在巴西。食品饮料是主要目标。网络威胁日益受关注。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;政治与经济不稳定&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;政治变革导致新贸易政策、关税和限制。监管不确定性、货币波动和劳动力中断。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;劳动力短缺与发展&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;熟练劳动力短缺，尤其在可再生能源等行业。工作条件、实际工资和工人保护不足。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;商业运营中的文化差异&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;沟通方式、等级制度、守时和决策过程与西方标准不同。决策过程通常较慢，更注重共识。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;竞争优势与机遇&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;div id="opportunitiesAccordion"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;近岸外包与友岸外包趋势&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;IDB估计可使年出口额增加近780亿美元。汽车、纺织、制药和可再生能源潜力巨大。墨西哥是热点。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;市场增长与消费需求&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;庞大人口，约一半是中产阶级。电子商务市场增长快，预计到2027年年增长率19%。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;丰富的自然资源&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;“锂三角”（阿根廷、玻利维亚、智利）对电动汽车供应链至关重要。可再生能源、采矿和汽车行业投资增加。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;战略地理位置&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;&lt;p&gt;与北美和欧洲地理邻近。墨西哥是连接北美和拉美其他地区的桥梁。&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="outlook" class="tab-content" style="display:none;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="section-title"&gt;结论与未来展望&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;供应链与经济贸易发展的匹配度&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="mb-4"&gt;拉丁美洲供应链与经济贸易发展存在显著差距，但也展现独特优势。作为主要原材料和农产品出口国，经济高度依赖大宗商品价格。基础设施不足仍是制约因素，导致物流成本高、效率低。数字化转型不均衡。然而，自然资源丰富、消费市场庞大、地理位置优越以及近岸外包趋势是重要机遇。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;未来五年的关键挑战&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;ul class="list-disc list-inside space-y-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;政治与经济不确定性&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;基础设施投资不足（目前仅占GDP的1.3%）&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;气候变化影响（如巴拿马运河干旱）&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;数字化鸿沟（数字文化、人才、技术采纳差距）&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;li&gt;安全与合规风险（货运盗窃、网络威胁、海关复杂性）&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/ul&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">             </span>&lt;div class="content-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 class="sub-section-title"&gt;未来增长的关键趋势与建议&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="recommendationsAccordion"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;战略性基础设施与技术投资&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;ul class="list-disc list-inside space-y-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;推动公私合作升级交通网络、港口和数字基础设施。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;现代化港口与道路，投资自动化和数字化。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;加速数字技术采纳（AI, IoT, 区块链等），尤其在仓储自动化和最后一公里配送。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/ul&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;加强区域一体化与贸易便利化&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>&lt;ul class="list-disc list-inside space-y-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;协调海关法规，简化程序，提高效率和透明度。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;深化区域内贸易，减少贸易壁垒，整合区域价值链。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/ul&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;发展高素质劳动力&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;ul class="list-disc list-inside space-y-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;投资培训项目，培养熟练物流和技术专业人才。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;制定激励措施，吸引和留住人才，改善工作条件。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/ul&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>&lt;div class="accordion-item"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-header"&gt;&lt;span&gt;优先考虑可持续性与韧性&lt;/span&gt;&lt;span class="accordion-icon"&gt;▼&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="accordion-content"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;ul class="list-disc list-inside space-y-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;建设气候韧性基础设施，制定应急计划。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;推广绿色物流（电动车、优化路线、可回收包装）。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;li&gt;多元化供应商网络，分散风险，增强灵活性。&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/ul&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/main&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;footer class="bg-orange-600 text-white text-center p-6 mt-12"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p&gt;&amp;copy; 2024 拉丁美洲供应链全景分析。根据提供报告生成。&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/footer&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const tabs = document.querySelectorAll('.tab-button');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const tabContents = document.querySelectorAll('.tab-content');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function showTab(tabId) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>tabContents.forEach(content =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>content.style.display = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>tabs.forEach(tab =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>tab.classList.remove('active');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Adjust tab button style for active state on orange background</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (tab.textContent === document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`).textContent) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>tab.classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>tab.style.borderColor = 'white'; // Example: white border for active tab on orange header</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>tab.style.color = 'white';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>tab.style.borderColor = 'transparent';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>tab.style.color = '#FEE2E2'; // Lighter text for inactive tabs</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById(tabId).style.display = 'block';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Ensure active tab button on orange header has distinct active style</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const activeButton = document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (activeButton) {</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>activeButton.classList.add('active'); // Re-ensure active class</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>activeButton.style.borderColor = 'white';<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                 </span>activeButton.style.color = 'white';</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>activeButton.style.fontWeight = 'bold';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">             </span>// For other tabs, ensure they are not bold</p>
+<p class="p1"><span class="Apple-converted-space">            </span>tabs.forEach(tab =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!tab.classList.contains('active')) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>tab.style.fontWeight = 'normal';</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>tab.style.color = '#FED7AA'; // amber-200 for inactive</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Initialize first tab</p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.addEventListener('DOMContentLoaded', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>showTab('overview');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderCharts();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>populateTables();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setupAccordions();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setupCountrySelector();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Chart.js label wrapping function</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function wrapText(ctx, text, maxWidth) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (typeof text !== 'string') {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return [String(text)]; // Ensure text is a string</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const words = text.split(' ');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let lines = [];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let currentLine = words[0];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 1; i &lt; words.length; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const word = words[i];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const width = ctx.measureText(currentLine + " " + word).width;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (width &lt; maxWidth) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>currentLine += " " + word;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>lines.push(currentLine);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>currentLine = word;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>lines.push(currentLine);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return lines;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function formatLabel(value, context, maxChars = 16) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let label = context.chart.data.labels[context.dataIndex];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (typeof label !== 'string') {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>label = String(label);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (label.length &gt; maxChars) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return label.substring(0, maxChars) + '...';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return label;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function renderCharts() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const commonOptions = {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>responsive: true,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>maintainAspectRatio: false,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>plugins: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>legend: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>position: 'top',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>labels: { color: '#374151' } // gray-700</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>tooltip: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>callbacks: {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>label: function(context) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>let label = context.dataset.label || '';</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (label) {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>label += ': ';</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (context.parsed.y !== null) {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>label += context.parsed.y;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>if (context.dataset.unit) label += context.dataset.unit;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>return label;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>title: function(context) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>return formatLabel(null, context[0], 30); // Longer for tooltip title</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: '#1F2937', // gray-800</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>titleColor: '#FFFFFF',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>bodyColor: '#FFFFFF',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>borderColor: '#F59E0B', // amber-500</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>borderWidth: 1</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scales: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>y: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>beginAtZero: true,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>ticks: { color: '#4B5563' }, // gray-600</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>grid: { color: '#E5E7EB' } // gray-200</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>x: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>ticks: {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>color: '#4B5563', // gray-600</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>callback: function(value, index, values) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const label = this.getLabelForValue(value);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>return label.length &gt; 10 ? label.substring(0,10) + '...' : label;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>grid: { display: false }</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const commonBarOptions = { ...commonOptions };</p>
+<p class="p1"><span class="Apple-converted-space">            </span>commonBarOptions.scales.x.ticks.callback = function(value) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const label = this.getLabelForValue(value);</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>if (typeof label === 'string' &amp;&amp; label.length &gt; 16) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return label.match(/.{1,16}/g); // Split into lines of 16 chars</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return label;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Latam Trade Trend Chart</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('latamTradeTrendChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'line',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['2019', '2020', '2021', '2022', '2023', '2024 H1'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>label: '商品出口增长 (%)',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>data: [2, -5, 15, 8, -1.3, 4], // Hypothetical data based on report</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderColor: '#3B82F6', // blue-500</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>tension: 0.1,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>unit: '%'</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>label: '服务出口增长 (%)',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>data: [3, -10, 12, 15, 10, 11], // Hypothetical data</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderColor: '#10B981', // emerald-500</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>tension: 0.1,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>unit: '%'</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: commonOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Top Economies Chart (Bar)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('topEconomiesChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'bar',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['圭亚那', '乌拉圭', '巴拿马', '哥斯达黎加', '智利', '墨西哥', '阿根廷', '多米尼加', '巴西', '秘鲁'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: '2024年人均GDP (美元)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: [28920, 23053, 19369, 17860, 16365, 13972, 12814, 11692, 10296, 8316],</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: '#F59E0B', // amber-500</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>unit: '美元'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: commonBarOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Top Trade Partners Chart (Pie)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('topTradePartnersChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'pie',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['美国', '中国', '巴西(区内)', '荷兰', '其他'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: '贸易伙伴份额 (%)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: [41.71, 12.97, 2.50, 2.25, (100-41.71-12.97-2.50-2.25)],</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#6B7280'], // red, blue, emerald, amber, gray</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>unit: '%'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: { ...commonOptions, scales: { x: { display: false }, y: { display: false } } }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Export Categories Chart</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('exportCategoriesChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'doughnut',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['原材料', '资本货物', '消费品', '中间产品', '其他'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: '出口商品类别份额 (%)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: [32.72, 20.93, 19.23, 18.48, (100-32.72-20.93-19.23-18.48)],</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: ['#8B5CF6', '#EC4899', '#FCD34D', '#34D399', '#9CA3AF'], // violet, pink, amber, green, gray</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>unit: '%'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: { ...commonOptions, scales: { x: { display: false }, y: { display: false } } }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Import Categories Chart</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('importCategoriesChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'doughnut',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['消费品', '资本货物', '中间产品', '原材料', '其他'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: '进口商品类别份额 (%)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: [31.38, 30.39, 23.35, 6.96, (100-31.38-30.39-23.35-6.96)],</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: ['#0EA5E9', '#D946EF', '#FBBF24', '#22C55E', '#A1A1AA'], // sky, fuchsia, amber, green, zinc</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>unit: '%'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: { ...commonOptions, scales: { x: { display: false }, y: { display: false } } }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Transport Modes Chart</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('transportModesChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'pie',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['公路运输', '铁路运输', '航空运输', '水路运输', '其他'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: '货运方式占比 (%)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: [85, 5, 3, 5, 2], // Hypothetical, report says 85% road, limited rail</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: ['#F97316', '#A855F7', '#2563EB', '#059669', '#78716C'], // orange, purple, blue, green, stone</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>unit: '%'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: { ...commonOptions, scales: { x: { display: false }, y: { display: false } } }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// LPI Chart (Top 5 + Mexico)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const lpiData = [</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '巴西', score: 3.2 }, { country: '巴拿马', score: 3.1 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '智利', score: 3.0 }, { country: '秘鲁', score: 3.0 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '乌拉圭', score: 3.0 }, { country: '墨西哥', score: 2.9 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '哥伦比亚', score: 2.9}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('lpiChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'bar',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: lpiData.map(d =&gt; d.country),</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: 'LPI 得分 (2023)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: lpiData.map(d =&gt; d.score),</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: '#06B6D4', // cyan-500</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: commonBarOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Tech Adoption Chart</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('techAdoptionChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'bar',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['ERP系统', 'TMS系统 (预期)', 'AI/ML (实际)', '预测分析 (意愿)'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: '技术采纳率/意愿 (%)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: [70, 60, 11.9, 71.9], // TMS hypothetical based on growth, AI/ML and predictive from report</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: ['#6366F1', '#EC4899', '#F59E0B', '#10B981'], // indigo, pink, amber, emerald</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>unit: '%'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: commonBarOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// TMS Market Growth Chart</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('tmsMarketGrowthChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'line',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['2024', '2025', '2026', '2027', '2028', '2029', '2030'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: 'TMS市场规模 (百万美元)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: [600, 710, 840, 990, 1170, 1380, 1734], // Calculated based on CAGR 18.2% from a base</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>borderColor: '#8B5CF6', // violet-500</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>tension: 0.1,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>unit: '百万美元'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: commonOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// E-commerce Growth Chart</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('ecommerceGrowthChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'line',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: ['2022', '2023', '2024', '2025', '2026', '2027'],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: '电子商务市场年增长率 (%)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: [19, 19, 19, 19, 19, 19], // Report states 19% annual growth</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>borderColor: '#EF4444', // red-500</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: 'rgba(239, 68, 68, 0.1)',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>fill: true,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>tension: 0.1,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>unit: '%'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: commonOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// DEI Chart (Top 5 + Brazil, Mexico)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const deiData = [</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '智利', score: 58.7 }, { country: '波多黎各', score: 54.7 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '巴哈马', score: 53.3 }, { country: '乌拉圭', score: 53.0 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '哥斯达黎加', score: 52.6 }, { country: '墨西哥', score: 47.6 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '巴西', score: 47.6 }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>new Chart(document.getElementById('deiChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'bar',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: deiData.map(d =&gt; d.country),</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>label: 'DEI 得分',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>data: deiData.map(d =&gt; d.score),</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>backgroundColor: '#22C55E', // green-500</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}]</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: commonBarOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>let countryExportChartInstance, countryImportChartInstance;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function updateCountryCharts(country) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const countryData = {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>brazil: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exports: { labels: ['矿物燃料', '油籽', '矿渣灰', '肉类', '糖'], data: [15, 12, 10, 9, 8] }, // Hypothetical %</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>imports: { labels: ['机械', '矿物燃料', '电气设备', '车辆', '肥料'], data: [20, 18, 15, 10, 7] }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>mexico: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exports: { labels: ['车辆', '电气设备', '机械', '光学医疗器械', '矿物燃料'], data: [25, 20, 15, 10, 8] },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>imports: { labels: ['电气设备', '机械', '车辆', '塑料', '矿物燃料'], data: [22, 18, 15, 12, 9] }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>argentina: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exports: { labels: ['谷物', '食品工业残渣', '车辆', '矿物燃料', '动植物油脂'], data: [18, 15, 12, 10, 9] },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>imports: { labels: ['机械', '车辆', '电气设备', '化学品', '塑料'], data: [25, 20, 15, 10, 8] }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>colombia: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exports: { labels: ['原油', '煤炭', '黄金', '咖啡', '鲜花'], data: [25.4, 16.2, 6.8, 5.9, 4.2] },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>imports: { labels: ['石油(非原油)', '汽车', '电话机', '药品', '飞机'], data: [8.2, 4.4, 3.7, 3.6, 3.5] }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chile: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exports: { labels: ['矿渣灰', '铜', '水果坚果', '鱼类', '无机化学品'], data: [30, 25, 10, 8, 5] },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>imports: { labels: ['矿物燃料', '机械', '车辆', '电气设备', '塑料'], data: [20, 18, 15, 12, 10] } // Generic, report specific for Feb 2025</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>peru: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exports: { labels: ['矿渣灰', '宝石贵金属', '水果坚果', '矿物燃料', '铜'], data: [25, 20, 15, 12, 10] },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>imports: { labels: ['石油(非原油)', '原油', '汽车', '电话机', '载货车'], data: [13.1, 4.2, 3.0, 2.7, 2.4] }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const selected = countryData[country];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const chartOptions = {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>responsive: true,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>maintainAspectRatio: false,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>indexAxis: 'y', // Horizontal bar chart</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>plugins: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>legend: { display: false },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>tooltip: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>callbacks: {</p>
+<p class="p1"><span class="Apple-converted-space">                             </span>label: function(context) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>return `${context.raw}%`;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scales: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>x: { beginAtZero: true, ticks: { callback: value =&gt; `${value}%` } },</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>y: { ticks: { callback: function(value) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const label = this.getLabelForValue(value);</p>
+<p class="p1"><span class="Apple-converted-space">                                 </span>if (typeof label === 'string' &amp;&amp; label.length &gt; 10) { // Shorter for y-axis</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>return label.substring(0,10) + '...';</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>return label;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}<span class="Apple-converted-space">  </span>} }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (countryExportChartInstance) countryExportChartInstance.destroy();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>countryExportChartInstance = new Chart(document.getElementById('countryExportChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'bar',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: selected.exports.labels,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{ data: selected.exports.data, backgroundColor: '#34D399' }] // emerald-400</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: chartOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (countryImportChartInstance) countryImportChartInstance.destroy();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>countryImportChartInstance = new Chart(document.getElementById('countryImportChart'), {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: 'bar',</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>labels: selected.imports.labels,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datasets: [{ data: selected.imports.data, backgroundColor: '#F87171' }] // red-400</p>
+<p class="p1"><span class="Apple-converted-space">                </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options: chartOptions</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const countryInfoDiv = document.getElementById('countryTradeInfo');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>countryInfoDiv.innerHTML = `&lt;p class="text-sm text-gray-700 mt-2"&gt;以上图表显示了&lt;strong&gt;${document.getElementById('countrySelector').options[document.getElementById('countrySelector').selectedIndex].text}&lt;/strong&gt;的主要进出口商品类别占比（示意数据）。详细数据请参考报告原文。&lt;/p&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function setupCountrySelector() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const selector = document.getElementById('countrySelector');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>selector.addEventListener('change', (event) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>updateCountryCharts(event.target.value);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Initial call</p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateCountryCharts(selector.value);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function populateTables() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Top Economies Table</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const economiesData = [</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 1, country: '圭亚那', gdp: '28,920' }, { rank: 2, country: '乌拉圭', gdp: '23,053' },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 3, country: '巴拿马', gdp: '19,369' }, { rank: 4, country: '哥斯达黎加', gdp: '17,860' },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 5, country: '智利', gdp: '16,365' }, { rank: 6, country: '墨西哥', gdp: '13,972' },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 7, country: '阿根廷', gdp: '12,814' }, { rank: 8, country: '多米尼加共和国', gdp: '11,692' },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 9, country: '巴西', gdp: '10,296' }, { rank: 10, country: '秘鲁', gdp: '8,316' }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const economiesTableBody = document.getElementById('topEconomiesTable').getElementsByTagName('tbody')[0];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>economiesData.forEach(item =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let row = economiesTableBody.insertRow();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.rank;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.country;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.gdp;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// LPI Table</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const lpiTableData = [</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '巴西', rank: 51, score: 3.2, customs: 2.9, infra: 3.2, shipping: 2.9, logistics: 3.3, tracking: 3.2, timeliness: 3.5 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '巴拿马', rank: 57, score: 3.1, customs: 3.0, infra: 3.3, shipping: 3.1, logistics: 3.0, tracking: 2.9, timeliness: 3.4 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '智利', rank: 61, score: 3.0, customs: 3.0, infra: 2.8, shipping: 2.7, logistics: 3.1, tracking: 3.0, timeliness: 3.2 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '秘鲁', rank: 61, score: 3.0, customs: 2.6, infra: 2.5, shipping: 3.1, logistics: 2.7, tracking: 3.4, timeliness: 3.4 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '乌拉圭', rank: 61, score: 3.0, customs: 2.9, infra: 2.7, shipping: 2.7, logistics: 3.1, tracking: 3.3, timeliness: 3.2 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '墨西哥', rank: 66, score: 2.9, customs: 2.5, infra: 2.8, shipping: 2.8, logistics: 3.0, tracking: 3.1, timeliness: 3.5 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '哥伦比亚', rank: 66, score: 2.9, customs: 2.5, infra: 2.9, shipping: 3.0, logistics: 3.1, tracking: 3.1, timeliness: 3.2 },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ country: '阿根廷', rank: 73, score: 2.8, customs: 2.7, infra: 2.8, shipping: 2.7, logistics: 2.7, tracking: 2.9, timeliness: 3.1 },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const lpiTableBody = document.getElementById('lpiTable').getElementsByTagName('tbody')[0];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>lpiTableData.forEach(item =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let row = lpiTableBody.insertRow();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.country;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.rank;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.score;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.customs;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.infra;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.shipping;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.logistics;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.tracking;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.timeliness;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// DEI Table</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const deiTableData = [</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 1, country: '智利', score: 58.7, speed: '2.9%' }, { rank: 2, country: '波多黎各', score: 54.7, speed: '2.2%' },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 3, country: '巴哈马', score: 53.3, speed: '2.0%' }, { rank: 4, country: '乌拉圭', score: 53.0, speed: '3.4%' },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 5, country: '哥斯达黎加', score: 52.6, speed: '3.3%' }, { rank: 10, country: '墨西哥', score: 47.6, speed: '3.3%' },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{ rank: 11, country: '巴西', score: 47.6, speed: '2.0%' }, { rank: 12, country: '哥伦比亚', score: 46.4, speed: '3.2%' },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const deiTableBody = document.getElementById('deiTable').getElementsByTagName('tbody')[0];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>deiTableData.forEach(item =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let row = deiTableBody.insertRow();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.rank;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.country;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.score;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>row.insertCell().textContent = item.speed;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function setupAccordions() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const accordionItems = document.querySelectorAll('.accordion-item');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>accordionItems.forEach(item =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const header = item.querySelector('.accordion-header');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>header.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const isActive = item.classList.contains('active');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Optional: close other accordions when one is opened</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// accordionItems.forEach(i =&gt; i.classList.remove('active'));</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!isActive) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>item.classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                         </span>item.classList.remove('active');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
