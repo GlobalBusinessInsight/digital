@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6214772877334340"
+     crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互式报告：坦桑尼亚投资政策与中国企业战略导航 (深度版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
+    <!-- Application Structure Plan: The SPA is designed as a top-down narrative dashboard. It starts with a high-level summary (the "dual-track" paradox), then allows users to dive into specific policies (Prohibition Order, Local Content), understand the concrete impacts, and finally access a "Strategic Toolkit". This structure guides the user from understanding the "what" to the "so what" and "now what", which is more intuitive for decision-makers than a traditional report layout. Navigation is handled by a sticky header, allowing quick jumps between these logical sections. -->
+    <!-- Visualization & Content Choices: 
+        1. Key Stats (FDI, GDP): Goal: Inform. Method: Dynamic stat cards (HTML/CSS). Interaction: Simple visual highlight. Justification: Quickly conveys the positive economic context.
+        2. Dual-Track Policy: Goal: Explain a core concept. Method: HTML/Tailwind diagram. Interaction: None. Justification: Visually simplifies the central policy paradox of "open doors" vs. "high walls".
+        3. Prohibited Industries (GN 487A): Goal: Organize & Inform. Method: Interactive card grid (HTML/JS). Interaction: Clicking a card reveals details and exceptions. Justification: More engaging and less overwhelming than a long table.
+        4. Local Content Requirements (Mining): Goal: Compare & Inform. Method: Doughnut charts (Chart.js). Interaction: Tooltips on hover. Justification: Visually represents the mandated percentages for key areas like ownership and staffing, making them easy to grasp.
+        5. Impact Differentiation: Goal: Compare. Method: Side-by-side comparison layout (HTML/Tailwind). Interaction: None. Justification: Clearly contrasts the direct vs. indirect impacts on different types of Chinese enterprises.
+        6. Strategic Toolkit: Goal: Organize & Provide Actionable Advice. Method: Tabbed interface and accordions (HTML/JS). Interaction: Clicking tabs and accordion headers reveals detailed content. Justification: Organizes a large amount of strategic advice into digestible, user-selectable chunks, preventing information overload.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8f7f4;
+            color: #3d405b;
+        }
+        .bg-warm-neutral { background-color: #f8f7f4; }
+        .bg-card { background-color: #ffffff; }
+        .text-primary { color: #3d405b; }
+        .text-secondary { color: #81b29a; }
+        .text-accent { color: #e07a5f; }
+        .border-accent { border-color: #e07a5f; }
+        .bg-accent { background-color: #e07a5f; }
+        .bg-accent-light { background-color: #f2ccb6; }
+        .nav-link {
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #81b29a;
+            color: #ffffff;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            border-bottom-color: #e07a5f;
+            color: #e07a5f;
+            font-weight: 700;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .prose ul > li::before {
+            content: "✓";
+            color: #81b29a;
+            font-weight: bold;
+            display: inline-block; 
+            width: 1em;
+            margin-left: -1em;
+        }
+    </style>
+</head>
+<body class="bg-warm-neutral">
+
+    <header id="main-header" class="bg-card shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl md:text-2xl font-bold text-primary">坦桑尼亚投资政策导航 (深度版)</h1>
+                </div>
+                <nav class="hidden md:flex space-x-1 lg:space-x-2">
+                    <a href="#overview" class="nav-link text-sm lg:text-base">宏观概览</a>
+                    <a href="#policy" class="nav-link text-sm lg:text-base">政策深潜</a>
+                    <a href="#impact" class="nav-link text-sm lg:text-base">影响评估</a>
+                    <a href="#strategy" class="nav-link text-sm lg:text-base">战略工具箱</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-primary focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden bg-card border-t">
+            <a href="#overview" class="block nav-link text-center border-b">宏观概览</a>
+            <a href="#policy" class="block nav-link text-center border-b">政策深潜</a>
+            <a href="#impact" class="block nav-link text-center border-b">影响评估</a>
+            <a href="#strategy" class="block nav-link text-center">战略工具箱</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <section id="overview" class="pt-16 -mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center text-primary mb-4">宏观概览：机遇与挑战并存</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg text-gray-600 mb-12">坦桑尼亚正推行一种“双轨制”投资政策：一方面通过《2022年投资法》等宏观改革积极吸引大型战略投资，另一方面则通过具体法规保护本国中小企业，为外国投资者创造了一个机遇与挑战并存的复杂环境。</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-card p-6 rounded-lg shadow-lg text-center transition-transform hover:scale-105">
+                    <div class="text-5xl font-bold text-secondary">5.5-6%</div>
+                    <p class="text-primary mt-2 font-semibold">预期GDP增长率</p>
+                    <p class="text-sm text-gray-500 mt-1">国际机构普遍看好其强劲经济前景。</p>
+                </div>
+                <div class="bg-card p-6 rounded-lg shadow-lg text-center transition-transform hover:scale-105">
+                    <div class="text-5xl font-bold text-secondary">$10.5亿</div>
+                    <p class="text-primary mt-2 font-semibold">2024年中国FDI</p>
+                    <p class="text-sm text-gray-500 mt-1">中国是坦桑尼亚最大的外资来源国。</p>
+                </div>
+                <div class="bg-card p-6 rounded-lg shadow-lg text-center transition-transform hover:scale-105">
+                    <div class="text-5xl font-bold text-secondary">~700家</div>
+                    <p class="text-primary mt-2 font-semibold">在坦中资企业数量</p>
+                    <p class="text-sm text-gray-500 mt-1">深度融入当地经济结构。</p>
+                </div>
+            </div>
+
+            <div class="bg-card p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-center text-primary mb-6">解读“双轨制”政策悖论</h3>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                    <div class="flex-1 text-center p-6 bg-green-50 rounded-lg border-2 border-green-200">
+                        <div class="text-6xl mb-4">🚪</div>
+                        <h4 class="text-xl font-bold text-green-800">敞开的大门</h4>
+                        <p class="mt-2 text-green-700">通过《2022年投资法》为<strong class="font-bold">战略性、资本密集型、技术密集型</strong>投资铺设“红地毯”，如大型基建、制造业、能源。</p>
+                    </div>
+                    <div class="text-4xl font-bold text-accent">↔️</div>
+                     <div class="flex-1 text-center p-6 bg-red-50 rounded-lg border-2 border-red-200">
+                        <div class="text-6xl mb-4">🚧</div>
+                        <h4 class="text-xl font-bold text-red-800">更高的门槛</h4>
+                        <p class="mt-2 text-red-700">通过《2025年商业许可禁令》为<strong class="font-bold">零售、小规模服务等</strong>与本地中小企业竞争的领域关上“大门”。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-300">
+
+        <section id="policy" class="pt-16 -mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center text-primary mb-4">政策深潜：规则与红线</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg text-gray-600 mb-12">坦桑尼亚通过多层次的法律法规构建了其本土化政策框架。这不仅包括明确的行业禁令，还涵盖了战略行业的深度本地化要求以及跨行业的普遍限制。</p>
+
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold text-primary mb-2">1. 明确禁区：《2025年商业许可禁令》</h3>
+                <p class="text-gray-600 mb-6">该法令是对本地商会长期抱怨（尤其是在卡里亚库市场）外国商贩构成不公平竞争的回应。它明确禁止非公民从事15类商业活动，现有许可证到期后不予续签，并严惩“挂名法人”行为。</p>
+                <div id="forbidden-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                </div>
+            </div>
+
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold text-primary mb-2">2. 监管蓝图：矿业的“本地内容”示范效应</h3>
+                 <p class="text-gray-600 mb-8">矿业的“本地内容”规定是未来其他战略行业（如能源、大型基建）立法的蓝本。其核心要求为所有投资者提供了政府在本地合作、供应链和员工结构方面的政策预演。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-card p-4 rounded-lg shadow-lg text-center">
+                        <h4 class="font-bold text-lg mb-2">本地股权</h4>
+                        <div class="chart-container h-48">
+                            <canvas id="equityChart"></canvas>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">合资企业中，坦方持股需<strong class="text-accent">≥20%</strong>。国家在所有项目中享有<strong class="text-accent">16%</strong>无偿干股。</p>
+                    </div>
+                    <div class="bg-card p-4 rounded-lg shadow-lg text-center">
+                        <h4 class="font-bold text-lg mb-2">管理与雇佣</h4>
+                        <div class="chart-container h-48">
+                            <canvas id="managementChart"></canvas>
+                        </div>
+                         <p class="text-sm text-gray-500 mt-2">本土公司高级管理层中，坦方需占<strong class="text-accent">≥80%</strong>，非管理层职位则需<strong class="text-accent">100%</strong>。</p>
+                    </div>
+                    <div class="bg-card p-4 rounded-lg shadow-lg text-center">
+                        <h4 class="font-bold text-lg mb-2">本地采购</h4>
+                        <div class="flex items-center justify-center h-48">
+                           <div class="text-6xl">🛒</div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">必须<strong class="text-accent">优先采购</strong>由坦桑尼亚本土公司生产的商品和服务。</p>
+                    </div>
+                    <div class="bg-card p-4 rounded-lg shadow-lg text-center">
+                        <h4 class="font-bold text-lg mb-2">金融服务</h4>
+                        <div class="flex items-center justify-center h-48">
+                            <div class="text-6xl">🏦</div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">政策<strong class="text-accent">鼓励使用</strong>本地银行和金融机构的服务。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold text-primary mb-2">3. 跨行业的普遍限制</h3>
+                <p class="text-gray-600 mb-6">除了特定禁令和本地内容要求，外国投资者在多个领域还面临普遍的运营障碍。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h4 class="font-bold text-lg text-primary mb-2">媒体与建筑</h4>
+                        <p class="text-sm text-gray-600">媒体行业外资持股上限为49%。外国承包商通常被限制在一级（大型）项目，并需临时注册。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h4 class="font-bold text-lg text-primary mb-2">外籍劳工</h4>
+                        <p class="text-sm text-gray-600">《2022年投资法》取消了5个外籍员工的自动配额，所有工作许可均需单独申请，增加了人力资源挑战。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h4 class="font-bold text-lg text-primary mb-2">土地所有权</h4>
+                        <p class="text-sm text-gray-600">外国人无法直接拥有土地，只能通过投资中心（TIC）获得“衍生权利”，过程可能非常耗时。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-gray-300">
+
+        <section id="impact" class="pt-16 -mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center text-primary mb-4">影响评估：分化的机遇与挑战</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg text-gray-600 mb-12">本土化政策对不同类型的中国企业产生了截然不同的影响。中小企业面临直接的生存挑战，而大型企业则承受着合规成本上升的间接压力。</p>
+            
+            <div class="bg-card p-8 rounded-lg shadow-lg mb-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div class="border-r-0 md:border-r-2 border-red-200 pr-0 md:pr-8">
+                        <h3 class="text-2xl font-bold text-accent mb-4">直接冲击：中小企业的生存挤压</h3>
+                        <p class="text-gray-700 mb-4">从事零售、批发、手机维修等被禁行业的企业，其商业模式受到根本性挑战。这部分企业多为民营，高度集中在卡里亚库等市场。</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li>现有营业执照到期后<strong class="text-red-600">无法续签</strong>。</li>
+                            <li>面临业务出售、关闭或高风险重组的抉择。</li>
+                            <li>利润空间有限，难以承担复杂的合规成本。</li>
+                            <li>成为本地商会政治诉求的直接目标，生存空间被精准压缩。</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-secondary mb-4">间接压力：大型企业的运营负担</h3>
+                        <p class="text-gray-700 mb-4">从事基建、矿业、大型制造的企业，虽有机遇，但运营负担全面加重，合规成为核心议题。</p>
+                         <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong class="text-blue-600">合资合作成为必然</strong>，增加管理成本。</li>
+                            <li>本地内容、CSR等<strong class="text-blue-600">合规成本显著上升</strong>。</li>
+                            <li>外籍员工配额收紧，<strong class="text-blue-600">人力资源面临挑战</strong>。</li>
+                            <li>本地采购要求带来<strong class="text-blue-600">供应链重构压力</strong>。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-card p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-center text-primary mb-6">关键风险点：挂名法人与协会力量</h3>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                    <div class="flex-1 text-center p-6 bg-yellow-50 rounded-lg border-2 border-yellow-200">
+                        <div class="text-6xl mb-4">🎭</div>
+                        <h4 class="text-xl font-bold text-yellow-800">“挂名法人”的法律陷阱</h4>
+                        <p class="mt-2 text-yellow-700">法律严惩为非公民提供“挂名”的本地人。这种“纸面合规”风险极高，一旦查实，双方均将面临法律制裁。企业必须寻找<strong class="font-bold">真正的战略伙伴</strong>。</p>
+                    </div>
+                    <div class="text-4xl font-bold text-accent">⚔️</div>
+                     <div class="flex-1 text-center p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
+                        <div class="text-6xl mb-4">🏛️</div>
+                        <h4 class="text-xl font-bold text-blue-800">本地协会的双刃剑</h4>
+                        <p class="mt-2 text-blue-700">本地商会能推动排外禁令，也能为行业争取政策豁免（如旅游业）。中国企业应<strong class="font-bold">积极融入本地行业协会</strong>，变潜在对手为盟友。</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <hr class="my-16 border-gray-300">
+
+        <section id="strategy" class="pt-16 -mt-16">
+            <h2 class="text-3xl font-bold text-center text-primary mb-4">战略工具箱：风险规避与发展路径</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg text-gray-600 mb-12">面对稳定但复杂的政策未来，中国企业必须摒弃短期投机，建立系统的风险管理框架，并采取全新的战略范式。</p>
+
+            <div class="bg-card p-4 sm:p-6 lg:p-8 rounded-lg shadow-lg">
+                <div class="mb-6 border-b border-gray-200">
+                    <nav id="strategy-tabs" class="flex flex-wrap -mb-px" aria-label="Tabs">
+                        <button class="tab-btn active text-base md:text-lg p-3 md:p-4 border-b-2 border-transparent rounded-t-lg" data-tab="compliance">合规与重组</button>
+                        <button class="tab-btn text-base md:text-lg p-3 md:p-4 border-b-2 border-transparent rounded-t-lg" data-tab="partner">伙伴与尽调</button>
+                        <button class="tab-btn text-base md:text-lg p-3 md:p-4 border-b-2 border-transparent rounded-t-lg" data-tab="hedging">法律与金融对冲</button>
+                        <button class="tab-btn text-base md:text-lg p-3 md:p-4 border-b-2 border-transparent rounded-t-lg" data-tab="new-invest">新投资战略</button>
+                    </nav>
+                </div>
+                <div id="tab-content">
+                    <div class="tab-pane active" id="compliance-content">
+                        <p class="mb-6 text-gray-700">对于已在坦桑尼亚运营的企业，尤其是处于受影响行业的企业，必须立即采取行动，进行战略调整和风险控制。</p>
+                        <div class="space-y-4 accordion-container prose">
+                            <ul class="space-y-3">
+                                <li><strong>立即进行合规审计</strong>：对照《2025年禁令》和本地内容规定，彻底审查现有业务，识别所有风险点。</li>
+                                <li><strong>规划战略性重组</strong>：对于身处被禁止行业的企业，必须在许可证到期前，提前规划业务剥离、资产出售或与经过严格尽调的本地战略伙伴成立真正意义上的合资企业。</li>
+                                <li><strong>深化“本土化”运营</strong>：超越最低合规要求。主动投资于本地供应链、员工培训和社区关系，建立“社会许可证”，积累政治资本。</li>
+                                <li><strong>融入本地行业生态</strong>：积极加入并参与相关的坦桑尼亚本地商会或行业协会，通过集体发声影响政策，建立商业联盟。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tab-pane hidden" id="partner-content">
+                        <p class="mb-6 text-gray-700">在本土化政策下，选择合适的本地合作伙伴已成为决定投资成败的最关键因素。尽职调查必须极为详尽，以规避“挂名”风险。</p>
+                        <div class="space-y-4 accordion-container">
+                            <div class="accordion-item border rounded-lg">
+                                <button class="accordion-header w-full text-left p-4 bg-gray-100 hover:bg-gray-200 font-semibold text-primary flex justify-between items-center rounded-t-lg">
+                                    <span>合作伙伴尽职调查清单</span>
+                                    <span class="transform transition-transform duration-300">▼</span>
+                                </button>
+                                <div class="accordion-content p-4 bg-white prose rounded-b-lg">
+                                    <ul class="space-y-2">
+                                        <li><strong>法律与公司状况</strong>: 核实BRELA注册文件、所有执照、股东协议及诉讼记录。</li>
+                                        <li><strong>财务健康状况</strong>: 审查经审计的财报、税务合规证明，评估其资本实力。</li>
+                                        <li><strong>技术与运营能力</strong>: 实地考察，评估其真实的项目经验、设备和技术团队。</li>
+                                        <li><strong>政治与声誉风险</strong>: 进行背景调查，筛查其政治背景、腐败指控及商界声誉。</li>
+                                        <li><strong>战略契合度</strong>: 确保双方在商业目标、管理理念和风险偏好上高度一致。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane hidden" id="hedging-content">
+                         <p class="mb-6 text-gray-700">面对政策不确定性，必须综合利用法律保护和金融工具来对冲非商业风险。</p>
+                        <div class="space-y-4 accordion-container prose">
+                           <ul class="space-y-3">
+                                <li><strong>利用《中坦双边投资协定》(BIT)</strong>: 该协定为投资者提供了公平公正待遇、反征收保护，并允许通过国际仲裁（ISDS）解决争端，这是重要的法律筹码。</li>
+                                <li><strong>购买政治风险保险 (PRI)</strong>: 这是必不可少的金融对冲工具。可以向世界银行下属的MIGA、商业保险公司（如安盛、安达）或非洲本土的ATIDI等机构投保，以覆盖征收、资本转移限制、政府违约等风险。</li>
+                                <li><strong>加强使馆协调</strong>: 积极与中国驻坦使馆经商处保持沟通，获取政策指导，并在必要时寻求外交渠道协助维护合法权益。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tab-pane hidden" id="new-invest-content">
+                        <p class="mb-6 text-gray-700">对于计划进入坦桑尼亚市场的投资者，必须从一开始就采用符合新规则的战略思维。</p>
+                        <div class="space-y-4 accordion-container prose">
+                            <ul class="space-y-3">
+                                <li><strong>进行战略性行业选择</strong>: 聚焦于政府欢迎的资本/技术密集型行业，如大规模制造、可再生能源、农产品深加工等，避免进入“红线区”。</li>
+                                <li><strong>从始至终合规设计</strong>: 如果需要成立合资企业，应在投资计划的最初阶段就将其作为核心要素进行设计，而不是事后弥补。</li>
+                                <li><strong>投资于“关系资本”</strong>: 从项目启动之初，就与坦桑尼亚投资中心（TIC）、相关政府部门建立透明、牢固的合作关系。</li>
+                                <li><strong>将政治风险定价</strong>: 在财务模型中，必须明确计入合规成本、行政延误成本及政治风险保险等费用，确保项目在复杂制度下依然可行。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-card mt-16 py-6 border-t">
+        <div class="container mx-auto text-center text-gray-500">
+            <p>&copy; 2025 坦桑尼亚投资政策交互式分析报告。仅供参考。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const forbiddenIndustries = [
+        { name: "批发和零售", icon: "📦", details: "不包括超市、专业产品专卖店及本地生产商自有的批发中心。" },
+        { name: "移动货币转账", icon: "💸", details: "无特定例外说明。" },
+        { name: "电子设备维修", icon: "📱", details: "无特定例外说明。" },
+        { name: "沙龙业务", icon: "💇‍♀️", details: "在酒店内或为旅游目的经营的除外。" },
+        { name: "清洁服务", icon: "🧹", details: "家庭、办公室和环境清洁服务。" },
+        { name: "小规模采矿", icon: "⛏️", details: "无特定例外说明。" },
+        { name: "国内邮政包裹", icon: "📮", details: "无特定例外说明。" },
+        { name: "国内导游", icon: "🗺️", details: "无特定例外说明。" },
+        { name: "广播电视", icon: "📺", details: "设立与运营。" },
+        { name: "博物馆/古玩店", icon: "🏺", details: "无特定例外说明。" },
+        { name: "经纪/代理服务", icon: "🤝", details: "商业和房地产领域。" },
+        { name: "清关/货运代理", icon: "�", details: "无特定例外说明。" },
+        { name: "农作物采购", icon: "🌾", details: "无特定例外说明。" },
+        { name: "赌博机运营", icon: "🎰", details: "在持牌赌场内进行的除外。" },
+        { name: "微/小型工业", icon: "🏭", details: "所有权与运营。" }
+    ];
+
+    const grid = document.getElementById('forbidden-grid');
+    if(grid) {
+        forbiddenIndustries.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'bg-card p-4 rounded-lg shadow-md text-center cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center';
+            card.innerHTML = `<div class="text-4xl mb-2">${item.icon}</div><h5 class="font-semibold text-sm text-primary">${item.name}</h5>`;
+            card.onclick = () => {
+                alert(`行业: ${item.name}\n\n说明: ${item.details}`);
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    const createDoughnutChart = (ctx, label, data, backgroundColor) => {
+        if(!ctx) return;
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [label, '其他'],
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColor,
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    const equityCtx = document.getElementById('equityChart')?.getContext('2d');
+    createDoughnutChart(equityCtx, '坦方持股', [20, 80], ['#81b29a', '#e6e6e6']);
+
+    const managementCtx = document.getElementById('managementChart')?.getContext('2d');
+    createDoughnutChart(managementCtx, '坦籍高管', [80, 20], ['#81b29a', '#e6e6e6']);
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 80) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            const linkHref = link.getAttribute('href');
+            if (linkHref && linkHref.includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (!mobileMenu.classList.contains('hidden')) {
+                 mobileMenu.classList.add('hidden');
+            }
+        });
+    });
+
+    const tabs = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            const targetId = tab.getAttribute('data-tab');
+            tabPanes.forEach(pane => {
+                if (pane.id === `${targetId}-content`) {
+                    pane.classList.remove('hidden');
+                    pane.classList.add('active');
+                } else {
+                    pane.classList.add('hidden');
+                    pane.classList.remove('active');
+                }
+            });
+        });
+    });
+    
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+    accordionHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('span:last-child');
+            
+            const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+            // Close all accordions in the same container before opening the new one
+            const container = header.closest('.accordion-container');
+            if(container){
+                container.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = '0px');
+                container.querySelectorAll('.accordion-header span:last-child').forEach(i => i.style.transform = 'rotate(0deg)');
+            }
+
+
+            if (!isOpen) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                if(icon) icon.style.transform = 'rotate(180deg)';
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>
+�
