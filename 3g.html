@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>十分钟学习系列之：三峡大坝工程</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: River & Earth Tones (Blues, Grays, Greens) -->
+    <!-- Application Structure Plan: The application uses a thematic, multi-section structure. It begins with a hero section, followed by "核心功能解析". It then details "调度效益分析", "智慧大脑：控制与管理系统", "工程建设的管理创新", "开放与合作", and "创造的工程奇迹". A new section, "综合效益定量分析" (Quantitative Analysis of Comprehensive Benefits), has been added to provide hard data on the dam's performance. The final sections cover environmental impact, socio-economic benefits, and the project timeline. This structure provides a comprehensive, logical flow. -->
+    <!-- Visualization & Content Choices: 
+        - Key Metrics (KPIs): Goal: Inform. Method: Large-stat cards (HTML/CSS). Justification: Provides an immediate sense of the project's immense scale.
+        - Quantitative Analysis: Goal: Provide evidence of success. Method: Data-rich cards with icons. Justification: Presents the key performance indicators since completion in a clear, impactful, and easy-to-compare format.
+        - International Cooperation: Goal: Explain collaboration. Method: Icon-based info cards. Justification: Details the value and impact of global partnerships on the project's success.
+        - Construction Management: Goal: Explain Process. Method: Icon-based info cards. Justification: Clearly explains the key management innovations that ensured the project's success.
+        - Timeline: Goal: Organize History. Method: Vertical styled list (HTML/CSS). Justification: Provides a clear, chronological overview of the project's key milestones.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f9fafb; /* gray-50 */
+            color: #1f2937; /* gray-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 45vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 280px;
+            }
+        }
+        .nav-tab {
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-tab.active {
+            border-bottom-color: #2563eb; /* blue-600 */
+            color: #1e3a8a; /* blue-900 */
+            font-weight: 700;
+        }
+        .kpi-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #e5e7eb; /* gray-200 */
+        }
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+        }
+        .content-panel {
+            display: none;
+        }
+        .content-panel.active {
+            display: block;
+        }
+        .fade-in {
+            animation: fadeInAnimation 0.6s ease-in-out forwards;
+        }
+        @keyframes fadeInAnimation {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3">长江三峡水利枢纽工程</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">一座集防洪、发电、航运、水资源利用等功能于一体的全球最大水利工程的交互式探索。</p>
+        </header>
+
+        <section id="kpi-section" class="mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div class="kpi-card bg-white p-6 rounded-lg">
+                    <h3 class="text-gray-500 text-sm font-medium uppercase">总装机容量</h3>
+                    <p class="text-4xl font-bold text-blue-900 mt-2">2,250万 <span class="text-xl">千瓦</span></p>
+                </div>
+                <div class="kpi-card bg-white p-6 rounded-lg">
+                    <h3 class="text-gray-500 text-sm font-medium uppercase">水库总库容</h3>
+                    <p class="text-4xl font-bold text-blue-900 mt-2">393亿 <span class="text-xl">立方米</span></p>
+                </div>
+                <div class="kpi-card bg-white p-6 rounded-lg">
+                    <h3 class="text-gray-500 text-sm font-medium uppercase">年均发电量</h3>
+                    <p class="text-4xl font-bold text-blue-900 mt-2">~988亿 <span class="text-xl">千瓦时</span></p>
+                </div>
+                <div class="kpi-card bg-white p-6 rounded-lg">
+                    <h3 class="text-gray-500 text-sm font-medium uppercase">工程总投资</h3>
+                    <p class="text-4xl font-bold text-blue-900 mt-2">~2030亿 <span class="text-xl">元</span></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="functions-analysis" class="bg-white p-6 sm:p-8 rounded-lg border border-gray-200 shadow-sm mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">核心功能解析</h2>
+                <p class="text-md text-gray-500 mt-2">点击下方标签，探索三峡工程在防洪、发电和航运方面的巨大作用。</p>
+            </div>
+            <nav class="flex justify-center border-b border-gray-200 mb-8">
+                <button data-target="flood-control" class="nav-tab py-3 px-6 text-gray-600 active">防洪</button>
+                <button data-target="power-generation" class="nav-tab py-3 px-6 text-gray-600">发电</button>
+                <button data-target="navigation" class="nav-tab py-3 px-6 text-gray-600">航运</button>
+            </nav>
+
+            <div id="function-content">
+                <div id="flood-control" class="content-panel active fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">长江的“调节器”</h3>
+                            <p class="text-gray-600 leading-relaxed">三峡工程的首要任务是防洪。通过221.5亿立方米的防洪库容，大坝能在汛期有效拦截和削减长江上游的洪峰，将下游荆江河段的防洪标准从十年一遇提高到百年一遇，极大地保障了长江中下游地区数千万人民的生命财产安全。</p>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-700 text-center mb-3">水库汛期水位变化示意图</h4>
+                            <div class="chart-container">
+                                <canvas id="waterLevelChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="power-generation" class="content-panel fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                         <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">世界的“绿色引擎”</h3>
+                            <p class="text-gray-600 leading-relaxed">作为全球最大的水电站，三峡拥有34台巨型水轮发电机组。其产生的巨大电能输送到华中、华东和华南地区，为中国经济发展提供了强大的清洁能源支持，相当于每年减少近1亿吨的二氧化碳排放。发电量与来水量密切相关，丰水年发电量更高。</p>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-700 text-center mb-3">历年发电量（单位：亿千瓦时）</h4>
+                            <div class="chart-container">
+                                <canvas id="powerGenChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-12 pt-8 border-t border-gray-200">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">发电机组布局与详情</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <h4 class="font-bold text-lg text-blue-800">左岸电站</h4>
+                                <ul class="mt-3 space-y-2 text-gray-600">
+                                    <li><strong class="font-semibold">机组数量:</strong> 14 台</li>
+                                    <li><strong class="font-semibold">单机容量:</strong> 70万千瓦</li>
+                                    <li><strong class="font-semibold">总容量:</strong> 980万千瓦</li>
+                                    <li class="pt-2"><strong class="font-semibold">特点:</strong> 最早建设投产的电站，引进了国际先进技术，并与国内制造相结合，为后续机组国产化奠定了基础。</li>
+                                </ul>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <h4 class="font-bold text-lg text-blue-800">右岸电站</h4>
+                                <ul class="mt-3 space-y-2 text-gray-600">
+                                    <li><strong class="font-semibold">机组数量:</strong> 12 台</li>
+                                    <li><strong class="font-semibold">单机容量:</strong> 70万千瓦</li>
+                                    <li><strong class="font-semibold">总容量:</strong> 840万千瓦</li>
+                                    <li class="pt-2"><strong class="font-semibold">特点:</strong> 在左岸电站的基础上，实现了主要设备和技术的全面国产化，是中国水电重大装备制造的里程碑。</li>
+                                </ul>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <h4 class="font-bold text-lg text-blue-800">地下电站</h4>
+                                <ul class="mt-3 space-y-2 text-gray-600">
+                                    <li><strong class="font-semibold">机组数量:</strong> 6 台</li>
+                                    <li><strong class="font-semibold">单机容量:</strong> 70万千瓦</li>
+                                    <li><strong class="font-semibold">总容量:</strong> 420万千瓦</li>
+                                    <li class="pt-2"><strong class="font-semibold">特点:</strong> 位于右岸山体内，是电站的扩容工程，充分利用了地质空间，进一步提升了电站的发电能力和调峰性能。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-6">注：除以上32台主机组外，另有2台5万千瓦的电源机组，为大坝自身运行提供电力，总装机容量共计2250万千瓦。</p>
+                    </div>
+                </div>
+                <div id="navigation" class="content-panel fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">黄金水道的“升级”</h3>
+                            <p class="text-gray-600 leading-relaxed">三峡工程显著改善了长江川江河段的航运条件，使万吨级船队可以直达重庆。双线五级船闸和垂直升船机共同构成了高效的过坝通道，极大提升了长江航运能力，降低了运输成本，使长江真正成为贯穿东西的“黄金水道”。</p>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-700 text-center mb-3">三峡枢纽年货运量（单位：亿吨）</h4>
+                            <div class="chart-container">
+                                <canvas id="navigationChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="dispatch-analysis" class="mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">调度效益分析：削峰填谷与水资源利用</h2>
+                <p class="text-md text-gray-500 mt-2 max-w-3xl mx-auto">三峡工程的核心调度原则是“蓄丰补枯”。即在汛期（丰水期）拦蓄洪水，将破坏性的洪峰转化为宝贵的水资源；在枯水期增加下泄流量，补充下游生产、生活和生态用水。</p>
+            </div>
+            <div class="bg-white p-6 sm:p-8 rounded-lg border border-gray-200 shadow-sm">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">防洪调度：削峰效益</h3>
+                        <p class="text-gray-600 leading-relaxed mb-4">下图模拟了一次典型的洪水过程。蓝线代表上游来的自然洪峰（入库流量），其峰值远超下游河道的安全泄量。通过大坝的拦蓄，实际向下游排放的流量（灰色条形）被控制在安全范围内，洪峰被显著“削平”，避免了下游的洪涝灾害。</p>
+                        <p class="text-gray-600 leading-relaxed">被拦蓄的洪水也抬高了水库的水位，增加了发电水头，从而在确保安全的前提下，实现了防洪和发电的双赢。</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-700 text-center mb-3">典型洪峰调度过程示意图 (单位: 立方米/秒)</h4>
+                        <div class="chart-container">
+                            <canvas id="dispatchChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-12 pt-8 border-t border-gray-200">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">水库年度运行规律：蓄丰补枯</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-800">1. 汛前消落期 (5-6月)</h4>
+                            <p class="text-sm text-gray-700 mt-2">逐步加大下泄流量，将水位从175米高位降至145米汛限水位，腾出221.5亿立方米防洪库容。</p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-red-800">2. 汛期防洪期 (6-9月)</h4>
+                            <p class="text-sm text-gray-700 mt-2">维持145米低水位运行。遇洪峰时，拦蓄洪水，确保出库流量小于入库流量，保障下游安全。</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-green-800">3. 汛后蓄水期 (9-11月)</h4>
+                            <p class="text-sm text-gray-700 mt-2">减少下泄流量，开始蓄水。目标是在10月底或11月初将水位从145米重新抬升至175米。</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-yellow-800">4. 枯水期供水期 (12-4月)</h4>
+                            <p class="text-sm text-gray-700 mt-2">维持175米高水位运行，并加大下泄流量（出库>入库），为下游航运、生产和生态补水。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="control-management-system" class="mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">智慧大脑：控制与管理系统</h2>
+                <p class="text-md text-gray-500 mt-2 max-w-3xl mx-auto">三峡工程的平稳运行，依赖于一个高度自动化、智能化的“神经中枢”。该系统分为调度控制和安全管理两大核心。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center">
+                        <span class="text-2xl mr-3">🧠</span> 梯级调度与控制系统
+                    </h3>
+                    <p class="text-gray-600">这不是一个单一电站的控制系统，而是以三峡为核心，联合调度长江上游多个巨型水库（如溪洛渡、向家坝等）的梯级调度系统。它通过计算机模型和大数据分析，实现流域效益最大化。</p>
+                    <ul class="mt-4 space-y-2 text-gray-600 list-disc list-inside">
+                        <li><strong>洪水预报:</strong> 实时分析上游水文数据，精准预测洪峰。</li>
+                        <li><strong>发电优化:</strong> 根据来水和电网需求，动态调整机组出力。</li>
+                        <li><strong>联合调度:</strong> 协调上下游水库，实现防洪、发电、航运、生态补水的综合平衡。</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center">
+                        <span class="text-2xl mr-3">🛡️</span> 大坝安全管理系统
+                    </h3>
+                    <p class="text-gray-600">这是一个遍布大坝内外的“神经网络”，通过数千个精密传感器，对大坝的健康状况进行7x24小时不间断的实时监测，确保大坝绝对安全。</p>
+                    <ul class="mt-4 space-y-2 text-gray-600 list-disc list-inside">
+                        <li><strong>变形监测:</strong> 测量大坝的位移、沉降等微小变化。</li>
+                        <li><strong>渗流监测:</strong> 监控坝体内部的水压和渗流量。</li>
+                        <li><strong>应力应变:</strong> 分析大坝混凝土的内部受力情况。</li>
+                        <li><strong>数据分析:</strong> 自动采集和分析海量数据，实现健康诊断和风险预警。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="construction-management" class="mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">工程建设的管理创新</h2>
+                <p class="text-md text-gray-500 mt-2 max-w-3xl mx-auto">三峡工程的成功不仅是技术的胜利，更是中国现代工程管理体系的典范。它通过一系列创新的制度，确保了这一世界级工程的质量、进度和投资得到有效控制。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">项目法人责任制</h3>
+                    <p class="text-gray-600">设立“中国长江三峡工程开发总公司”作为项目法人，全面负责工程的建设、资金筹措和运营管理。实现了政企分开，权责明确，是工程走向市场化运作的关键一步。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">招标投标制</h3>
+                    <p class="text-gray-600">工程的关键项目全部通过国内外公开招标，引入竞争机制。这不仅吸引了全球最优秀的承建商，也有效控制了成本，保证了施工质量和技术先进性。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">建设监理制</h3>
+                    <p class="text-gray-600">引入独立的第三方监理公司，对工程的质量、进度、投资进行全过程、全方位的监督和控制，确保各项建设活动都符合设计和合同要求，防止了质量问题和投资超支。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">合同管理制</h3>
+                    <p class="text-gray-600">所有参建单位都通过严谨的法律合同来明确各自的权利、责任和义务。这种以合同为纽带的管理方式，为处理工程中复杂的协作关系和潜在纠纷提供了法律依据。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">投资控制：“静态控制、动态管理”</h3>
+                    <p class="text-gray-600">以批准的静态概算为投资上限进行严格控制，同时在建设过程中对资金使用、成本变化进行动态跟踪和管理，确保工程总投资不超标。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">质量与安全：“双零”目标</h3>
+                    <p class="text-gray-600">在工程建设中推行“零质量缺陷”和“零安全事故”的管理目标。通过建立四级质量管理体系和严格的安全生产责任制，创造了世界水利工程建设史上的奇迹。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="international-cooperation" class="mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">开放与合作：全球智慧的结晶</h2>
+                <p class="text-md text-gray-500 mt-2 max-w-3xl mx-auto">三峡工程的成功，离不开“以我为主，博采众长”的开放态度。通过广泛的国际合作，引进了全球最先进的技术、资金和管理经验，并在此基础上实现了消化、吸收与再创新。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">技术引进与再创新</h3>
+                    <p class="text-gray-600">通过国际招标，引进了阿尔斯通、西门子等世界顶级公司的巨型水轮发电机组。中方团队在合作制造过程中，全面学习、掌握了核心技术，并最终实现了70万千瓦级机组的完全国产化，带动了中国水电装备制造业的跨越式发展。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">国际融资与咨询</h3>
+                    <p class="text-gray-600">积极利用国际资本市场，并通过世界银行等国际金融机构获得贷款，为工程建设提供了资金支持。同时，聘请了来自全球的顶尖专家组成顾问团队，为工程中的重大技术和环境问题提供了宝贵的咨询意见。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="engineering-miracles" class="mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">创造的工程奇迹</h2>
+                <p class="text-md text-gray-500 mt-2 max-w-3xl mx-auto">三峡工程不仅是一座大坝，更是一座丰碑，刷新了中国乃至世界水利水电工程的多项纪录。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <span class="text-3xl mr-3">🌍</span> 世界之最
+                    </h3>
+                    <ul class="space-y-3 text-gray-600">
+                        <li><strong class="font-semibold text-gray-700">综合规模第一：</strong>集防洪、发电、航运、水资源利用于一体，是世界上综合效益最广泛的水利枢纽。</li>
+                        <li><strong class="font-semibold text-gray-700">装机容量第一：</strong>总装机容量2250万千瓦，全球最大的水电站。</li>
+                        <li><strong class="font-semibold text-gray-700">泄洪能力第一：</strong>最大泄洪量可达11.6万立方米/秒，确保极端洪水下的安全。</li>
+                        <li><strong class="font-semibold text-gray-700">技术最复杂的升船机：</strong>全球规模最大、技术难度最高的垂直升船机，被誉为“船舶电梯”。</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <span class="text-3xl mr-3">🇨🇳</span> 中国第一
+                    </h3>
+                    <ul class="space-y-3 text-gray-600">
+                        <li><strong class="font-semibold text-gray-700">管理体系的创举：</strong>首次在特大型工程中全面推行“四制”（项目法人制、招标投标制、建设监理制、合同管理制）。</li>
+                        <li><strong class="font-semibold text-gray-700">重大装备国产化：</strong>实现了70万千瓦级巨型水轮发电机组的完全自主设计和制造，打破了国外技术垄断。</li>
+                        <li><strong class="font-semibold text-gray-700">最大规模的移民工程：</strong>完成了百万人口级别的移民安置，是世界工程史上前所未有的社会工程。</li>
+                        <li><strong class="font-semibold text-gray-700">最先进的安全监测：</strong>建成了全球规模最大、技术最全面的大坝安全监测系统，确保工程长治久安。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="quantitative-analysis" class="mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">综合效益定量分析</h2>
+                <p class="text-md text-gray-500 mt-2 max-w-3xl mx-auto">自全面建成投运以来，三峡工程的各项效益可以通过一系列宏观数据得到直观体现。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="text-2xl mr-3">🌊</span> 防洪效益</h3>
+                    <p class="text-4xl font-bold text-blue-900">2100亿+</p>
+                    <p class="text-gray-500 mb-3">立方米累计拦洪量</p>
+                    <p class="text-gray-600">实施防洪调度近70次，多次将超过70000立方米/秒的巨型洪峰削减约40%，从根本上解除了长江中下游的洪水威胁，避免的经济损失远超工程总投资。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="text-2xl mr-3">⚡️</span> 发电效益</h3>
+                    <p class="text-4xl font-bold text-blue-900">1.7万亿+</p>
+                    <p class="text-gray-500 mb-3">千瓦时累计发电量</p>
+                    <p class="text-gray-600">相当于节约标准煤超5.5亿吨，减少二氧化碳排放近15亿吨。仅发电业务贡献的税收就已超过1000亿元，是名副其实的“绿色印钞机”。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="text-2xl mr-3">🚢</span> 航运效益</h3>
+                    <p class="text-4xl font-bold text-blue-900">22亿+</p>
+                    <p class="text-gray-500 mb-3">吨累计过闸货运量</p>
+                    <p class="text-gray-600">年货运量已超过1.7亿吨，是建库前的17倍以上，运输成本降低约40%，打通了中国西部内陆的“出海口”，使长江成为名副其实的“黄金水道”。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="text-2xl mr-3">💰</span> 综合经济效益</h3>
+                    <p class="text-4xl font-bold text-blue-900">早已收回成本</p>
+                    <p class="text-gray-500 mb-3">巨大的综合价值</p>
+                    <p class="text-gray-600">综合发电收入、航运成本节约、防洪减灾的巨大价值以及水资源调配效益，三峡工程的投资成本早已收回，并持续为国民经济创造着巨大的正向价值。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact-environment" class="mb-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">对自然环境的影响</h2>
+                <p class="text-md text-gray-500 mt-2 max-w-3xl mx-auto">重大工程对环境的影响是双向的。三峡工程在根治一种重大自然灾害的同时，也对局部地质和气候环境带来了新的挑战。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">洪涝灾害：显著抑制</h3>
+                    <p class="text-gray-600">这是工程最核心的正面效益。通过“削峰”能力，将长江中下游的防洪标准提升至百年一遇，从根本上遏制了该区域大规模、灾难性的洪涝灾害。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">地质灾害：风险增加</h3>
+                    <p class="text-gray-600">库区水位周期性涨落（145米-175米），反复浸泡两岸坡体，增加了诱发滑坡和崩塌的风险。为此，国家已建立完善的监测预警体系并开展了大量治理工程。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">诱发地震：频率增加</h3>
+                    <p class="text-gray-600">巨大水体对地壳的压力可能诱发小规模、浅源的地震。监测显示，蓄水后微震活动有所增加，但震级低，远低于工程抗震设防标准，风险总体可控。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">局地气候：轻微改变</h3>
+                    <p class="text-gray-600">巨大水面形成了“水库微气候”，使库区附近冬季更暖、夏季更凉，雾日增多。但这种影响范围有限（约10-20公里），不足以改变大尺度的气候格局。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact-benefits" class="mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">综合社会经济效益</h2>
+                <p class="text-md text-gray-500 mt-2">一个工程的价值需要从多个维度来衡量，包括其社会、环境和经济贡献。</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-semibold text-gray-800 text-center mb-4">清洁能源贡献</h3>
+                    <div class="chart-container h-72">
+                        <canvas id="cleanEnergyChart"></canvas>
+                    </div>
+                    <p class="text-center text-gray-600 mt-4">年发电量约等于替代<strong class="text-blue-800">4900万吨</strong>原煤，减少近<strong class="text-blue-800">1亿吨</strong>CO₂排放。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col justify-center items-center text-center">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">社会影响：百万移民</h3>
+                    <p class="text-6xl font-bold text-blue-900">130<span class="text-3xl ml-2">万+</span></p>
+                    <p class="text-gray-600 mt-4 max-w-sm">为支持工程建设，约130万居民从库区迁移。这是三峡工程在社会层面最深远的影响，也是一项空前浩大的社会工程。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="timeline">
+             <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800">工程时间线</h2>
+            </div>
+            <div class="relative max-w-2xl mx-auto">
+                <div class="absolute left-1/2 w-0.5 h-full bg-gray-300 transform -translate-x-1/2"></div>
+                <div class="space-y-12">
+                    <div class="relative">
+                        <div class="absolute left-1/2 w-4 h-4 bg-blue-600 rounded-full mt-1.5 -translate-x-1/2 border-4 border-white"></div>
+                        <div class="ml-auto w-2/5 p-4 bg-white rounded-lg border border-gray-200 shadow-sm text-right">
+                            <h3 class="font-bold text-blue-800">1992年</h3><p class="text-sm text-gray-600">全国人大批准兴建三峡工程</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute left-1/2 w-4 h-4 bg-blue-600 rounded-full mt-1.5 -translate-x-1/2 border-4 border-white"></div>
+                        <div class="mr-auto w-2/5 p-4 bg-white rounded-lg border border-gray-200 shadow-sm text-left">
+                            <h3 class="font-bold text-blue-800">1994年</h3><p class="text-sm text-gray-600">三峡工程正式开工</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute left-1/2 w-4 h-4 bg-blue-600 rounded-full mt-1.5 -translate-x-1/2 border-4 border-white"></div>
+                        <div class="ml-auto w-2/5 p-4 bg-white rounded-lg border border-gray-200 shadow-sm text-right">
+                            <h3 class="font-bold text-blue-800">2003年</h3><p class="text-sm text-gray-600">开始蓄水通航，首批机组发电</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute left-1/2 w-4 h-4 bg-blue-600 rounded-full mt-1.5 -translate-x-1/2 border-4 border-white"></div>
+                        <div class="mr-auto w-2/5 p-4 bg-white rounded-lg border border-gray-200 shadow-sm text-left">
+                            <h3 class="font-bold text-blue-800">2006年</h3><p class="text-sm text-gray-600">三峡大坝全线建成</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute left-1/2 w-4 h-4 bg-blue-600 rounded-full mt-1.5 -translate-x-1/2 border-4 border-white"></div>
+                        <div class="ml-auto w-2/5 p-4 bg-white rounded-lg border border-gray-200 shadow-sm text-right">
+                            <h3 class="font-bold text-blue-800">2012年</h3><p class="text-sm text-gray-600">所有发电机组投产，工程全面完工</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const chartColors = {
+                blue: 'rgba(37, 99, 235, 0.8)',
+                blueLight: 'rgba(59, 130, 246, 0.1)',
+                green: 'rgba(22, 163, 74, 0.8)',
+                greenLight: 'rgba(34, 197, 94, 0.6)',
+                gray: 'rgba(107, 114, 128, 0.8)'
+            };
+
+            const charts = {};
+
+            const createChart = (ctx, type, data, options) => {
+                return new Chart(ctx, { type, data, options });
+            };
+
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1f2937',
+                        titleColor: '#f9fafb',
+                        bodyColor: '#f9fafb',
+                        titleFont: { weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 4,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#e5e7eb' },
+                        ticks: { color: '#4b5563', font: { family: "'Noto Sans SC', sans-serif" } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#4b5563', font: { family: "'Noto Sans SC', sans-serif" } }
+                    }
+                }
+            };
+
+            function initWaterLevelChart() {
+                const ctx = document.getElementById('waterLevelChart').getContext('2d');
+                charts.waterLevel = createChart(ctx, 'line', {
+                    labels: ['4月', '5月', '6月(汛前)', '7月', '8月', '9月(汛末)', '10月'],
+                    datasets: [{
+                        label: '水位 (米)',
+                        data: [175, 175, 145, 150, 160, 145, 175],
+                        borderColor: chartColors.blue,
+                        backgroundColor: chartColors.blueLight,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                }, defaultChartOptions);
+            }
+
+            function initPowerGenChart() {
+                const ctx = document.getElementById('powerGenChart').getContext('2d');
+                charts.powerGen = createChart(ctx, 'bar', {
+                    labels: ['2018', '2019', '2020 (丰水)', '2021', '2022 (枯水)'],
+                    datasets: [{
+                        label: '发电量 (亿千瓦时)',
+                        data: [1016, 968, 1118, 1036, 842],
+                        backgroundColor: chartColors.green,
+                    }]
+                }, defaultChartOptions);
+            }
+
+            function initNavigationChart() {
+                const ctx = document.getElementById('navigationChart').getContext('2d');
+                charts.navigation = createChart(ctx, 'bar', {
+                    labels: ['2003', '2011', '2016', '2021', '2023'],
+                    datasets: [{
+                        label: '货运量 (亿吨)',
+                        data: [0.34, 1.0, 1.3, 1.56, 1.7],
+                        backgroundColor: chartColors.gray,
+                    }]
+                }, defaultChartOptions);
+            }
+
+            function initCleanEnergyChart() {
+                const ctx = document.getElementById('cleanEnergyChart').getContext('2d');
+                charts.cleanEnergy = createChart(ctx, 'doughnut', {
+                    labels: ['三峡水电', '等效燃煤'],
+                    datasets: [{
+                        data: [100, 200], // Proportional, not actual values
+                        backgroundColor: [chartColors.blue, '#d1d5db'],
+                        borderWidth: 0
+                    }]
+                }, {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#4b5563', font: { family: "'Noto Sans SC', sans-serif" }} },
+                        tooltip: { enabled: false }
+                    }
+                });
+            }
+            
+            function initDispatchChart() {
+                const ctx = document.getElementById('dispatchChart').getContext('2d');
+                charts.dispatch = createChart(ctx, 'bar', {
+                    labels: ['第1天', '第2天', '第3天', '第4天', '第5天', '第6天', '第7天'],
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: '入库流量 (洪峰)',
+                            data: [25000, 35000, 55000, 65000, 50000, 40000, 30000],
+                            borderColor: chartColors.blue,
+                            backgroundColor: chartColors.blueLight,
+                            tension: 0.4,
+                            fill: true,
+                            order: 1
+                        },
+                        {
+                            type: 'bar',
+                            label: '出库流量 (调节后)',
+                            data: [25000, 32000, 38000, 40000, 40000, 38000, 30000],
+                            backgroundColor: chartColors.gray,
+                            order: 2
+                        }
+                    ]
+                }, {
+                    ...defaultChartOptions,
+                    plugins: {
+                        ...defaultChartOptions.plugins,
+                        legend: { display: true, position: 'bottom' }
+                    }
+                });
+            }
+
+            const functionTabs = document.querySelectorAll('.nav-tab');
+            const contentPanels = document.querySelectorAll('.content-panel');
+
+            functionTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.dataset.target;
+
+                    functionTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    contentPanels.forEach(panel => {
+                        if (panel.id === targetId) {
+                            panel.classList.add('active');
+                            panel.classList.add('fade-in');
+                        } else {
+                            panel.classList.remove('active');
+                            panel.classList.remove('fade-in');
+                        }
+                    });
+                });
+            });
+            
+            initWaterLevelChart();
+            initPowerGenChart();
+            initNavigationChart();
+            initCleanEnergyChart();
+            initDispatchChart();
+        });
+    </script>
+</body>
+</html>
+
