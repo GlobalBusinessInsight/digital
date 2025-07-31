@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿尔及利亚投资战略杂志 (三语版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500&family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles */
+        body {
+            background-color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            perspective: 2500px;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        /* Magazine container */
+        .magazine-container {
+            width: 90vw;
+            height: 90vh;
+            max-width: 1200px;
+            max-height: 800px;
+            position: relative;
+        }
+
+        /* Page styles */
+        .page {
+            width: 50%;
+            height: 100%;
+            background: white;
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform-style: preserve-3d;
+            transform-origin: left;
+            transition: transform 1.2s ease-in-out;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+        
+        .page.first-page {
+             border-radius: 10px 10px 10px 10px;
+        }
+
+        .page-front, .page-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            padding: 2.5rem;
+            overflow-y: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page-back {
+            transform: rotateY(180deg);
+            border-radius: 10px 0 0 10px;
+            background: white;
+        }
+        
+        .page-content-zh { font-family: 'Noto Serif SC', serif; }
+        .page-content-en { font-family: 'Lato', sans-serif; }
+        .page-content-fr { font-family: 'Lato', sans-serif; }
+        
+        .title-zh { font-family: 'Noto Serif SC', serif; }
+        .title-en, .title-fr { font-family: 'Playfair Display', serif; }
+
+        .cover-image {
+            background-image: url('https://placehold.co/600x800/1e3a8a/ffffff?text=ALGÉRIE');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .pull-quote {
+            border-left: 4px solid #1e3a8a;
+            padding-left: 1.5rem;
+            font-style: italic;
+            font-size: 1.25rem;
+            color: #1e3a8a;
+            margin: 2rem 0;
+        }
+
+        /* Navigation buttons */
+        .nav-button {
+            position: fixed;
+            bottom: 30px;
+            background-color: rgba(30, 58, 138, 0.8);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 2000;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .nav-button:hover {
+             background-color: rgba(30, 58, 138, 1);
+             transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: rgba(100, 116, 139, 0.5);
+            cursor: not-allowed;
+            transform: translateY(0);
+        }
+
+        #prev-btn { left: 30px; }
+        #next-btn { right: 30px; }
+        
+        .page-number {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="magazine-container">
+        <!-- Static Left Half (Back of previous page) -->
+        <div id="static-left-half" class="page-front" style="visibility: hidden; position: absolute; left: 0; width: 50%; height: 100%; background: white; border-radius: 10px 0 0 10px; box-shadow: -5px 0 15px rgba(0,0,0,0.1);">
+            <!-- Content will be injected by JS -->
+        </div>
+
+        <!-- Chinese Pages -->
+        <div id="page-1" class="page first-page" style="z-index: 16;">
+            <div class="page-front cover-image flex flex-col justify-end p-8 text-white bg-gray-800">
+                <div class="bg-black/60 p-6 rounded-lg backdrop-blur-sm">
+                    <h1 class="text-5xl font-bold title-zh">阿尔及利亚</h1>
+                    <h2 class="text-3xl mt-2 title-zh">投资战略导航</h2>
+                    <hr class="my-4 border-gray-400">
+                    <h3 class="text-xl title-fr">Algérie: Guide d'Investissement Stratégique</h3>
+                    <h3 class="text-xl title-en">Algeria: A Strategic Investment Guide</h3>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-zh">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2">目录</h3>
+                    <ul class="space-y-4 text-lg">
+                        <li class="flex justify-between"><span>政经格局：稳定与转型</span> <span>P. 3</span></li>
+                        <li class="flex justify-between"><span>核心变革：告别“51/49”</span> <span>P. 5</span></li>
+                        <li class="flex justify-between"><span>影响评估：这对您意味着什么？</span> <span>P. 7</span></li>
+                        <li class="flex justify-between"><span>战略工具箱：新环境下的行动指南</span> <span>P. 9</span></li>
+                    </ul>
+                     <div class="mt-12 p-6 bg-gray-100 rounded-lg">
+                        <h4 class="font-bold text-xl mb-2">编者按</h4>
+                        <p class="text-gray-700">阿尔及利亚正处在一个关键的转折点。长期以来，以“51/49规则”为核心的投资壁垒正在被选择性地打破。本期杂志将深入剖析这一历史性变革，为中国投资者提供清晰的战略导航。</p>
+                    </div>
+                    <div class="page-number">2</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-2" class="page" style="z-index: 15;">
+            <div class="page-front">
+                <div class="page-content-zh">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4">政经格局</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">寻求变革的谨慎稳定</h3>
+                    <p class="text-gray-600 leading-relaxed">在总统阿卜杜勒-马吉德·特本的领导下，阿尔及利亚政治格局呈现出一种“威权下的稳定”状态。经历了2019年“希拉克”大规模社会运动的洗礼后，政府通过强化国家控制力、并辅以一系列旨在改善民生的经济改革，成功维持了社会大局的稳定。国家安全机构，特别是军方，在政治生活中依然扮演着举足轻重的角色，构成了政权的坚实后盾。</p>
+                    <div class="pull-quote">
+                        政府将经济多元化和吸引外资视为维护长期社会稳定的关键，这是当前改革的根本动力。
+                    </div>
+                    <p class="text-gray-600 leading-relaxed">当前政府的执政合法性，在很大程度上建立在兑现其经济发展承诺之上。面对高企的青年失业率（约30%）和民众对改善生活水平的持续期望，推动经济增长、创造就业已成为首要政治任务。因此，与过去相比，现政府对吸引能够带来真实技术和就业岗位的外国直接投资（FDI）表现出更强的政治意愿。然而，这种开放是谨慎和有选择性的，其前提是不能动摇国家对关键经济领域的控制权。投资者应理解，任何经济政策的调整，都深嵌在这种“稳定压倒一切”的政治逻辑之中。</p>
+                    <div class="page-number">3</div>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-zh">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4">产业与需求</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">油气依赖下的转型渴望</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">阿尔及利亚是典型的资源依赖型经济体。其经济命脉与国际油气价格紧密相连。</p>
+                     <ul class="space-y-2 text-gray-700 bg-gray-100 p-4 rounded-lg">
+                        <li><strong class="font-semibold">油气产业：</strong>贡献了约25%的GDP，超过93%的出口收入和约60%的政府财政收入。</li>
+                        <li><strong class="font-semibold">经济增长：</strong>国际货币基金组织（IMF）预测2025年GDP增长约为3.1%，但高度依赖能源价格。</li>
+                        <li><strong class="font-semibold">进口替代：</strong>为摆脱依赖，政府大力推行“进口替代”战略，通过高关税限制成品进口，鼓励本地生产。</li>
+                    </ul>
+                    <p class="text-gray-600 leading-relaxed mt-6">这种结构决定了其核心需求：</p>
+                     <ul class="list-disc list-inside space-y-2 mt-2 text-gray-700">
+                        <li><strong class="text-blue-800">技术需求：</strong>在农业（提高粮食自给率）、可再生能源（尤其是太阳能）、制药、水处理和数字经济等领域，对外国先进技术和管理经验的需求极为迫切。</li>
+                        <li><strong class="text-blue-800">投资需求：</strong>政府欢迎能够带动本地产业链发展的制造业投资，特别是汽车零部件、家电、建材和消费电子等领域。</li>
+                        <li><strong class="text-blue-800">产品需求：</strong>对最终消费品的进口需求受到抑制，但对生产所需的资本设备、工业机械、原材料和半成品的需求旺盛。</li>
+                    </ul>
+                    <div class="page-number">4</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="page-3" class="page" style="z-index: 14;">
+            <div class="page-front">
+                <div class="page-content-zh">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4">核心变革</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">“51/49规则”时代的终结</h3>
+                    <p class="text-gray-600 leading-relaxed">阿尔及利亚《2022年第22-18号投资法》带来了历史性转变，废除了对绝大多数行业的外资持股限制。理解这一核心变化，是把握当前投资机遇与挑战的关键。这意味着，对于绝大多数经济领域，外国投资者现在可以设立100%持股的全资子公司。这是一个历史性的转变，从根本上改变了外国投资者在阿尔及利亚的运营模式和战略选择。</p>
+                    <div class="pull-quote">
+                        从“普遍限制”到“精准调控”，阿尔及利亚的投资大门正以一种前所未有的方式打开。
+                    </div>
+                    <p class="text-gray-600 leading-relaxed">这一转变标志着阿尔及利亚从普适性的投资限制，转向了一种更为精准和务实的FDI管理模式。其目标是吸引能够带来技术、管理经验和促进出口的外国投资，同时牢牢掌握关系国家经济命脉的关键领域。</p>
+                    <div class="page-number">5</div>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-zh">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4">新规详解</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">机遇与红线</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">新投资法在放开大部分行业的同时，也划定了明确的“战略红线区”，并设立了新的投资促进机制。了解这些细节，才能精准定位投资方向。</p>
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-red-800">红线区：依然受“51/49规则”限制的战略性行业</h4>
+                        <ul class="list-disc list-inside mt-2 text-red-700">
+                            <li>矿产资源开采 (含油气)</li>
+                            <li>能源领域上游</li>
+                            <li>关键基础设施运营</li>
+                            <li>军工产业</li>
+                            <li>药品生产制造</li>
+                        </ul>
+                    </div>
+                    <p class="text-gray-600 leading-relaxed mt-6">在这些领域，外国投资仍需遵守阿方持股至少51%的规定。这体现了政府在开放的同时，牢牢掌握国家经济命脉的决心。</p>
+                    <div class="page-number">6</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-4" class="page" style="z-index: 13;">
+            <div class="page-front">
+                 <div class="page-content-zh">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4">影响评估</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">这对您的业务意味着什么？</h3>
+                     <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-lg text-gray-800">非战略性行业投资者</h4>
+                            <p class="text-gray-600">迎来最大利好。可以设立全资子公司，拥有完全的决策自主权、运营控制权和100%的利润分配权，极大地提升了投资吸引力。</p>
+                        </div>
+                         <div>
+                            <h4 class="font-bold text-lg text-gray-800">战略性行业投资者</h4>
+                            <p class="text-gray-600">虽然规则不变，但政策环境更具可预测性。成功的关键在于深化与Sonatrach等国有巨头的战略合作，利用其政治和市场优势。</p>
+                        </div>
+                         <div>
+                            <h4 class="font-bold text-lg text-gray-800">贸易型企业</h4>
+                            <p class="text-gray-600">面临“进口替代”战略的直接挑战。高昂的进口关税将迫使企业考虑从“贸易”转向“贸易+投资”模式，在当地设厂生产。</p>
+                        </div>
+                    </div>
+                    <div class="page-number">7</div>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-zh">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4">战略工具箱</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">新环境下的行动指南</h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li><strong class="font-semibold text-gray-900">1. 精准评估，把握股权机遇：</strong>非战略行业寻求控股，战略行业优化伙伴关系。</li>
+                        <li><strong class="font-semibold text-gray-900">2. 拥抱“本地化”，构建核心竞争力：</strong>投资本地制造，构建本地供应链，培养本地人才。</li>
+                        <li><strong class="font-semibold text-gray-900">3. 建立强大的合规与政府关系团队：</strong>聘请专业法律支持，主动进行政府关系管理。</li>
+                        <li><strong class="font-semibold text-gray-900">4. 灵活运用金融与法律工具：</strong>优化融资结构，关注《中阿双边投资协定》提供的保护。</li>
+                    </ul>
+                     <div class="pull-quote mt-8">
+                        成功的关键，在于从简单的产品输出，转向技术、资本和管理经验的深度在地化整合。
+                    </div>
+                    <div class="page-number">8</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="page-5" class="page" style="z-index: 12;">
+             <div class="page-front">
+                <div class="page-content-zh">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">结语</h2>
+                    <p class="text-gray-600 leading-relaxed text-lg">阿尔及利亚的投资大门正在以一种前所未有的方式打开，但门后的路径依然复杂。对于能够理解其政策深层逻辑、适应其独特商业环境并能带来真实技术和产业价值的中国企业而言，这个北非大国无疑提供了广阔的战略新机遇。</p>
+                    <p class="text-gray-600 leading-relaxed text-lg mt-4">一个要求更高、但回报也可能更稳定的投资新时代正在开启。</p>
+                    <div class="page-number">9</div>
+                </div>
+            </div>
+             <div class="page-back page-content-fr flex flex-col items-center justify-center bg-blue-900 text-white text-center p-8">
+                 <h2 class="text-4xl font-bold title-fr">Section Française</h2>
+                 <p class="mt-4 text-xl">Débute à la page suivante</p>
+                 <div class="page-number text-gray-400">10</div>
+            </div>
+        </div>
+
+        <!-- French Pages -->
+        <div id="page-6" class="page" style="z-index: 11;">
+            <div class="page-front">
+                 <div class="page-content-fr">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2 title-fr">Table des Matières</h3>
+                    <ul class="space-y-4 text-lg">
+                        <li class="flex justify-between"><span>Paysage Politique et Économique</span> <span>P. 13</span></li>
+                        <li class="flex justify-between"><span>Le Changement Clé : La Fin de la Règle "51/49"</span> <span>P. 15</span></li>
+                        <li class="flex justify-between"><span>Analyse d'Impact : Qu'est-ce que cela signifie pour vous ?</span> <span>P. 17</span></li>
+                        <li class="flex justify-between"><span>Boîte à Outils Stratégique : Guide d'Action</span> <span>P. 19</span></li>
+                    </ul>
+                     <div class="mt-12 p-6 bg-gray-100 rounded-lg">
+                        <h4 class="font-bold text-xl mb-2 title-fr">Note de l'Éditeur</h4>
+                        <p class="text-gray-700">L'Algérie est à un tournant critique. La barrière à l'investissement de longue date, centrée sur la règle "51/49", est en train d'être démantelée de manière sélective. Ce numéro analyse en profondeur ce changement historique pour fournir une navigation stratégique claire aux investisseurs.</p>
+                    </div>
+                    <div class="page-number">11</div>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-fr">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-fr">Paysage Politique</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">Stabilité Prudente en Quête de Changement</h3>
+                    <p class="text-gray-600 leading-relaxed">Sous la direction du président Abdelmadjid Tebboune, le paysage politique algérien présente un état de "stabilité autoritaire". Après le mouvement social de masse "Hirak" de 2019, le gouvernement a maintenu la stabilité générale en renforçant le contrôle de l'État, complété par des réformes économiques visant à améliorer les moyens de subsistance.</p>
+                    <div class="pull-quote">
+                        Le gouvernement considère la diversification économique et l'attraction des IDE comme la clé du maintien de la stabilité sociale à long terme.
+                    </div>
+                    <p class="text-gray-600 leading-relaxed">La légitimité du gouvernement actuel repose en grande partie sur la réalisation de ses promesses de développement économique. Face à un taux de chômage des jeunes élevé (environ 30 %), il a une forte volonté politique d'attirer les investissements étrangers directs (IDE) qui apportent une technologie et des emplois réels.</p>
+                    <div class="page-number">12</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-7" class="page" style="z-index: 10;">
+            <div class="page-front">
+                 <div class="page-content-fr">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-fr">Industrie et Demande</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">Désir de Transformation face à la Dépendance aux Hydrocarbures</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">L'Algérie est une économie typique dépendante des ressources.</p>
+                     <ul class="space-y-2 text-gray-700 bg-gray-100 p-4 rounded-lg">
+                        <li><strong class="font-semibold">Secteur des hydrocarbures :</strong> Contribue à environ 25% du PIB, plus de 93% des recettes d'exportation.</li>
+                        <li><strong class="font-semibold">Croissance économique :</strong> Le FMI prévoit une croissance du PIB d'environ 3,1% pour 2025.</li>
+                        <li><strong class="font-semibold">Substitution des importations :</strong> Le gouvernement promeut fortement une stratégie de "substitution des importations", encourageant la production locale.</li>
+                    </ul>
+                    <p class="text-gray-600 leading-relaxed mt-6">Cette structure dicte ses besoins fondamentaux :</p>
+                     <ul class="list-disc list-inside space-y-2 mt-2 text-gray-700">
+                        <li><strong class="text-blue-800">Demande technologique :</strong> Urgente dans l'agriculture, les énergies renouvelables (solaire), la pharmacie et l'économie numérique.</li>
+                        <li><strong class="text-blue-800">Demande d'investissement :</strong> Bienvenue dans l'industrie manufacturière qui stimule les chaînes industrielles locales.</li>
+                        <li><strong class="text-blue-800">Demande de produits :</strong> La demande de biens d'équipement, de machines industrielles et de matières premières est forte.</li>
+                    </ul>
+                    <div class="page-number">13</div>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-fr">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-fr">Le Changement Clé</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">La Fin de l'Ère de la Règle "51/49"</h3>
+                    <p class="text-gray-600 leading-relaxed">La loi sur l'investissement n° 22-18 de 2022 a apporté un changement historique, abolissant les restrictions de participation étrangère pour la grande majorité des secteurs. Cela signifie que pour la plupart des domaines économiques, les investisseurs étrangers peuvent désormais créer des filiales à 100 %.</p>
+                    <div class="pull-quote">
+                        De la "restriction généralisée" à la "réglementation de précision", les portes de l'investissement en Algérie s'ouvrent d'une manière sans précédent.
+                    </div>
+                    <p class="text-gray-600 leading-relaxed">Ce changement marque un passage d'une restriction d'investissement universelle à un modèle de gestion des IDE plus précis et pragmatique, visant à attirer des investissements qui apportent de la technologie et de l'expérience en gestion.</p>
+                    <div class="page-number">14</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-8" class="page" style="z-index: 9;">
+            <div class="page-front">
+                <div class="page-content-fr">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-fr">Analyse d'Impact</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">Qu'est-ce que cela signifie pour vous ?</h3>
+                     <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-lg text-gray-800">Investisseurs dans les secteurs non stratégiques</h4>
+                            <p class="text-gray-600">Bénéficient le plus. Ils peuvent créer des filiales à 100 %, ce qui leur confère une autonomie décisionnelle complète.</p>
+                        </div>
+                         <div>
+                            <h4 class="font-bold text-lg text-gray-800">Investisseurs dans les secteurs stratégiques</h4>
+                            <p class="text-gray-600">Bien que la règle reste, l'environnement politique est plus prévisible. Le succès réside dans l'approfondissement des partenariats stratégiques avec des géants d'État comme Sonatrach.</p>
+                        </div>
+                         <div>
+                            <h4 class="font-bold text-lg text-gray-800">Entreprises commerciales</h4>
+                            <p class="text-gray-600">Sont confrontées au défi direct de la stratégie de "substitution des importations", les forçant à passer du "commerce" au "commerce + investissement".</p>
+                        </div>
+                    </div>
+                    <div class="page-number">15</div>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-fr">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-fr">Boîte à Outils Stratégique</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">Guide d'Action</h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li><strong class="font-semibold text-gray-900">1. Évaluation précise :</strong> Rechercher le contrôle majoritaire dans les secteurs non stratégiques ; optimiser les partenariats dans les secteurs stratégiques.</li>
+                        <li><strong class="font-semibold text-gray-900">2. Adopter la "localisation" :</strong> Investir dans la fabrication locale, construire des chaînes d'approvisionnement locales, former les talents locaux.</li>
+                        <li><strong class="font-semibold text-gray-900">3. Construire des équipes solides de conformité et de relations gouvernementales.</strong></li>
+                        <li><strong class="font-semibold text-gray-900">4. Utiliser de manière flexible les outils financiers et juridiques.</strong></li>
+                    </ul>
+                     <div class="pull-quote mt-8">
+                        La clé du succès est de passer de la simple exportation de produits à une intégration approfondie et localisée de la technologie, du capital et de l'expérience en gestion.
+                    </div>
+                    <div class="page-number">16</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-9" class="page" style="z-index: 8;">
+            <div class="page-front">
+                <div class="page-content-fr">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6 title-fr">Conclusion</h2>
+                    <p class="text-gray-600 leading-relaxed text-lg">Les portes de l'investissement en Algérie s'ouvrent d'une manière sans précédent, mais le chemin reste complexe. Pour les entreprises capables de comprendre la logique profonde de ses politiques et d'apporter une valeur technologique et industrielle réelle, cette nation nord-africaine offre sans aucun doute de vastes nouvelles opportunités stratégiques.</p>
+                    <div class="page-number">17</div>
+                </div>
+            </div>
+            <div class="page-back page-content-en flex flex-col items-center justify-center bg-blue-900 text-white text-center p-8">
+                 <h2 class="text-4xl font-bold title-en">English Section</h2>
+                 <p class="mt-4 text-xl">Begins on the next page</p>
+                 <div class="page-number text-gray-400">18</div>
+            </div>
+        </div>
+
+        <!-- English Pages -->
+        <div id="page-10" class="page" style="z-index: 7;">
+            <div class="page-front">
+                <div class="page-content-en">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b-2 pb-2 title-en">Table of Contents</h3>
+                    <ul class="space-y-4 text-lg">
+                        <li class="flex justify-between"><span>Political & Economic Landscape</span> <span>P. 21</span></li>
+                        <li class="flex justify-between"><span>The Key Change: End of the "51/49" Rule</span> <span>P. 23</span></li>
+                        <li class="flex justify-between"><span>Impact Analysis: What It Means for You</span> <span>P. 25</span></li>
+                        <li class="flex justify-between"><span>Strategic Toolkit: A Guide to Action</span> <span>P. 27</span></li>
+                    </ul>
+                     <div class="mt-12 p-6 bg-gray-100 rounded-lg">
+                        <h4 class="font-bold text-xl mb-2 title-en">Editor's Note</h4>
+                        <p class="text-gray-700">Algeria is at a critical juncture. The long-standing investment barrier centered on the "51/49 rule" is being selectively dismantled. This issue provides an in-depth analysis of this historic change to offer clear strategic navigation for investors.</p>
+                    </div>
+                    <div class="page-number">19</div>
+                </div>
+            </div>
+            <div class="page-back">
+                 <div class="page-content-en">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-en">Political Landscape</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">Cautious Stability in Search of Change</h3>
+                    <p class="text-gray-600 leading-relaxed">Under President Abdelmadjid Tebboune, Algeria's political landscape presents a state of "authoritarian stability." Following the 2019 "Hirak" mass social movement, the government has maintained overall stability by strengthening state control, supplemented by economic reforms aimed at improving livelihoods.</p>
+                    <div class="pull-quote">
+                        The government views economic diversification and attracting FDI as key to maintaining long-term social stability.
+                    </div>
+                    <p class="text-gray-600 leading-relaxed">The current government's legitimacy largely rests on delivering its economic development promises. Facing high youth unemployment (around 30%), there is a strong political will to attract Foreign Direct Investment (FDI) that brings real technology and jobs.</p>
+                    <div class="page-number">20</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-11" class="page" style="z-index: 6;">
+            <div class="page-front">
+                <div class="page-content-en">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-en">Industry & Demand</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">A Desire for Transformation Amid Hydrocarbon Dependence</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">Algeria is a typical resource-dependent economy.</p>
+                     <ul class="space-y-2 text-gray-700 bg-gray-100 p-4 rounded-lg">
+                        <li><strong class="font-semibold">Hydrocarbon Sector:</strong> Contributes to ~25% of GDP, over 93% of export earnings.</li>
+                        <li><strong class="font-semibold">Economic Growth:</strong> The IMF forecasts GDP growth of ~3.1% for 2025.</li>
+                        <li><strong class="font-semibold">Import Substitution:</strong> The government strongly promotes an "import substitution" strategy, encouraging local production.</li>
+                    </ul>
+                    <p class="text-gray-600 leading-relaxed mt-6">This structure dictates its core needs:</p>
+                     <ul class="list-disc list-inside space-y-2 mt-2 text-gray-700">
+                        <li><strong class="text-blue-800">Technological Demand:</strong> Urgent in agriculture, renewable energy (solar), pharmaceuticals, and the digital economy.</li>
+                        <li><strong class="text-blue-800">Investment Demand:</strong> Welcome in manufacturing that drives local industrial chains.</li>
+                        <li><strong class="text-blue-800">Product Demand:</strong> Strong demand for capital goods, industrial machinery, and raw materials for production.</li>
+                    </ul>
+                    <div class="page-number">21</div>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-en">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-en">The Key Change</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">The End of the "51/49 Rule" Era</h3>
+                    <p class="text-gray-600 leading-relaxed">The Investment Law No. 22-18 of 2022 brought a historic shift, abolishing foreign ownership restrictions for the vast majority of sectors. This means that for most economic areas, foreign investors can now establish 100% owned subsidiaries.</p>
+                    <div class="pull-quote">
+                        From "blanket restriction" to "precision regulation," Algeria's investment doors are opening in an unprecedented way.
+                    </div>
+                    <p class="text-gray-600 leading-relaxed">This change marks a shift from a universal investment restriction to a more precise and pragmatic FDI management model, aiming to attract investment that brings technology and management experience.</p>
+                    <div class="page-number">22</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-12" class="page" style="z-index: 5;">
+            <div class="page-front">
+                <div class="page-content-en">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-en">Impact Analysis</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">What This Means for Your Business</h3>
+                     <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-lg text-gray-800">Non-Strategic Sector Investors</h4>
+                            <p class="text-gray-600">Reap the biggest benefits. They can establish wholly-owned subsidiaries, giving them full decision-making autonomy.</p>
+                        </div>
+                         <div>
+                            <h4 class="font-bold text-lg text-gray-800">Strategic Sector Investors</h4>
+                            <p class="text-gray-600">While the rule remains, the policy environment is more predictable. Success lies in deepening strategic partnerships with state giants like Sonatrach.</p>
+                        </div>
+                         <div>
+                            <h4 class="font-bold text-lg text-gray-800">Trading Companies</h4>
+                            <p class="text-gray-600">Face the direct challenge of the "import substitution" strategy, forcing a shift from "trade" to "trade + investment".</p>
+                        </div>
+                    </div>
+                    <div class="page-number">23</div>
+                </div>
+            </div>
+            <div class="page-back">
+                <div class="page-content-en">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-4 title-en">Strategic Toolkit</h2>
+                    <h3 class="text-xl text-gray-700 mb-6">A Guide to Action</h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li><strong class="font-semibold text-gray-900">1. Precise Assessment:</strong> Seek majority control in non-strategic sectors; optimize partnerships in strategic ones.</li>
+                        <li><strong class="font-semibold text-gray-900">2. Embrace "Localization":</strong> Invest in local manufacturing, build local supply chains, cultivate local talent.</li>
+                        <li><strong class="font-semibold text-gray-900">3. Build Strong Compliance & Government Relations Teams.</strong></li>
+                        <li><strong class="font-semibold text-gray-900">4. Flexibly Use Financial and Legal Tools.</strong></li>
+                    </ul>
+                     <div class="pull-quote mt-8">
+                        The key to success is shifting from simple product export to a deep, localized integration of technology, capital, and management experience.
+                    </div>
+                    <div class="page-number">24</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-13" class="page" style="z-index: 4;">
+            <div class="page-front">
+                <div class="page-content-en">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6 title-en">Conclusion</h2>
+                    <p class="text-gray-600 leading-relaxed text-lg">Algeria's investment doors are opening in an unprecedented way, but the path forward remains complex. For companies that can understand the deep logic of its policies and bring real technological and industrial value, this North African nation undoubtedly offers vast new strategic opportunities.</p>
+                    <div class="page-number">25</div>
+                </div>
+            </div>
+            <div class="page-back bg-gray-800 text-white flex items-center justify-center">
+                 <h2 class="text-4xl font-bold title-en">Strategic Navigation</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <button id="prev-btn" class="nav-button" disabled>&lt; 上一页</button>
+    <button id="next-btn" class="nav-button">下一页 &gt;</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pages = Array.from(document.querySelectorAll('.page'));
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const staticLeftHalf = document.getElementById('static-left-half');
+
+            let currentPageIndex = 0;
+            const totalPages = pages.length;
+
+            function updateButtons() {
+                prevBtn.disabled = currentPageIndex === 0;
+                nextBtn.disabled = currentPageIndex === totalPages;
+            }
+
+            function updateStaticContent() {
+                if (currentPageIndex > 0) {
+                    const prevPage = pages[currentPageIndex - 1];
+                    if (prevPage) {
+                        const prevPageBackContent = prevPage.querySelector('.page-back').innerHTML;
+                        staticLeftHalf.innerHTML = prevPageBackContent;
+                        staticLeftHalf.style.visibility = 'visible';
+                    }
+                } else {
+                    staticLeftHalf.style.visibility = 'hidden';
+                }
+            }
+            
+            function flipPage(direction) {
+                if (direction === 'next' && currentPageIndex < totalPages) {
+                    pages[currentPageIndex].classList.add('flipped');
+                    pages[currentPageIndex].style.zIndex = currentPageIndex + 1;
+                    currentPageIndex++;
+                } else if (direction === 'prev' && currentPageIndex > 0) {
+                    currentPageIndex--;
+                    pages[currentPageIndex].classList.remove('flipped');
+                    pages[currentPageIndex].style.zIndex = totalPages - currentPageIndex;
+                }
+                updateButtons();
+                updateStaticContent();
+            }
+
+            nextBtn.addEventListener('click', () => flipPage('next'));
+            prevBtn.addEventListener('click', () => flipPage('prev'));
+            
+            updateStaticContent();
+        });
+    </script>
+</body>
+</html>
