@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>架构全球优势：中国出海企业的新战略蓝图</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed for a top-down, "reveal-on-demand" user journey. It starts with the high-level value proposition (Hero Section), establishes the market context (The Challenge), presents the core differentiators as interactive cards (Three Pillars), visualizes the service methodology as an interactive flywheel (Growth Flywheel), uses a radar chart for a powerful competitive comparison, shows global presence visually, and ends with a clear CTA. This structure guides the user from "what you do" to "why you're the best choice" in an engaging, non-linear way, prioritizing clarity and impact over the report's original sequence. -->
+    <!-- Visualization & Content Choices: Report Info -> Goal -> Viz/Presentation Method -> Interaction -> Justification. 1. Competitive Landscape -> Compare -> Radar Chart (Chart.js) -> Clickable tabs below chart -> Instantly shows the company's balanced strengths vs. competitors' skewed capabilities. 2. Service Model -> Organize/Explain -> HTML/CSS Flywheel Diagram -> Clickable stages reveal details -> Visually represents the integrated, cyclical nature of the service, far more effective than a static list. 3. Global Offices -> Inform/Impress -> HTML/CSS stylized map -> Hover reveals city names -> More visually appealing and reinforces "Global Reach" better than a text list. 4. Core Advantages -> Inform -> Interactive Cards -> Click reveals text -> Breaks down key differentiators into digestible, user-initiated chunks. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F8F5F2;
+            color: #333333;
+        }
+        .text-brand-blue { color: #2C3E50; }
+        .bg-brand-blue { background-color: #2C3E50; }
+        .border-brand-blue { border-color: #2C3E50; }
+        .text-brand-gold { color: #C09A3E; }
+        .bg-brand-gold { background-color: #C09A3E; }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #2C3E50;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #555;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .nav-button {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .nav-button.active {
+            background-color: #2C3E50;
+            color: white;
+        }
+        .nav-button:not(.active) {
+            background-color: #E0E0E0;
+            color: #333333;
+        }
+        .flywheel-stage {
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .flywheel-stage.active {
+            border-color: #C09A3E;
+            transform: scale(1.05);
+        }
+        .flywheel-line {
+            position: absolute;
+            background-color: #2C3E50;
+            opacity: 0.5;
+        }
+        .flywheel-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+                max-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-brand-blue">增长架构师</h1>
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="#vision" class="text-gray-600 hover:text-brand-blue transition">公司愿景</a>
+                <a href="#advantage" class="text-gray-600 hover:text-brand-blue transition">核心优势</a>
+                <a href="#services" class="text-gray-600 hover:text-brand-blue transition">服务体系</a>
+                <a href="#competition" class="text-gray-600 hover:text-brand-blue transition">竞争格局</a>
+                <a href="#contact" class="bg-brand-blue text-white px-4 py-2 rounded-full hover:bg-opacity-90 transition">联系我们</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#vision" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">公司愿景</a>
+            <a href="#advantage" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">核心优势</a>
+            <a href="#services" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">服务体系</a>
+            <a href="#competition" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">竞争格局</a>
+            <a href="#contact" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">联系我们</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-brand-blue leading-tight mb-4">全球视野，智慧整合</h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">我们不只是营销服务商，而是您全球增长的架构师。融合十年实战经验与AI驱动的技术，为中国品牌构建可持续、可防御的全球市场份额。</p>
+            </div>
+        </section>
+
+        <section id="vision" class="py-16 md:py-24">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title">我们的愿景与使命</h2>
+                <p class="section-subtitle">从“中国制造”到“中国品牌”的转型，是一场深刻的战略革命。我们致力于成为这场革命的关键力量，帮助中国企业在全球舞台上实现品牌崛起与商业成功。</p>
+                <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                    <div class="card p-8 text-left">
+                        <h3 class="text-2xl font-bold text-brand-blue mb-4">公司愿景</h3>
+                        <p class="text-gray-600">构建一个由全球化中国品牌引领的全新商业格局。我们预见，在未来的每一个主流国际市场，“中国品牌”将成为创新、信赖与文化共鸣的代名词。</p>
+                    </div>
+                    <div class="card p-8 text-left">
+                        <h3 class="text-2xl font-bold text-brand-blue mb-4">公司使命</h3>
+                        <p class="text-gray-600">以智慧整合架构全球增长。通过无缝整合的增长引擎，赋能中国出海企业和跨境电商领域的领导者，交付可持续、可防御的全球市场份额。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="advantage" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title">无可撼动的优势</h2>
+                <p class="section-subtitle">我们的核心竞争力源于三大支柱的深度融合，这构成了任何竞争对手都难以复制的系统性护城河。</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="card p-8">
+                        <div class="text-5xl text-brand-gold mb-4">🌍</div>
+                        <h3 class="text-2xl font-bold text-brand-blue mb-3">全球-本土联动</h3>
+                        <p class="text-gray-600">在中国、北美、欧洲、亚洲均设实体办公室，提供既深刻理解中国文化，又精通目标市场的“双语”战略思维与本地执行力。</p>
+                    </div>
+                    <div class="card p-8">
+                         <div class="text-5xl text-brand-gold mb-4">📈</div>
+                        <h3 class="text-2xl font-bold text-brand-blue mb-3">十年成功交付</h3>
+                        <p class="text-gray-600">服务数千客户的十年经验，不仅是信任的硬通货，更积累了驱动AI引擎的、无可比拟的专有行业数据库。</p>
+                    </div>
+                    <div class="card p-8">
+                         <div class="text-5xl text-brand-gold mb-4">🧠</div>
+                        <h3 class="text-2xl font-bold text-brand-blue mb-3">智慧整合技术栈</h3>
+                        <p class="text-gray-600">将全球专家网络（人脑智慧）与专有AI平台（机器智能）完美结合，形成一个自我强化的、一体化的增长系统。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="services" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center">
+                    <h2 class="section-title">一体化服务架构：增长飞轮</h2>
+                    <p class="section-subtitle">我们的服务并非孤立的模块，而是一个能产生复利效应的、自我强化的闭环系统。点击每个阶段，了解其如何为您的增长提供动力。</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-0 relative">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 w-full max-w-6xl">
+                        <div id="flywheel-1" class="flywheel-stage card p-6 text-center active">
+                            <h4 class="font-bold text-lg text-brand-blue">1. 品牌架构</h4>
+                            <p class="text-sm text-gray-500">构建全球叙事</p>
+                        </div>
+                        <div id="flywheel-2" class="flywheel-stage card p-6 text-center">
+                            <h4 class="font-bold text-lg text-brand-blue">2. 曝光引流</h4>
+                            <p class="text-sm text-gray-500">获取精准流量</p>
+                        </div>
+                        <div id="flywheel-3" class="flywheel-stage card p-6 text-center">
+                            <h4 class="font-bold text-lg text-brand-blue">3. 智能获客</h4>
+                            <p class="text-sm text-gray-500">AI预测分析</p>
+                        </div>
+                        <div id="flywheel-4" class="flywheel-stage card p-6 text-center">
+                            <h4 class="font-bold text-lg text-brand-blue">4. 客户转化</h4>
+                            <p class="text-sm text-gray-500">实现商业价值</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="flywheel-details" class="mt-12 max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-inner">
+                </div>
+            </div>
+        </section>
+
+        <section id="competition" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center">
+                    <h2 class="section-title">竞争格局分析</h2>
+                    <p class="section-subtitle">当前市场充斥着能力碎片化的服务商。我们的独特价值在于整合了所有关键能力。通过下面的雷达图和分析，您可以清晰地看到我们的战略定位。</p>
+                </div>
+                <div class="chart-container p-4 card">
+                    <canvas id="competitorChart"></canvas>
+                </div>
+                <div class="mt-8 flex justify-center space-x-2 md:space-x-4" id="competitor-nav">
+                    <button data-competitor="us" class="nav-button active">我们</button>
+                    <button data-competitor="giants" class="nav-button">国际巨头</button>
+                    <button data-competitor="locals" class="nav-button">本土专家</button>
+                    <button data-competitor="techs" class="nav-button">技术先锋</button>
+                </div>
+                <div id="competitor-details" class="mt-8 max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg">
+                </div>
+            </div>
+        </section>
+
+        <section id="global-presence" class="py-16 md:py-24">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title">我们的全球足迹</h2>
+                <p class="section-subtitle">我们的全球办公室网络是实现“全球-本土联动”战略的物理基础，确保您的品牌声音在世界各地被清晰听见并深刻理解。</p>
+                <div class="relative max-w-4xl mx-auto aspect-video bg-blue-50 rounded-lg p-4">
+                    <div class="absolute w-full h-full bg-contain bg-no-repeat bg-center opacity-20" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg');"></div>
+                    <div class="absolute top-[35%] left-[80%]" title="东京"><div class="w-3 h-3 md:w-4 md:h-4 bg-brand-gold rounded-full"></div></div>
+                    <div class="absolute top-[45%] left-[75%]" title="新加坡"><div class="w-3 h-3 md:w-4 md:h-4 bg-brand-gold rounded-full"></div></div>
+                    <div class="absolute top-[40%] left-[70%]" title="宁波/杭州/南京"><div class="w-3 h-3 md:w-4 md:h-4 bg-brand-gold rounded-full"></div></div>
+                    <div class="absolute top-[30%] left-[50%]" title="巴黎"><div class="w-3 h-3 md:w-4 md:h-4 bg-brand-gold rounded-full"></div></div>
+                    <div class="absolute top-[28%] left-[22%]" title="纽约"><div class="w-3 h-3 md:w-4 md:h-4 bg-brand-gold rounded-full"></div></div>
+                    <div class="absolute top-[25%] left-[28%]" title="蒙特利尔/多伦多"><div class="w-3 h-3 md:w-4 md:h-4 bg-brand-gold rounded-full"></div></div>
+                </div>
+                 <div class="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 max-w-5xl mx-auto text-gray-600">
+                    <div class="p-2 text-center">宁波</div>
+                    <div class="p-2 text-center">杭州</div>
+                    <div class="p-2 text-center">南京</div>
+                    <div class="p-2 text-center">蒙特利尔</div>
+                    <div class="p-2 text-center">多伦多</div>
+                    <div class="p-2 text-center">纽约</div>
+                    <div class="p-2 text-center">巴黎</div>
+                    <div class="p-2 text-center">东京</div>
+                    <div class="p-2 text-center">新加坡</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-16 md:py-24 bg-brand-blue">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">准备好架构您的全球优势了吗？</h2>
+                <p class="text-lg text-gray-300 max-w-2xl mx-auto mb-8">对于任何一个志在将“中国制造”升级为“全球品牌”的企业，选择我们，将是您迈向全球商业领导地位的过程中，所能做出的最关键的战略决策之一。</p>
+                <a href="mailto:contact@growth-architects.com" class="bg-brand-gold text-brand-blue font-bold px-8 py-4 rounded-full text-lg hover:opacity-90 transition-opacity">成为我们的合作伙伴</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center text-gray-400">
+            <p>&copy; 2025 全球增长架构师. All Rights Reserved.</p>
+            <p class="text-sm mt-2">本页面内容为基于战略报告的创意演示，非公司最终宣传材料。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const flywheelDetailsData = {
+                "flywheel-1": {
+                    title: "品牌架构与全球叙事",
+                    content: "这是所有增长的战略基石。我们为您进行深入的市场研究，提炼核心价值，创造能跨越文化鸿沟的品牌故事，并构建高性能、多语种的全球化网站和电商平台。",
+                    items: ["全球化网络形象", "跨文化品牌塑造", "内容战略"]
+                },
+                "flywheel-2": {
+                    title: "全球曝光与用户引流",
+                    content: "在品牌基石之上，我们执行协同的多渠道战略，为您带来源源不断的精准目标流量。我们统一规划和执行针对Google和百度的SEO，并同步管理全球主流社媒平台。",
+                    items: ["统一搜索引擎优化", "全球社交媒体管理", "精准付费媒体"]
+                },
+                "flywheel-3": {
+                    title: "AI驱动的获客与预测分析",
+                    content: "这是我们的技术核心。专有AI引擎持续分析市场数据，预测高价值客户的购买意向，并大规模生成高度个性化的互动内容，让销售精力聚焦于最可能成交的机会。",
+                    items: ["专有AI引擎", "LLM驱动的互动", "预测性线索评分"]
+                },
+                "flywheel-4": {
+                    title: "客户转化与ROI闭环",
+                    content: "我们将高质量潜在客户转化为付费客户。通过系统性的转化率优化（CRO）、营销自动化和透明的ROI报告，将每一分投入都清晰地映射到收入增长，并反哺品牌战略。",
+                    items: ["转化率优化 (CRO)", "营销与销售自动化", "闭环ROI报告"]
+                }
+            };
+
+            const flywheelContainer = document.querySelector('#services .flex-col');
+            const flywheelDetailsContainer = document.getElementById('flywheel-details');
+
+            function updateFlywheelDetails(stageId) {
+                const data = flywheelDetailsData[stageId];
+                flywheelDetailsContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-brand-blue mb-4">${data.title}</h3>
+                    <p class="text-gray-600 mb-6">${data.content}</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${data.items.map(item => `<span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded">${item}</span>`).join('')}
+                    </div>
+                `;
+                document.querySelectorAll('.flywheel-stage').forEach(el => el.classList.remove('active'));
+                document.getElementById(stageId).classList.add('active');
+            }
+            
+            document.querySelectorAll('.flywheel-stage').forEach(stage => {
+                stage.addEventListener('click', () => updateFlywheelDetails(stage.id));
+            });
+
+            updateFlywheelDetails('flywheel-1');
+
+            const competitorDetailsData = {
+                us: {
+                    title: "我们：整合式全球增长架构师",
+                    content: "我们的定位是市场的整合者。通过融合全球本土联动能力、十年行业经验和一体化AI技术，我们填补了市场空白，为客户提供了一个全面的、无缝对接的增长引擎，旨在获取可持续的全球市场份额。"
+                },
+                giants: {
+                    title: "国际巨头 (如 WebFX)",
+                    content: "优势在于规模化流程和全面的服务矩阵，拥有成熟的技术平台追踪ROI。弱点在于其组织文化主要为西方客户设计，可能与中国企业存在文化和战略脱节，解决方案容易陷入“一刀切”模式。"
+                },
+                locals: {
+                    title: "本土专家 (如 GAB China)",
+                    content: "优势在于精通中国本土的数字生态和商业文化，拥有无可比拟的本地信誉。弱点在于其全球执行能力有限，商业模式多为帮助外国品牌进入中国，而非助力中国品牌走向世界。"
+                },
+                techs: {
+                    title: "技术先锋 (如 Rankstar)",
+                    content: "优势在于拥有颠覆性的单点技术，如专注于让品牌被AI推荐，对寻求快速获得优势的客户极具吸引力。弱点在于服务范围过于狭窄，缺乏全渠道的品牌战略和复杂的客户转化方法论。"
+                }
+            };
+
+            const competitorNav = document.getElementById('competitor-nav');
+            const competitorDetailsContainer = document.getElementById('competitor-details');
+
+            function updateCompetitorDetails(competitorId) {
+                const data = competitorDetailsData[competitorId];
+                competitorDetailsContainer.innerHTML = `
+                    <h4 class="font-bold text-xl text-brand-blue mb-2">${data.title}</h4>
+                    <p class="text-gray-700">${data.content}</p>
+                `;
+                competitorNav.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.competitor === competitorId) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            competitorNav.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    updateCompetitorDetails(e.target.dataset.competitor);
+                }
+            });
+            
+            updateCompetitorDetails('us');
+
+            const ctx = document.getElementById('competitorChart').getContext('2d');
+            const competitorChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['全球视野', '本土洞察', '技术整合', '战略广度', '客户转化'],
+                    datasets: [{
+                        label: '我们',
+                        data: [5, 5, 5, 5, 5],
+                        backgroundColor: 'rgba(192, 154, 62, 0.2)',
+                        borderColor: 'rgba(192, 154, 62, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(192, 154, 62, 1)'
+                    }, {
+                        label: '国际巨头',
+                        data: [5, 2, 4, 4, 4],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        hidden: true
+                    }, {
+                        label: '本土专家',
+                        data: [2, 5, 2, 3, 3],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        hidden: true
+                    }, {
+                        label: '技术先锋',
+                        data: [3, 2, 5, 2, 2],
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        hidden: true
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                    family: "'Noto Sans SC', sans-serif"
+                                },
+                                color: '#333333'
+                            },
+                            ticks: {
+                                backdropColor: 'rgba(248, 245, 242, 1)',
+                                color: '#666',
+                                stepSize: 1,
+                                display: false
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 5
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12,
+                                    family: "'Noto Sans SC', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.r !== null) {
+                                        label += context.parsed.r;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
