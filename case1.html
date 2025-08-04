@@ -32,7 +32,7 @@
             margin: 0 auto;
         }
         .section-title-magazine {
-            font-size: 2.5rem;
+            font-size: 2rem; /* Mobile first font size */
             font-weight: 700;
             color: #1a237e; /* A deep, serious blue */
             border-bottom: 2px solid #e0e0e0;
@@ -40,49 +40,66 @@
             margin-bottom: 1rem;
         }
         .section-subtitle-magazine {
-            font-size: 1.25rem;
+            font-size: 1.1rem; /* Mobile first font size */
             color: #666;
             margin-bottom: 2rem;
             font-family: 'Noto Sans SC', sans-serif;
         }
         .pull-quote {
             border-left: 4px solid #1a237e;
-            padding-left: 1.5rem;
-            font-size: 1.25rem;
+            padding-left: 1rem;
+            font-size: 1.1rem; /* Mobile first font size */
             font-style: italic;
             color: #1a237e;
-            margin: 2rem 0;
+            margin: 1.5rem 0;
         }
         .chart-container-magazine {
             position: relative;
             width: 100%;
-            min-height: 400px;
+            min-height: 300px; /* Adjusted for mobile */
+        }
+        /* Desktop styles */
+        @media (min-width: 768px) {
+            .section-title-magazine {
+                font-size: 2.5rem;
+            }
+            .section-subtitle-magazine {
+                font-size: 1.25rem;
+            }
+            .pull-quote {
+                padding-left: 1.5rem;
+                font-size: 1.25rem;
+                margin: 2rem 0;
+            }
+            .chart-container-magazine {
+                min-height: 400px;
+            }
         }
     </style>
 </head>
 <body class="bg-[#fdfdfd]">
 
     <header class="border-b-2 border-gray-900">
-        <div class="magazine-container px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">全球增长架构师 | 商业洞察</h1>
-            <p class="text-sm text-gray-600">北美市场特刊</p>
+        <div class="magazine-container px-4 md:px-6 py-4 flex justify-between items-center">
+            <h1 class="text-lg md:text-2xl font-bold text-gray-900">全球增长架构师 | 商业洞察</h1>
+            <p class="text-xs md:text-sm text-gray-600">北美市场特刊</p>
         </div>
     </header>
 
-    <main class="magazine-container px-6 py-12">
+    <main class="magazine-container px-4 md:px-6 py-8 md:py-12">
 
         <!-- HERO / COVER STORY -->
-        <section id="hero" class="text-center mb-20">
-            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 leading-tight font-serif">从中国工厂到北美货架</h1>
-            <p class="mt-4 text-lg text-gray-700">一份专为中国外贸企业打造的北美消费品市场实战指南</p>
+        <section id="hero" class="text-center mb-12 md:mb-20">
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight font-serif">从中国工厂到北美货架</h1>
+            <p class="mt-4 text-base md:text-lg text-gray-700">一份专为中国外贸企业打造的北美消费品市场实战指南</p>
             <p class="mt-6 text-sm text-gray-500">作者：您的全球增长架构师</p>
             <div class="w-24 h-1 bg-[#1a237e] mx-auto mt-8"></div>
         </section>
 
         <!-- SECTION 1: CONSUMER -->
-        <section id="consumer" class="mb-20">
+        <section id="consumer" class="mb-12 md:mb-20">
             <div class="grid md:grid-cols-12 gap-8">
-                <div class="md:col-span-5">
+                <div class="md:col-span-12 lg:col-span-5">
                     <h2 class="section-title-magazine font-serif">消费者解码</h2>
                     <p class="section-subtitle-magazine">一切商业的起点</p>
                     <p class="text-gray-700 leading-relaxed">
@@ -95,8 +112,8 @@
                         如下图所示，产品质量和价格构成了消费者决策的基础，但品牌声誉与设计创新正成为日益重要的差异化因素。这表明，单纯的低价策略已不足以赢得市场，价值与体验的结合才是关键。
                     </p>
                 </div>
-                <div class="md:col-span-7 bg-gray-50 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-center mb-4 text-gray-800 font-serif">北美消费者购物核心考虑因素</h3>
+                <div class="md:col-span-12 lg:col-span-7 bg-gray-50 p-4 md:p-6 rounded-lg">
+                    <h3 class="text-lg md:text-xl font-bold text-center mb-4 text-gray-800 font-serif">北美消费者购物核心考虑因素</h3>
                     <div class="chart-container-magazine">
                         <canvas id="consumerFactorsChart"></canvas>
                     </div>
@@ -104,14 +121,13 @@
             </div>
         </section>
 
-        <div class="border-t my-16 border-gray-200"></div>
+        <div class="border-t my-12 md:my-16 border-gray-200"></div>
 
         <!-- SECTION 2: MARKET PLAYERS -->
-        <section id="players" class="mb-20">
+        <section id="players" class="mb-12 md:mb-20">
             <h2 class="section-title-magazine text-center font-serif">市场玩家图谱</h2>
             <p class="section-subtitle-magazine text-center">理解您的潜在客户生态</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Cards from previous version, styled for magazine -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-xl transition-shadow">
                     <h4 class="font-bold text-lg text-[#1a237e] font-serif">进口商/批发商</h4>
                     <p class="text-sm text-gray-600 mt-2">市场的“蓄水池”，传统B2B贸易的核心。他们承担库存和分销，是规模化出口的基石。</p>
@@ -131,18 +147,18 @@
             </div>
         </section>
 
-        <div class="border-t my-16 border-gray-200"></div>
+        <div class="border-t my-12 md:my-16 border-gray-200"></div>
 
         <!-- SECTION 3: WINNING IMPORTERS -->
-        <section id="importer" class="mb-20">
+        <section id="importer" class="mb-12 md:mb-20">
              <div class="grid md:grid-cols-12 gap-8 items-center">
-                <div class="md:col-span-7 bg-gray-50 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-center mb-4 text-gray-800 font-serif">北美采购商核心考量因素</h3>
+                <div class="md:col-span-12 lg:col-span-7 bg-gray-50 p-4 md:p-6 rounded-lg">
+                    <h3 class="text-lg md:text-xl font-bold text-center mb-4 text-gray-800 font-serif">北美采购商核心考量因素</h3>
                     <div class="chart-container-magazine">
                         <canvas id="buyerFactorsChart"></canvas>
                     </div>
                 </div>
-                <div class="md:col-span-5">
+                <div class="md:col-span-12 lg:col-span-5">
                     <h2 class="section-title-magazine font-serif">赢得客户</h2>
                     <p class="section-subtitle-magazine">构建信任的五大支柱</p>
                     <p class="text-gray-700 leading-relaxed">
@@ -159,66 +175,66 @@
             </div>
         </section>
         
-        <div class="border-t my-16 border-gray-200"></div>
+        <div class="border-t my-12 md:my-16 border-gray-200"></div>
 
         <!-- SECTION 4: STRATEGY -->
-        <section id="strategy" class="mb-20">
+        <section id="strategy" class="mb-12 md:mb-20">
             <h2 class="section-title-magazine text-center font-serif">构建您的出海策略</h2>
             <p class="section-subtitle-magazine text-center">三种核心路径的选择</p>
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="bg-white p-6 rounded-lg border border-gray-200">
-                    <h4 class="font-bold text-xl text-gray-800 mb-2 font-serif">策略一：精益代工 (OEM/ODM)</h4>
+                    <h4 class="font-bold text-lg md:text-xl text-gray-800 mb-2 font-serif">策略一：精益代工 (OEM/ODM)</h4>
                     <p class="text-gray-600 text-sm">专注于发挥中国的制造优势，为海外品牌或进口商提供生产服务。核心是成本控制、质量管理和生产效率。此路径风险低，现金流稳定，但利润空间有限。</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border-2 border-[#1a237e] shadow-lg">
-                     <h4 class="font-bold text-xl text-[#1a237e] mb-2 font-serif">策略二：贸易整合</h4>
+                     <h4 class="font-bold text-lg md:text-xl text-[#1a237e] mb-2 font-serif">策略二：贸易整合</h4>
                     <p class="text-gray-600 text-sm">利用对中国供应链的熟悉，整合多家工厂的货源，提供一站式采购服务。核心是寻源能力、品控和物流服务。此路径模式灵活，但对供应链掌控力要求高。</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg border border-gray-200">
-                    <h4 class="font-bold text-xl text-gray-800 mb-2 font-serif">策略三：品牌出海</h4>
+                    <h4 class="font-bold text-lg md:text-xl text-gray-800 mb-2 font-serif">策略三：品牌出海</h4>
                     <p class="text-gray-600 text-sm">通过跨境电商或在海外设立分公司，直接将自有品牌卖给终端消费者。核心是产品定义、品牌营销和本地化运营。此路径利润空间最大，但风险与投入也最高。</p>
                 </div>
             </div>
         </section>
 
-        <div class="border-t my-16 border-gray-200"></div>
+        <div class="border-t my-12 md:my-16 border-gray-200"></div>
         
         <!-- SECTION 5: SOLUTION -->
-        <section id="solution" class="mb-20 bg-gray-50 p-8 rounded-lg">
+        <section id="solution" class="mb-12 md:mb-20 bg-gray-50 p-6 md:p-8 rounded-lg">
             <h2 class="section-title-magazine text-center font-serif">全球增长架构师的一体化方案</h2>
             <p class="section-subtitle-magazine text-center">我们整合碎片化服务，将您的潜力转化为增长</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 <div class="architect-card">
-                    <h4 class="font-bold text-xl text-[#1a237e] mb-3 font-serif">1. 品牌架构</h4>
+                    <h4 class="font-bold text-lg md:text-xl text-[#1a237e] mb-3 font-serif">1. 品牌架构</h4>
                     <p class="text-gray-600">我们帮助您构建能与北美消费者产生共鸣的品牌故事，奠定坚实的品牌基石。</p>
                 </div>
                 <div class="architect-card">
-                    <h4 class="font-bold text-xl text-[#1a237e] mb-3 font-serif">2. 曝光引流</h4>
+                    <h4 class="font-bold text-lg md:text-xl text-[#1a237e] mb-3 font-serif">2. 曝光引流</h4>
                     <p class="text-gray-600">我们通过多渠道营销策略，为您获取高质量的商业线索和精准流量。</p>
                 </div>
                 <div class="architect-card">
-                    <h4 class="font-bold text-xl text-[#1a237e] mb-3 font-serif">3. 智能获客</h4>
+                    <h4 class="font-bold text-lg md:text-xl text-[#1a237e] mb-3 font-serif">3. 智能获客</h4>
                     <p class="text-gray-600">我们的AI“智慧引擎”深度分析市场数据，预测趋势，锁定高价值商业机会。</p>
                 </div>
                 <div class="architect-card">
-                    <h4 class="font-bold text-xl text-[#1a237e] mb-3 font-serif">4. 客户转化</h4>
+                    <h4 class="font-bold text-lg md:text-xl text-[#1a237e] mb-3 font-serif">4. 客户转化</h4>
                     <p class="text-gray-600">我们通过数据驱动的流程和本地化支持，高效地将商业机会转化为销售额。</p>
                 </div>
             </div>
         </section>
 
-        <div class="border-t my-16 border-gray-200"></div>
+        <div class="border-t my-12 md:my-16 border-gray-200"></div>
 
         <!-- SECTION 6: CASE STUDY -->
-        <section id="case" class="mb-20">
+        <section id="case" class="mb-12 md:mb-20">
             <h2 class="section-title-magazine text-center font-serif">成功蓝图：一家消费品公司的进化之路</h2>
             <p class="section-subtitle-magazine text-center">携手架构师，实现从“制造”到“品牌”的飞跃</p>
             <div class="grid md:grid-cols-12 gap-8">
-                <div class="md:col-span-8">
+                <div class="md:col-span-12 lg:col-span-8">
                     <div id="timeline-container" class="space-y-8"></div>
                 </div>
-                <div class="md:col-span-4">
-                    <div class="sticky top-24 bg-white p-6 rounded-lg border border-gray-200">
+                <div class="md:col-span-12 lg:col-span-4">
+                    <div class="lg:sticky lg:top-24 bg-white p-6 rounded-lg border border-gray-200">
                         <h4 class="font-bold text-lg text-[#1a237e] font-serif">案例启示</h4>
                         <p class="text-sm text-gray-600 mt-4 leading-relaxed">
                         这个案例的核心，是企业在每个发展阶段，都勇于借助外部智慧来突破自身瓶颈。
@@ -282,7 +298,7 @@
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                scales: { r: { angleLines: { color: '#dee2e6' }, grid: { color: '#dee2e6' }, pointLabels: { font: { size: 14 } }, suggestedMin: 0, suggestedMax: 100 } },
+                scales: { r: { angleLines: { color: '#dee2e6' }, grid: { color: '#dee2e6' }, pointLabels: { font: { size: 12 } }, suggestedMin: 0, suggestedMax: 100 } },
                 plugins: { legend: { display: false } }
             }
         });
