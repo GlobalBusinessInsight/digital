@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸西非推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Afrobeat Gold -->
+    <!-- Application Structure Plan: 采用杂志式翻页布局，将复杂的西非市场战略分解为五个章节：战略概览、市场准入、推广战术、合规与文化、行业与国别。这种叙事性结构旨在引导用户沉浸式地探索西非市场的机遇与挑战，从尼日利亚的人口红利到法语区的稳定增长，提供一个连贯且富有洞察力的决策框架。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示西非关键经济指标，特别是金融科技的崛起。市场准入部分用流程图卡片阐释进入该区域的二元路径（英语区 vs. 法语区）。推广战术和合规文化部分通过分栏对比，清晰展示数字与传统渠道、英美法系/大陆法系与本地文化的要点。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本和雷达图，为用户提供针对不同行业和核心国家（如尼日利亚、加纳、科特迪瓦）的定制化战略。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #FDFBF6; /* A very warm, almost beige white */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "西非篇：驾驭人口红利与文化浪潮",
+                intro: "西非，以其超过4亿的人口和非洲“巨人”尼日利亚为核心，是全球最具增长潜力的消费市场之一。本战略旨在揭示，成功的西非战略必须采用二元视角，同时驾驭以尼日利亚和加纳为代表的英语区（Anglophone）的巨大市场活力，以及以科特迪瓦和塞内加尔为代表的法语区（Francophone）的稳定增长。抓住其金融科技革命、城市化浪潮和“非洲酷感”（Afro-cool）文化输出的机遇，是制胜关键。",
+                stats: [
+                    { label: "中尼双边贸易额 (2023)", value: "226亿美元", icon: "🤝" },
+                    { label: "尼日利亚人口", value: "超2.2亿", icon: "👨‍👩‍👧‍👦" },
+                    { label: "西非金融科技融资额", value: "非洲领先", icon: "💸" },
+                    { label: "西非经济共同体(ECOWAS)市场", value: "15国，4亿人", icon: "🌍" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '区域GDP平均增长率 (%)',
+                            data: [-1.7, 4.3, 3.8, 3.2, 3.7],
+                            borderColor: '#166534', // green-800
+                            backgroundColor: 'rgba(22, 101, 52, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '金融科技投资年增长率 (%)',
+                            data: [30, 55, 60, 40, 45],
+                            borderColor: '#F59E0B', // amber-500
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：实施“双核驱动”战略",
+                intro: "进入西非市场，必须摒弃“一刀切”的思维。英语区和法语区在法律体系、商业文化、港口物流和消费习惯上均有显著差异。最有效的策略是设立“双总部”：以尼日利亚拉各斯为枢纽，辐射英语区市场；以科特迪瓦阿比让为中心，覆盖整个西非法语区（UEMOA）。",
+                steps: [
+                    { 
+                        title: "第一阶段：平台试水", 
+                        icon: "🌊",
+                        methods: [
+                            { name: "英语区电商", description: "利用Jumia, Konga等平台进入尼日利亚和加纳市场，直面最活跃的消费者。" },
+                            { name: "法语区代理", description: "与在科特迪瓦或塞内加尔有成熟分销网络的公司合作，是进入法语区的稳妥起步方式。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：设立双核",
+                        icon: "🇳�🇨🇮",
+                        methods: [
+                            { name: "在拉各斯设立运营中心", description: "直面尼日利亚这个巨型市场，并以此为基地管理加纳等英语区业务。" },
+                            { name: "在阿比让设立区域中心", description: "利用阿比让的港口优势和区域金融中心地位，作为进入8个西非经货联盟成员国的跳板。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：深度整合",
+                        icon: "🔗",
+                        methods: [
+                            { name: "在尼日利亚本地化生产", description: "在拉各斯周边的自贸区（如莱基自贸区）设厂，生产快消品、建材、电子产品，以规避进口限制并降低成本。" },
+                            { name: "参与资源与基建项目", description: "在科特迪瓦、加纳等国参与可可、腰果等农产品加工项目，或为港口、能源等基建项目提供设备与服务。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：拥抱“非洲酷感”与社群经济",
+                intro: "西非，特别是尼日利亚，是全球青年文化的重要输出地。从风靡全球的Afrobeats音乐，到影响力巨大的“尼莱坞”（Nollywood）电影，文化软实力是品牌推广的强大助推器。成功的策略必须将产品与这种充满活力的文化深度绑定，并通过社交媒体和网红经济引爆社群。",
+                digital: [
+                    { title: "网红与明星代言", icon:"⭐", description: "签约Afrobeats当红歌星或尼莱坞知名演员作为品牌大使，是快速获得国民级认知度和信任度的捷径。" },
+                    { title: "WhatsApp社群营销", icon:"💬", description: "是西非商业的操作系统。建立品牌专属的WhatsApp频道，发布新品、提供客服、组织团购，是构建私域流量的核心。" },
+                    { title: "短视频内容为王", icon:"🎵", description: "在TikTok和Instagram上发起与音乐、舞蹈、喜剧相关的挑战赛，利用UGC内容实现病毒式传播。" },
+                    { title: "金融科技场景植入", icon:"💳", description: "与Flutterwave, Paystack等本地金融科技公司合作，将品牌支付与各类线上消费场景深度融合。" }
+                ],
+                traditional: [
+                    { title: "占领线下市场", icon:"🛍️", description: "在拉各斯的Balogun市场、阿克拉的Makola市场等大型露天市场建立强大的分销网络，是触达海量普通消费者的生命线。" },
+                    { title: "交通要道广告牌", icon:"🚗", description: "在拉各斯、阿比让等“堵城”的主要高架桥和交通枢纽上投放巨幅广告牌，拥有极高的曝光率和品牌彰显效果。" },
+                    { title: "足球营销", icon:"⚽", description: "足球是整个地区的共同信仰。赞助国家队或本地联赛，能有效激发消费者的爱国热情和品牌好感。" },
+                    { title: "宗教社群活动", icon:"⛪🕌", description: "通过赞助教堂或清真寺的社区活动，与本地社群领袖建立良好关系，是建立基层信任的有效方式。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：应对二元法律体系与复杂营商环境",
+                intro: "西非的合规挑战具有显著的二元性：企业需要同时适应尼日利亚和加纳的英美法系（Common Law）以及科特迪瓦等国的欧陆法系（Civil Law）。此外，港口拥堵、外汇管制和不稳定的政策是所有投资者必须面对的现实。",
+                regulations: [
+                    { title: "外汇管制", content: "尼日利亚等国存在较严格的外汇管制，利润汇出可能面临延迟和挑战。需要与有经验的本地银行和金融顾问合作，制定合规的资金管理策略。" },
+                    { title: "海关与港口", content: "拉各斯的阿帕帕港等主要港口以效率低下和流程复杂闻名。优化物流方案，选择可靠的清关代理，并考虑利用更通畅的邻国港口（如多哥洛美港）进行转运，是重要的战略考量。" },
+                    { title: "本地内容要求", content: "尼日利亚等国对石油、天然气和信息技术等行业有本地内容要求，鼓励企业雇佣本地员工、使用本地服务和与本地公司合资。满足这些要求是获得大型合同的前提。" },
+                ],
+                culture: [
+                    { title: "尊重长者与权威", icon:"👨‍💼", description: "无论是英语区还是法语区，等级观念和社会地位都非常重要。与“Big Man”（有权势的人物）建立良好关系是商业成功的关键。" },
+                    { title: "英语区 vs. 法语区", icon:"🇬🇧🇫🇷", description: "英语区商业文化更直接、更具企业家精神（特别是尼日利亚的“Hustle”文化）；法语区则更注重礼节、形式和建立正式的长期关系。" },
+                    { title: "宗教的重要性", icon:"🙏", description: "宗教（南部以基督教为主，北部和萨赫勒地带以伊斯兰教为主）深刻影响着人们的价值观和日常生活。公开表达宗教信仰是常见的社交方式，企业必须对此表示尊重。" },
+                    { title: "家庭与族群网络", icon:"👨‍👩‍👧‍👦", description: "家庭和族群是社会的基本单元，其网络对商业活动有巨大影响。了解并尊重这些网络，但同时在商业合作中保持专业和透明至关重要。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与国别专属路线图",
+                intro: "西非市场并非铁板一块。尼日利亚是高风险高回报的巨兽，加纳是稳定开放的门户，科特迪瓦是法语区的经济龙头。企业应根据不同国家的特点，选择最适合的赛道和打法。",
+                industries: {
+                    "fintech-digital-services": { name: "金融科技与数字服务", strategy: "尼日利亚拉各斯已成为全球金融科技的创新中心。策略核心是为庞大的、未被传统银行充分服务的年轻人口提供移动支付、小额信贷、数字银行和各类SaaS服务。" },
+                    "fmcg-consumer-electronics": { name: "快消品与消费电子", strategy: "面向西非数亿年轻消费者，市场潜力巨大。策略核心是通过极具吸引力的价格、强大的线下分销网络和病毒式的社交媒体营销，提供手机、家电、食品饮料、洗护用品等生活必需品。" },
+                    "creative-industries": { name: "创意产业（尼莱坞与Afrobeats）", strategy: "投资本地的电影制作、音乐发行、流媒体平台和艺人经纪，不仅能获得商业回报，更能掌握文化话语权，为其他实体产品的推广提供强大的品牌背书。" },
+                    "agri-processing": { name: "农产品加工", strategy: "西非是可可、腰果、棕榈油等多种经济作物的主产区。策略核心是在本地设立加工厂，提升农产品附加值，满足本地消费并出口国际市场，符合各国政府的工业化战略。" }
+                },
+                countries: {
+                    "nigeria": { name: "尼日利亚", summary: "非洲的人口与经济第一大国，一个充满活力、机遇与挑战并存的巨型市场。是所有消费品和金融科技公司的必争之地，但需应对基建、安全和政策不确定性。", chartData: { "市场规模": 10, "人口红利": 10, "创业生态": 9, "运营风险": 4, "经商便利度": 3 } },
+                    "ghana": { name: "加纳", summary: "西非地区的“稳定之锚”，政治环境稳定，商业法规（基于英美法）透明，是非洲大陆营商环境最好的国家之一。是进入英语区市场的理想切入点和区域总部所在地。", chartData: { "市场规模": 6, "人口红利": 7, "创业生态": 7, "运营风险": 7, "经商便利度": 8 } },
+                    "cote-divoire": { name: "科特迪瓦", summary: "法语区经济龙头，GDP增速常年领跑西非。经济以农业和基建为驱动，是进入西非经济货币联盟（UEMOA）八国的门户。", chartData: { "市场规模": 7, "人口红利": 8, "创业生态": 6, "运营风险": 6, "经商便利度": 7 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-green-800">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-green-900 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-green-800 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-green-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderTacticCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-green-700">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderTacticCard).join('');
+            const traditionalHtml = data.traditional.map(renderTacticCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-green-600 pb-2">数字渠道</h3>
+                        <div class="mt-4 space-y-4">${digitalHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">传统与线下</h3>
+                        <div class="mt-4 space-y-4">${traditionalHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-green-800">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-amber-600">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-green-600 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-green-800" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择国家</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-amber-600" id="roadmap-country-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-country-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心国家特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('country-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data.nigeria.chartData),
+                datasets: [
+                    { label: data.nigeria.name, data: Object.values(data.nigeria.chartData), borderColor: '#166534', backgroundColor: 'rgba(22, 101, 52, 0.2)', hidden: selectedCountryKey !== 'nigeria' },
+                    { label: data.ghana.name, data: Object.values(data.ghana.chartData), borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.2)', hidden: selectedCountryKey !== 'ghana' },
+                    { label: data['cote-divoire'].name, data: Object.values(data['cote-divoire'].chartData), borderColor: '#EA580C', backgroundColor: 'rgba(234, 88, 12, 0.2)', hidden: selectedCountryKey !== 'cote-divoire' },
+                    { label: data[selectedCountryKey].name + ' (选中)', data: Object.values(data[selectedCountryKey].chartData), borderColor: '#DC2626', backgroundColor: 'rgba(220, 38, 38, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
+�
