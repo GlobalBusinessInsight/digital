@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中东推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Desert Dawn -->
+    <!-- Application Structure Plan: 沿用仪表板风格，左侧为固定导航，右侧为内容区。此结构清晰，便于用户探索。模块根据中东市场特性重构为：战略概览、市场准入、推广战术、合规与文化、行业与国别。这种主题划分旨在将复杂的区域战略转化为直观、可操作的决策工具，通过交互式图表和定制化内容，帮助用户快速理解中东市场的机遇与挑战。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js面积图展示宏观经济转型。市场准入部分用流程图卡片阐释进入中东的独特路径（如自贸区、本地伙伴）。推广战术和合规文化使用选项卡和折叠面板来组织信息，突出本地化特点。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本和Chart.js雷达图，为用户提供针对沙特、阿联酋和卡塔尔的高度定制化战略洞察。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #FEFBF6;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "战略概览：拥抱中东经济转型浪潮",
+                intro: "对于寻求全球增长的中国企业而言，中东高收入国家（特别是海湾合作委员会GCC成员国）已从传统的能源市场，转变为充满活力的经济多元化热土。本部分旨在阐明，成功的推广战略必须与沙特‘2030愿景’、阿联酋‘我们阿联酋2031’等国家级转型蓝图同频共振，抓住非石油经济崛起的历史性机遇。",
+                stats: [
+                    { label: "中国-海合会贸易额 (2023)", value: "2869亿美元", icon: "💰" },
+                    { label: "沙特‘2030愿景’投资规模", value: "7万亿美元", icon: "🏗️" },
+                    { label: "中东地区互联网渗透率", value: "超过80%", icon: "📱" },
+                    { label: "计划增加奢侈品消费的中东受访者", value: "55%", icon: "💎" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '非石油部门GDP增长率 (%)',
+                            data: [2.5, 3.8, 5.5, 4.6, 4.2],
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '数字经济规模年增长率 (%)',
+                            data: [8, 10, 12, 15, 18],
+                            borderColor: '#F97316',
+                            backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：选择最佳路径",
+                intro: "进入中东市场，需要对本地商业生态有深刻理解。与西方市场不同，本地合作伙伴和官方渠道扮演着至关重要的角色。企业应根据自身行业特点和长期目标，选择直接投资、合资或利用自贸区等多元化路径。",
+                steps: [
+                    { 
+                        title: "第一阶段：市场探索", 
+                        icon: "🔍",
+                        methods: [
+                            { name: "跨境电商", description: "通过Noon、Amazon.ae等平台测试产品市场反应，成本较低。" },
+                            { name: "寻找本地代理商", description: "利用本地代理的渠道和网络，快速将产品铺向市场。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：建立据点",
+                        icon: "🌐",
+                        methods: [
+                            { name: "设立自贸区公司", description: "利用迪拜JAFZA等自贸区政策优势，享受100%外资所有权和税务优惠。" },
+                            { name: "与本地伙伴成立合资企业", description: "与信誉良好的本地家族企业或公司合资，是进入特定行业（如建筑、能源）的有效途径。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：深度扎根",
+                        icon: "🏢",
+                        methods: [
+                            { name: "设立在岸公司 (Onshore)", description: "直接在当地设立实体公司，全面参与本地市场竞争，是获取政府项目和大型合同的前提。" },
+                            { name: "本地化生产/研发", description: "响应‘本地内容’政策（如沙特IKTVA），设立工厂或研发中心，深度融入本地供应链。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：掌握渠道与策略",
+                intro: "中东市场的消费者高度数字化，同时又极为重视品牌体验和社交认同。成功的推广必须将前沿的数字营销与高端的线下体验相结合，打造符合本地文化语境的品牌魅力。",
+                digital: [
+                    { title: "社交媒体", icon:"📱", description: "核心平台是Instagram, Snapchat, TikTok和X。内容需高度视觉化，善用阿拉伯语，并与本地网红紧密合作。" },
+                    { title: "网红/KOL营销", icon:"⭐", description: "中东网红经济成熟，覆盖美妆、时尚、游戏、汽车等领域。合作能迅速建立品牌信任和带货能力。" },
+                    { title: "内容本地化", icon:"✍️", description: "营销内容需充分尊重伊斯兰文化和本地习俗，斋月等重要节日的营销活动需精心策划。" },
+                    { title: "数字支付整合", icon:"💳", description: "确保电商网站和应用支持本地主流的电子钱包和‘先买后付’(BNPL)服务。" }
+                ],
+                traditional: [
+                    { title: "大型国际展会", icon:"🎪", description: "参加迪拜GITEX（科技）、The Big 5（建筑）、阿拉伯健康展等顶级区域展会，是B2B业务的核心。" },
+                    { title: "高端购物中心", icon:"🏬", description: "在Dubai Mall, Mall of the Emirates等顶级购物中心开设旗舰店或快闪店，是触达高净值人群的关键。" },
+                    { title: "体育与娱乐赞助", icon:"⚽", description: "赞助F1大奖赛、骆驼比赛、电竞赛事等本地热门活动，能快速提升品牌知名度和好感度。" },
+                    { title: "户外广告", icon:"🏙️", description: "在利雅得、迪拜等主要城市的地标性位置进行大规模户外广告投放，是彰显品牌实力的有效方式。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：合规与适应",
+                intro: "在中东，商业的成功不仅取决于市场策略，更建立在对法律法规的严格遵守和对本地文化的深度尊重之上。合规是通行证，文化融合则是赢得信任的钥匙。",
+                regulations: [
+                    { title: "本地化政策 (如IKTVA)", content: "沙特等国推行‘本地内容’政策，要求在供应链、劳动力等方面达到一定本地化比例，是获得政府合同的关键。" },
+                    { title: "数据主权与隐私", content: "各国正陆续出台数据保护法（如沙特PDPL），要求数据本地化存储和处理，企业需构建合规的数据中心策略。" },
+                    { title: "清真(Halal)与标准认证", content: "对于食品、化妆品、医药等行业，获得本地认可的清真认证是市场准入的基本前提。其他产品需符合GCC标准化组织(GSO)的要求。" },
+                ],
+                culture: [
+                    { title: "建立‘Wasta’(人脉)", icon:"🤝", description: "与国内‘关系’不同，但个人信任和人脉网络在商业中极为重要。耐心建立和维护与合作伙伴的长期关系。" },
+                    { title: "尊重宗教与习俗", icon:"🕌", description: "理解并尊重伊斯兰教义、斋月期间的工作节奏调整、以及男女交往的界限。" },
+                    { title: "沟通与谈判风格", icon:"🗣️", description: "商务沟通往往更注重礼节和建立融洽氛围，决策过程可能较长，需要耐心和灵活性。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与市场专属路线图",
+                intro: "中东市场内部差异显著。沙特是雄心勃勃的转型巨人，阿联酋是成熟开放的商业枢纽，卡塔尔是富裕的精品市场。企业必须根据不同市场的特点和行业机遇，制定差异化的推广路线图。",
+                industries: {
+                    "renewable-energy": { name: "新能源与可持续技术", strategy: "核心是与‘2030愿景’等国家战略对齐，参与大型可再生能源项目（太阳能、绿氢），展示技术实力和对本地化的承诺。" },
+                    "ecommerce-fintech": { name: "电商与金融科技", strategy: "核心是提供极致的本地化用户体验。包括全阿拉伯语界面、整合本地支付网关、提供符合本地习惯的物流解决方案。" },
+                    "construction-infra": { name: "建筑与新基建", strategy: "核心是参与NEOM、红海项目等超大型‘Giga-Projects’。需要与本地大型承包商建立牢固的合作关系，并满足严格的本地化和可持续性要求。" },
+                    "luxury-tourism": { name: "奢侈品与旅游服务", strategy: "核心是打造独特、尊贵的线下体验。通过在高端购物中心设立旗舰店、提供VIP定制服务、以及与豪华酒店合作来吸引高净值客户。" }
+                },
+                countries: {
+                    "saudi": { name: "沙特阿拉伯", summary: "规模最大、最具潜力的转型市场。增长由政府主导的‘Giga-Projects’驱动，本地化要求高，是B2B企业的战略重心。", chartData: { "经济多元化": 10, "奢侈品需求": 8, "数字成熟度": 7, "监管开放度": 6, "本地伙伴依赖": 9 } },
+                    "uae": { name: "阿联酋", summary: "最成熟、最国际化的商业枢纽。市场开放，基础设施完善，是设立区域总部、发展转口贸易和推广B2C品牌的理想选择。", chartData: { "经济多元化": 8, "奢侈品需求": 9, "数字成熟度": 10, "监管开放度": 9, "本地伙伴依赖": 7 } },
+                    "qatar": { name: "卡塔尔", summary: "人均收入全球最高，市场规模小但购买力极强。专注于高端、利基市场，特别是奢侈品、体育和金融服务领域。", chartData: { "经济多元化": 7, "奢侈品需求": 10, "数字成熟度": 9, "监管开放度": 8, "本地伙伴依赖": 8 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-emerald-700">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-emerald-800 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-emerald-700 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-emerald-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderTacticCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-emerald-600">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderTacticCard).join('');
+            const traditionalHtml = data.traditional.map(renderTacticCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-emerald-500 pb-2">数字渠道</h3>
+                        <div class="mt-4 space-y-4">${digitalHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-orange-500 pb-2">传统与线下</h3>
+                        <div class="mt-4 space-y-4">${traditionalHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-emerald-700">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-orange-500">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-emerald-500 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-orange-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-emerald-700" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择市场</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-orange-600" id="roadmap-country-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-country-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心市场特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            // Render chart if the page has one
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('country-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data.saudi.chartData),
+                datasets: [
+                    { label: data.saudi.name, data: Object.values(data.saudi.chartData), borderColor: '#059669', backgroundColor: 'rgba(5, 150, 105, 0.2)', hidden: selectedCountryKey !== 'saudi' },
+                    { label: data.uae.name, data: Object.values(data.uae.chartData), borderColor: '#0284C7', backgroundColor: 'rgba(2, 132, 199, 0.2)', hidden: selectedCountryKey !== 'uae' },
+                    { label: data.qatar.name, data: Object.values(data.qatar.chartData), borderColor: '#A16207', backgroundColor: 'rgba(161, 98, 7, 0.2)', hidden: selectedCountryKey !== 'qatar' },
+                    { label: data[selectedCountryKey].name + ' (选中)', data: Object.values(data[selectedCountryKey].chartData), borderColor: '#DB2777', backgroundColor: 'rgba(219, 39, 119, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
