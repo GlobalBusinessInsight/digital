@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸欧洲推广战略交互式仪表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: 设计一个仪表板风格的SPA，左侧为固定导航栏，右侧为内容展示区。这种结构便于用户在不同战略模块间快速切换，而非线性阅读。模块划分为：概览、市场准入、推广战术、合规与文化、行业与国别。这种主题式划分比报告的章节结构更符合用户探索和决策的思维模式，通过交互式图表、选项卡和下拉菜单将复杂信息转化为易于消化和使用的工具。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示宏观趋势。市场准入部分用HTML/Tailwind构建可点击的卡片流程图。推广战术和合规文化使用选项卡和折叠面板（Accordion）来组织大量信息。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本内容和Chart.js雷达图，为用户提供高度定制化的战略洞察。所有选择都旨在将静态报告转化为动态的、以用户为中心的决策支持工具。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            background-color: #3B82F6; /* blue-500 */
+            color: white;
+            transform: translateX(4px);
+        }
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-button.active {
+            border-color: #3B82F6; /* blue-500 */
+            color: #3B82F6;
+            background-color: #EFF6FF; /* blue-100 */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="w-full md:w-64 bg-white shadow-lg md:fixed md:h-full">
+            <div class="p-6 border-b">
+                <h1 class="text-xl font-bold text-blue-600">欧洲推广战略导航</h1>
+                <p class="text-xs text-stone-500 mt-1">交互式决策支持工具</p>
+            </div>
+            <nav class="mt-4 p-3">
+                <a href="#overview" class="nav-link flex items-center p-3 my-1 rounded-lg hover:bg-stone-100">
+                    <span class="mr-3">🌍</span> 战略概览
+                </a>
+                <a href="#market-entry" class="nav-link flex items-center p-3 my-1 rounded-lg hover:bg-stone-100">
+                    <span class="mr-3">🚪</span> 市场准入
+                </a>
+                <a href="#tactics" class="nav-link flex items-center p-3 my-1 rounded-lg hover:bg-stone-100">
+                    <span class="mr-3">🎯</span> 推广战术
+                </a>
+                <a href="#compliance" class="nav-link flex items-center p-3 my-1 rounded-lg hover:bg-stone-100">
+                    <span class="mr-3">📜</span> 合规与文化
+                </a>
+                <a href="#roadmap" class="nav-link flex items-center p-3 my-1 rounded-lg hover:bg-stone-100">
+                    <span class="mr-3">🗺️</span> 行业与国别
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content" class="flex-1 md:ml-64 p-4 sm:p-6 lg:p-8">
+            <!-- Sections will be injected here by JavaScript -->
+        </main>
+    </div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "战略概览：洞悉现代欧洲市场",
+                intro: "对于任何寻求在欧洲大陆取得成功的中国外贸企业而言，首要任务是深刻理解其运营的宏观战略环境。本部分旨在构建一个高阶战略框架，推动中国企业从价格驱动的出口商向价值驱动的全球参与者转型。核心逻辑是从“供应商”（Supplier）转变为“利益相关者”（Stakeholder），通过深度融入来应对地缘政治风险和市场挑战。",
+                stats: [
+                    { label: "中欧日均贸易额", value: "188.8亿欧元", icon: "💰" },
+                    { label: "中国对欧绿地投资 (2024)", value: "59亿欧元", icon: "📈" },
+                    { label: "认为受不公对待的中国企业", value: "64%", icon: "⚖️" },
+                    { label: "购物时考虑环境影响的欧洲消费者", value: "72%", icon: "🌿" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '绿地投资 (亿欧元)',
+                            data: [20, 25, 35, 48, 59],
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '并购活动 (亿欧元)',
+                            data: [80, 75, 60, 45, 30],
+                            borderColor: '#6B7280',
+                            backgroundColor: 'rgba(107, 114, 128, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：选择最佳路径",
+                intro: "进入欧洲市场的方式多种多样，每种模式都有其独特的优势、风险和资源要求。中国企业必须根据自身的规模、财务状况、风险偏好和长期战略目标，审慎选择最合适的准入路径。一种稳健的策略是采用混合式、分阶段的模式，从低风险的电商测试开始，逐步深化到直接投资，实现风险与控制力的平衡。",
+                steps: [
+                    { 
+                        title: "第一阶段：市场测试", 
+                        icon: "🔍",
+                        methods: [
+                            { name: "间接出口 (OEM)", description: "投入少、风险低，但无法建立品牌和获取市场反馈。" },
+                            { name: "直接出口 (跨境电商)", description: "给予更多控制权，是测试市场反应和收集数据的绝佳“侦察兵”。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：扩大覆盖",
+                        icon: "🌐",
+                        methods: [
+                            { name: "战略联盟/合资", description: "与本土企业合作，快速获得市场知识和分销网络。" },
+                            { name: "寻找代理/分销商", description: "建立线下实体零售渠道，扩大市场覆盖面。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：深度融入",
+                        icon: "🏢",
+                        methods: [
+                            { name: "绿地投资", description: "从零建立生产或研发基地，运营控制权最大，是长期承诺的强烈信号。" },
+                            { name: "并购 (M&A)", description: "快速获取成熟品牌、技术和市场份额，但面临严格的监管审查。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：掌握渠道与策略",
+                intro: "在明确宏观战略后，需将其转化为具体、可执行的推广战术。欧洲的数字与实体环境与中国截然不同，成功的关键在于深度本地化和线上线下渠道的有机整合（Phygital），为消费者创造无缝的品牌体验。",
+                digital: [
+                    { title: "SEO/SEM", icon:"🔎", description: "核心从百度转向谷歌。进行多语言关键词研究和精准广告投放。" },
+                    { title: "社交媒体", icon:"📱", description: "重构矩阵，B2C主攻Instagram/Facebook，B2B深耕LinkedIn。" },
+                    { title: "社交电商", icon:"🛍️", description: "借鉴Shein/Temu模式，融合内容、娱乐与购物，主攻年轻群体。" },
+                    { title: "网红/KOL营销", icon:"⭐", description: "与本土KOL建立长期真实合作，快速建立品牌信誉。" },
+                    { title: "内容营销", icon:"✍️", description: "B2B创作深度白皮书，B2C讲述情感共鸣的品牌故事，注重“文化创译”。" }
+                ],
+                traditional: [
+                    { title: "行业展会", icon:"🎪", description: "B2B企业核心渠道，尤其德国工业展，是建立信任和获取线索的关键。" },
+                    { title: "分销网络", icon:"🚚", description: "通过代理、分销或直供零售商，构建产品触达终端的生命线。" },
+                    { title: "体育营销", icon:"⚽", description: "赞助欧洲杯等顶级赛事，快速提升品牌高端形象和全球知名度。" },
+                    { title: "实体店体验", icon:"🏬", description: "设立品牌专区或体验店，让消费者触摸产品，反哺线上销售。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：合规与适应",
+                intro: "如果说推广策略是成功的必要条件，那么合规性与文化适应性则是其稳固的基石。企业必须将合规视为进入欧洲市场的“通行证”，并将文化适应性作为赢得人心的“软实力”，从而将挑战转化为可持续的竞争优势。",
+                regulations: [
+                    { title: "数据合规：GDPR &《数据法案》", content: "GDPR是全球数据隐私黄金标准，必须保障数据主体权利。新《数据法案》重塑工业数据价值分配，要求制造商向用户开放数据。" },
+                    { title: "绿色准则：ESG & CBAM", content: "ESG已成为市场准入门槛。CSRD指令要求详细、经审计的可持续发展报告。CBAM（碳关税）对高碳进口产品征税，直接影响成本竞争力。" },
+                    { title: "市场准入：IPI & 反补贴调查", content: "欧盟启用IPI工具反制其认为不公平的市场壁垒（如医疗器械）。对电动汽车等行业的反补贴调查日益频繁，可能导致惩罚性关税。" },
+                ],
+                culture: [
+                    { title: "超越翻译", icon:"🗣️", description: "产品设计、功能、包装和营销信息需全面本地化，与当地文化价值观产生共鸣。" },
+                    { title: "弥合管理鸿沟", icon:"🤝", description: "聘用本地人才，调整高强度工作文化以适应欧洲强调工作生活平衡的价值观。" },
+                    { title: "忘掉“关系”", icon:"📝", description: "欧洲商业信任建立在透明流程和严谨合同之上，而非国内的非正式人情网络。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与市场专属路线图",
+                intro: "欧洲市场并非铁板一块。成功的推广策略必须具备高度的针对性，既要符合特定行业的内在逻辑，也要适应主要目标国家的独特市场环境。请选择一个行业和一个核心市场，查看定制化的战略建议和市场对比。",
+                industries: {
+                    "consumer-electronics": {
+                        name: "消费电子与家电",
+                        strategy: "核心是展示技术领先性与智能生态整合能力。通过旗舰展会（如IFA）、高端体育营销和强化线下体验店来建立品牌形象。"
+                    },
+                    "fashion": {
+                        name: "时尚服饰与快消品",
+                        strategy: "核心是构建基于社交媒体的快速反应体系和文化认同感。拥抱TikTok等社交电商，利用“国潮”元素差异化，并透明化应对可持续性质疑。"
+                    },
+                    "b2b": {
+                        name: "工业机械与B2B技术",
+                        strategy: "核心是建立专业权威、展示产品可靠性并提供卓越的本地化服务。深耕专业展会（如汉诺威工业博览会），构建分销服务网络，并进行专业内容营销。"
+                    },
+                    "automotive": {
+                        name: "汽车与电动汽车",
+                        strategy: "核心是通过本地化生产和战略合作，深度融入欧洲汽车生态系统。本地化投资设厂已成“必选项”，以规避关税壁垒并展示长期承诺。"
+                    }
+                },
+                countries: {
+                    "germany": {
+                        name: "德国",
+                        summary: "工业心脏，注重品质、技术和可靠性。B2B推广的桥头堡。营销应强调“硬实力”，善用世界级工业展会。",
+                        chartData: { "品质要求": 9, "品牌美学": 5, "数字原生": 6, "B2B中心": 10, "价格敏感": 7 }
+                    },
+                    "france": {
+                        name: "法国",
+                        summary: "内需驱动，注重品牌美学、叙事和生活方式。B2C品牌的试金石。一个动人的品牌故事比技术参数更具说服力。",
+                        chartData: { "品质要求": 7, "品牌美学": 10, "数字原生": 7, "B2B中心": 5, "价格敏感": 6 }
+                    },
+                    "uk": {
+                        name: "英国",
+                        summary: "高度开放的服务型经济，电商市场最成熟。应采取“数字优先”策略，是设立欧洲数字营销总部的理想选择。",
+                        chartData: { "品质要求": 7, "品牌美学": 8, "数字原生": 10, "B2B中心": 6, "价格敏感": 8 }
+                    }
+                }
+            }
+        };
+
+        const mainContent = document.getElementById('main-content');
+        const navLinks = document.querySelectorAll('.nav-link');
+        let activeChart = null;
+
+        function renderOverview() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white p-4 rounded-lg shadow flex items-center">
+                    <div class="text-3xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-500">${stat.label}</p>
+                        <p class="text-2xl font-bold">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div id="overview" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">${data.title}</h2>
+                    <p class="text-stone-600 mb-6">${data.intro}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        ${statsHtml}
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                         <h3 class="text-xl font-semibold mb-4">投资模式演变：从“收购技术”到“本土创造”</h3>
+                        <div class="chart-container">
+                            <canvas id="investmentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMarketEntry() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map((step, index) => `
+                ${index > 0 ? '<div class="flex justify-center my-4"><span class="text-3xl text-blue-400">↓</span></div>' : ''}
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <div class="text-5xl mb-2">${step.icon}</div>
+                    <h3 class="text-xl font-bold text-blue-600 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div id="market-entry" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">${data.title}</h2>
+                    <p class="text-stone-600 mb-6">${data.intro}</p>
+                    <div class="max-w-2xl mx-auto">
+                        ${stepsHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderTactics() {
+            const data = reportData.tactics;
+            const renderTacticCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow flex items-start space-x-4 hover:shadow-md transition-shadow">
+                    <div class="text-3xl mt-1">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderTacticCard).join('');
+            const traditionalHtml = data.traditional.map(renderTacticCard).join('');
+
+            return `
+                <div id="tactics" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">${data.title}</h2>
+                    <p class="text-stone-600 mb-6">${data.intro}</p>
+                    <div class="flex border-b mb-6">
+                        <button class="tab-button py-2 px-4 font-semibold border-b-2" data-tab="digital">数字渠道</button>
+                        <button class="tab-button py-2 px-4 font-semibold border-b-2 border-transparent text-stone-500" data-tab="traditional">传统渠道</button>
+                    </div>
+                    <div id="digital-tab" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${digitalHtml}
+                    </div>
+                    <div id="traditional-tab" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${traditionalHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCompliance() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map((reg, index) => `
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <button class="accordion-toggle w-full text-left p-4 font-bold flex justify-between items-center hover:bg-stone-50">
+                        <span>${reg.title}</span>
+                        <span class="transform transition-transform">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="p-4 pt-0 text-stone-600">${reg.content}</p>
+                    </div>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                <div class="bg-white p-4 rounded-lg shadow flex items-center">
+                    <div class="text-3xl mr-4">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div id="compliance" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">${data.title}</h2>
+                    <p class="text-stone-600 mb-6">${data.intro}</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">穿越合规迷宫</h3>
+                            <div class="space-y-4">${regulationsHtml}</div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">融入文化肌理</h3>
+                            <div class="space-y-4">${cultureHtml}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRoadmap() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            return `
+                <div id="roadmap" class="content-section">
+                    <h2 class="text-3xl font-bold mb-2">${data.title}</h2>
+                    <p class="text-stone-600 mb-6">${data.intro}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择市场</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-semibold mb-2" id="roadmap-industry-title"></h3>
+                            <p class="text-stone-600" id="roadmap-industry-content"></p>
+                            <hr class="my-4">
+                            <h3 class="text-xl font-semibold mb-2" id="roadmap-country-title"></h3>
+                            <p class="text-stone-600" id="roadmap-country-content"></p>
+                        </div>
+                        <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow">
+                             <h3 class="text-xl font-semibold mb-4">核心市场特征对比</h3>
+                             <div class="chart-container h-80 md:h-96">
+                                <canvas id="countryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createChart(ctx, type, data, options) {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            activeChart = new Chart(ctx, { type, data, options });
+        }
+
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data.germany.chartData),
+                datasets: [
+                    {
+                        label: data.germany.name,
+                        data: Object.values(data.germany.chartData),
+                        borderColor: '#6B7280',
+                        backgroundColor: 'rgba(107, 114, 128, 0.2)',
+                        hidden: selectedCountryKey !== 'germany'
+                    },
+                    {
+                        label: data.france.name,
+                        data: Object.values(data.france.chartData),
+                        borderColor: '#EF4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        hidden: selectedCountryKey !== 'france'
+                    },
+                    {
+                        label: data.uk.name,
+                        data: Object.values(data.uk.chartData),
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        hidden: selectedCountryKey !== 'uk'
+                    },
+                    {
+                        label: data[selectedCountryKey].name + ' (选中)',
+                        data: Object.values(data[selectedCountryKey].chartData),
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.4)',
+                        borderWidth: 2,
+                    }
+                ]
+            };
+            
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            createChart(ctx, 'radar', chartData, {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    r: {
+                        angleLines: { display: false },
+                        suggestedMin: 0,
+                        suggestedMax: 10,
+                        pointLabels: { font: { size: 12 } }
+                    }
+                }
+            });
+        }
+
+
+        function navigate(hash) {
+            if (!hash) hash = '#overview';
+
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === hash) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                if ('#' + section.id === hash) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            switch (hash) {
+                case '#overview':
+                    setTimeout(() => {
+                        const ctx = document.getElementById('investmentChart').getContext('2d');
+                        createChart(ctx, 'line', reportData.overview.chartData, {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'top' } },
+                            scales: { y: { beginAtZero: true } }
+                        });
+                    }, 50);
+                    break;
+                case '#tactics':
+                    document.querySelectorAll('.tab-button').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const tabId = e.target.dataset.tab;
+                            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                            e.target.classList.add('active');
+                            
+                            if(tabId === 'digital') {
+                                document.getElementById('digital-tab').classList.remove('hidden');
+                                document.getElementById('traditional-tab').classList.add('hidden');
+                            } else {
+                                document.getElementById('digital-tab').classList.add('hidden');
+                                document.getElementById('traditional-tab').classList.remove('hidden');
+                            }
+                        });
+                    });
+                    document.querySelector('.tab-button[data-tab="digital"]').classList.add('active');
+                    break;
+                case '#compliance':
+                    document.querySelectorAll('.accordion-toggle').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const content = button.nextElementSibling;
+                            const icon = button.querySelector('span:last-child');
+                            if (content.style.maxHeight) {
+                                content.style.maxHeight = null;
+                                icon.style.transform = 'rotate(0deg)';
+                            } else {
+                                content.style.maxHeight = content.scrollHeight + "px";
+                                icon.style.transform = 'rotate(180deg)';
+                            }
+                        });
+                    });
+                    break;
+                case '#roadmap':
+                    setTimeout(() => {
+                        updateRoadmap();
+                        document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                        document.getElementById('country-select').addEventListener('change', updateRoadmap);
+                    }, 50);
+                    break;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            mainContent.innerHTML = `
+                ${renderOverview()}
+                ${renderMarketEntry()}
+                ${renderTactics()}
+                ${renderCompliance()}
+                ${renderRoadmap()}
+            `;
+            navigate(window.location.hash);
+        });
+
+        window.addEventListener('hashchange', () => {
+            navigate(window.location.hash);
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (window.innerWidth < 768) { 
+                    // Simple scroll for mobile
+                } else {
+                    e.preventDefault();
+                    window.location.hash = e.currentTarget.getAttribute('href');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
