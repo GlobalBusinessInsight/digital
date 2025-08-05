@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸拉美推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Andean Sapphire -->
+    <!-- Application Structure Plan: 采用杂志式翻页布局，将复杂的拉美（西语区）市场战略分解为五个章节：战略概览、市场准入、推广战术、合规与文化、行业与国别。这种叙事性结构旨在引导用户沉浸式地探索该区域市场的多样性与共同点，从宏观经济背景到具体的国别打法，提供一个连贯且富有洞察力的决策框架。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示拉美西语区关键经济指标。市场准入部分用流程图卡片阐释进入该区域的多元路径，突出本地伙伴和自贸区的重要性。推广战术和合规文化部分通过分栏对比，清晰展示数字与传统渠道、法规与文化适应的要点。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本和雷达图，为用户提供针对不同行业和核心国家（如智利、哥伦比亚、阿根廷）的定制化战略。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #F0F9FF; /* A very light blue-tinted white */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "战略概览：解锁拉美新大陆（西语区）",
+                intro: "拉丁美洲（不含巴西、墨西哥）是一个由多元文化、不同经济发展阶段国家组成的复杂而充满机遇的市场。从安第斯山脉丰富的矿产资源，到阿根廷广袤的潘帕斯草原，再到哥伦比亚蓬勃发展的数字经济，本战略旨在为中国企业提供一个框架，以理解该区域的共同趋势与独特差异，抓住近岸外包、关键矿产和新兴消费市场带来的增长机遇。",
+                stats: [
+                    { label: "中国与太平洋联盟贸易额", value: "超700亿美元", icon: "🤝" },
+                    { label: "“锂三角”锂储量全球占比", value: "约58%", icon: "🔋" },
+                    { label: "拉美电商用户增长率", value: "全球领先", icon: "🛒" },
+                    { label: "哥伦比亚BPO服务出口额", value: "超13亿美元", icon: "📞" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '区域GDP平均增长率 (%)',
+                            data: [-7.0, 6.8, 3.9, 2.3, 2.1],
+                            borderColor: '#0284C7', // sky-600
+                            backgroundColor: 'rgba(2, 132, 199, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '数字支付交易量年增长率 (%)',
+                            data: [25, 35, 45, 30, 28],
+                            borderColor: '#BE185D', // pink-700
+                            backgroundColor: 'rgba(190, 24, 93, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：应对多样化的商业环境",
+                intro: "进入西班牙语拉美市场，关键在于认识到其“统一中的多样性”。虽然语言相通，但各国的法规、税制和清关流程差异巨大。一个灵活、分国施策并高度依赖本地专业伙伴的准入策略是成功的基石。",
+                steps: [
+                    { 
+                        title: "第一阶段：区域试水", 
+                        icon: "🌐",
+                        methods: [
+                            { name: "区域性电商平台", description: "利用Mercado Libre等覆盖多国的平台进行销售，是评估区域性需求的有效方式。" },
+                            { name: "寻找区域分销商", description: "与拥有跨国分销网络（如在智利、秘鲁、哥伦比亚均有业务）的伙伴合作，快速实现多点覆盖。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：单点突破",
+                        icon: "🎯",
+                        methods: [
+                            { name: "设立国别公司", description: "选择一个战略支点国家（如智利或哥伦比亚），成立子公司，集中资源深耕单一市场。" },
+                            { name: "利用自贸区", description: "利用哥伦比亚、巴拿马等国的自贸区政策，作为面向周边国家的仓储和物流枢纽。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：深度本土化",
+                        icon: "🔗",
+                        methods: [
+                            { name: "建立本地供应链", description: "针对矿业、农业等领域，与本地供应商建立合作，或直接投资上游产业，深度融入本地价值链。" },
+                            { name: "组建本地团队", description: "在核心市场国家建立完全由本地人才管理的运营团队，以最地道的方式理解和响应市场变化。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：连接数字原住民与传统消费者",
+                intro: "拉美消费者热情、恋家且高度依赖社交网络获取信息和建立信任。成功的推广策略需要将Facebook和Instagram的社群营销与WhatsApp的私域沟通相结合，同时不能忽视线下零售和传统媒体在建立品牌信誉中的作用。",
+                digital: [
+                    { title: "社交流量为王", icon:"📱", description: "Facebook, Instagram是品牌建设和社群互动的主战场。视觉化、家庭导向和情感化的内容最能引发共鸣。" },
+                    { title: "WhatsApp即时沟通", icon:"💬", description: "是客服、销售和客户关系维护的核心工具。许多交易的最后一步是在WhatsApp上完成的。" },
+                    { title: "网红(Influencers)建立信任", icon:"⭐", description: "本地网红，特别是中小型和微型网红，因其真实性和亲和力，在推荐产品时拥有极高的可信度。" },
+                    { title: "Mercado Libre生态", icon:"🛒", description: "不仅是销售渠道，其广告系统(Mercado Ads)和支付系统(Mercado Pago)是触达活跃购物人群的关键工具。" }
+                ],
+                traditional: [
+                    { title: "大型零售商超", icon:"🏬", description: "进入Falabella, Cencosud, Éxito等大型连锁百货或超市，是产品实现大规模覆盖和建立品牌正规性形象的标志。" },
+                    { title: "足球与本地节日", icon:"⚽", description: "足球是贯穿整个地区的共同语言。赞助本地球队或利用重要赛事进行营销，能快速拉近与消费者的距离。" },
+                    { title: "行业特定展会", icon:"⛏️", description: "参加智利Expomin（矿业）、阿根廷Expoagro（农业）等专业展会，是B2B业务建立联系和展示实力的核心舞台。" },
+                    { title: "口碑与推荐", icon:"🗣️", description: "家庭和朋友的推荐是影响购买决策的最重要因素之一。营销活动应鼓励用户分享和推荐。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：合规与适应",
+                intro: "在西语拉美地区，商业成功不仅需要商业智慧，更需要文化情商和对规则的尊重。理解各国迥异的劳动法、消费者保护法，并学会建立基于信任(Confianza)的商业关系，是长期发展的保障。",
+                regulations: [
+                    { title: "进口与清关", content: "各国海关流程和关税税率差异巨大，且时常变动。拥有一个经验丰富、值得信赖的本地报关行是避免货物滞留和罚款的关键。" },
+                    { title: "劳动法", content: "该区域国家的劳动法普遍严格，对员工保护非常到位。在雇佣本地员工前，必须咨询专业律师，以合规地设计劳动合同和薪酬福利。" },
+                    { title: "消费者保护", content: "各国对产品保修、退货政策和广告宣传有明确规定。营销材料必须真实准确，避免夸大宣传，以免引发消费者投诉和诉讼。" },
+                ],
+                culture: [
+                    { title: "建立信任 (Confianza)", icon:"🤝", description: "商业关系高度个人化。拉美人倾向于与他们喜欢和信任的人做生意。正式谈判前花时间闲聊、共进午餐非常重要。" },
+                    { title: "等级与尊重", icon:"👨‍💼", description: "商业环境中等级观念依然存在。与高层决策者建立联系是推动项目进展的关键。沟通时应表现出对对方职位和年龄的尊重。" },
+                    { title: "时间观念的灵活性", icon:"🕒", description: "虽然守时是商业美德，但会议延迟或议程变更在该地区较为常见。保持耐心和灵活性，是顺利开展业务的心理前提。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与国别专属路线图",
+                intro: "西语拉美市场内部的差异性是其最显著的特征。智利的稳定开放、哥伦比亚的数字活力、阿根廷的资源禀赋，为不同行业的中国企业提供了差异化的战略切入点。",
+                industries: {
+                    "mining-energy": { name: "矿业与新能源", strategy: "聚焦“锂三角”（智利、阿根廷、玻利维亚）的锂矿，以及智利和秘鲁的铜矿。策略核心是提供采矿设备、技术解决方案，或直接参与上游投资，并为能源转型提供光伏、风能设备。" },
+                    "ecommerce-logistics": { name: "电商与物流", strategy: "该区域电商市场正处在高速增长期，但物流是最大痛点。策略核心是为跨境电商提供仓储、清关、最后一公里派送等一体化物流解决方案，或推出满足细分市场需求的垂直电商品牌。" },
+                    "agribusiness": { name: "现代农业", strategy: "阿根廷、秘鲁、智利等国是全球重要的农产品出口国。策略核心是提供农业无人机、灌溉技术、农产品加工设备和冷链物流技术，帮助本地农业提升效率和附加值。" },
+                    "automotive-parts": { name: "汽车及零部件", strategy: "随着区域经济发展，汽车保有量持续上升。策略核心是建立覆盖主要国家的汽车零部件分销网络，或针对特定市场（如智利、哥伦比亚）引入高性价比的电动汽车品牌。" }
+                },
+                countries: {
+                    "chile": { name: "智利", summary: "拉美地区政治最稳定、经济最开放、人均收入最高的国家。是推广高品质消费品、金融科技和新能源技术的理想市场。", chartData: { "政治稳定性": 9, "经商便利度": 9, "市场开放度": 10, "数字普及率": 8, "资源潜力": 8 } },
+                    "colombia": { name: "哥伦比亚", summary: "拉美第三大人口国，数字经济和创业生态系统充满活力。是发展电商、软件服务外包(BPO)和消费品业务的战略要地。", chartData: { "政治稳定性": 6, "经商便利度": 7, "市场开放度": 7, "数字普及率": 9, "资源潜力": 6 } },
+                    "argentina": { name: "阿根廷", summary: "市场规模巨大，在农业和自然资源领域拥有世界级潜力，但经济波动性高，政策风险大。适合风险偏好高、寻求长期布局的投资者。", chartData: { "政治稳定性": 3, "经商便利度": 4, "市场开放度": 5, "数字普及率": 7, "资源潜力": 10 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-sky-700">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-sky-800 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-sky-700 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-sky-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderTacticCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-sky-600">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderTacticCard).join('');
+            const traditionalHtml = data.traditional.map(renderTacticCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-sky-500 pb-2">数字渠道</h3>
+                        <div class="mt-4 space-y-4">${digitalHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">传统与线下</h3>
+                        <div class="mt-4 space-y-4">${traditionalHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-sky-700">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-amber-600">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-sky-500 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-sky-700" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择国家</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-amber-600" id="roadmap-country-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-country-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心国家特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('country-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data.chile.chartData),
+                datasets: [
+                    { label: data.chile.name, data: Object.values(data.chile.chartData), borderColor: '#0284C7', backgroundColor: 'rgba(2, 132, 199, 0.2)', hidden: selectedCountryKey !== 'chile' },
+                    { label: data.colombia.name, data: Object.values(data.colombia.chartData), borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.2)', hidden: selectedCountryKey !== 'colombia' },
+                    { label: data.argentina.name, data: Object.values(data.argentina.chartData), borderColor: '#6D28D9', backgroundColor: 'rgba(109, 40, 217, 0.2)', hidden: selectedCountryKey !== 'argentina' },
+                    { label: data[selectedCountryKey].name + ' (选中)', data: Object.values(data[selectedCountryKey].chartData), borderColor: '#DC2626', backgroundColor: 'rgba(220, 38, 38, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
