@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸巴西推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Tropical Verde -->
+    <!-- Application Structure Plan: 采用杂志式翻页布局，将复杂的巴西市场战略分解为五个章节：战略概览、市场准入、推广战术、合规与文化、行业与区域。这种叙事性结构旨在引导用户沉浸式地探索巴西市场的机遇与挑战，从宏观经济背景到具体的区域打法，提供一个连贯且富有洞察力的决策框架。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示巴西经济的关键指标。市场准入部分用流程图卡片阐释进入巴西的复杂路径，突出税务和法律实体的重要性。推广战术和合规文化部分通过分栏对比，清晰展示数字与传统渠道、法规与文化适应的要点。最具交互性的“行业与区域”部分，通过下拉菜单联动更新文本和雷达图，为用户提供针对不同行业和巴西主要经济区域（如圣保罗、里约）的定制化战略。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #F8FDFA; /* A very light green-tinted white */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "战略概览：探索拉丁美洲的增长引擎",
+                intro: "巴西，作为拉丁美洲最大的经济体和BRICS金砖国家的重要成员，为中国企业提供了一个充满活力和巨大潜力的消费市场。本战略旨在揭示，要在巴西取得成功，企业必须学会在其独特的数字生态中航行，应对其复杂的“巴西成本”（Custo Brasil），并抓住其农业科技、金融科技和可再生能源等领域的结构性机遇。",
+                stats: [
+                    { label: "中巴双边贸易额 (2023)", value: "1575亿美元", icon: "🤝" },
+                    { label: "巴西电商市场规模", value: "超450亿美元", icon: "🛒" },
+                    { label: "即时支付系统Pix用户数", value: "超1.5亿", icon: "💸" },
+                    { label: "可再生能源发电占比", value: "近80%", icon: "🌿" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: 'GDP年增长率 (%)',
+                            data: [-3.3, 4.8, 3.0, 2.9, 2.2],
+                            borderColor: '#16A34A', // green-600
+                            backgroundColor: 'rgba(22, 163, 74, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '电商销售额年增长率 (%)',
+                            data: [41, 27, 16, 12, 10],
+                            borderColor: '#4F46E5', // indigo-600
+                            backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：穿越复杂的税务与法律体系",
+                intro: "进入巴西市场，首要挑战是理解其极其复杂的税务系统和官僚程序。选择正确的法律实体和税务模式，是决定企业能否健康运营的关键。与经验丰富的本地法律和会计伙伴合作是必经之路。",
+                steps: [
+                    { 
+                        title: "第一阶段：远程测试", 
+                        icon: "📡",
+                        methods: [
+                            { name: "跨境电商", description: "通过Mercado Livre, Americanas, Shopee等平台进行销售，是测试市场水温的低成本方式。" },
+                            { name: "寻找进口商/分销商", description: "与巴西本地进口商合作，由其负责清关和分销，规避直接面对税务复杂性。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：建立实体",
+                        icon: "⚖️",
+                        methods: [
+                            { name: "设立贸易公司 (Trading)", description: "成立专门的贸易公司处理进出口业务，可以更灵活地管理税务和物流。" },
+                            { name: "成立有限责任公司 (LTDA)", description: "这是在巴西最常见的公司形式，能让企业全面开展本地业务，但需直接承担完整的税务负担。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：深度整合",
+                        icon: "🏭",
+                        methods: [
+                            { name: "本地化组装/生产", description: "在巴西设立组装线或工厂，可以显著降低因高额进口关税带来的成本，并更好地服务本地市场。" },
+                            { name: "并购本地企业 (M&A)", description: "收购拥有成熟渠道、品牌和运营经验的本地公司，是快速扩大市场份额的捷径。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：融入热情奔放的数字文化",
+                intro: "巴西消费者是全球最活跃的社交媒体用户之一。他们热爱视觉化、充满音乐和情感联系的内容。成功的推广策略必须拥抱这种热情文化，将WhatsApp的即时沟通、Instagram的视觉叙事和TikTok的病毒式传播力融为一体。",
+                digital: [
+                    { title: "WhatsApp营销", icon:"💬", description: "不仅是聊天工具，更是关键的客服和销售渠道。通过WhatsApp Business与客户直接沟通、发布新品和完成交易。" },
+                    { title: "Instagram & TikTok", icon:"📸", description: "视觉内容为王。通过短视频、Reels和与本地KOL合作，展示产品的使用场景和品牌故事，是建立品牌好感度的核心。" },
+                    { title: "网红(Influenciadores)营销", icon:"⭐", description: "巴西网红影响力巨大。与美妆、游戏、生活方式等领域的网红合作，能带来极高的转化率和品牌曝光。" },
+                    { title: "节日营销", icon:"�", description: "紧抓狂欢节(Carnaval)、黑五(Black Friday)和圣诞节等关键营销节点，推出符合节日氛围的促销活动。" }
+                ],
+                traditional: [
+                    { title: "购物中心(Shopping)", icon:"🏬", description: "购物中心是巴西人重要的社交和消费场所。在主流购物中心开设实体店或快闪店，是建立品牌形象的重要一环。" },
+                    { title: "足球营销", icon:"⚽", description: "足球是巴西的“国教”。赞助本地足球俱乐部或相关赛事，是与广大民众建立情感连接的绝佳方式。" },
+                    { title: "行业展会(Feiras)", icon:"🎪", description: "参加圣保罗举办的各行业大型展会，如Feicon(建材)、Intermodal(物流)，是B2B业务获取客户和建立网络的核心。" },
+                    { title: "户外广告(OOH)", icon:"🏙️", description: "在圣保罗、里约等大城市的主干道和地铁系统进行广告投放，对于提升品牌知名度依然有效。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：合规与适应",
+                intro: "在巴西做生意，耐心和专业是两大基石。企业必须投入资源来理解并遵守其繁杂的法规，同时要学会适应本地独特的商业文化和“巴西之道”(Jeitinho Brasileiro)。",
+                regulations: [
+                    { title: "税务系统", content: "巴西的税务系统以其复杂性闻名，涉及联邦、州、市三级税种（如ICMS, IPI, PIS/COFINS）。聘请专业的本地会计师事务所至关重要。" },
+                    { title: "数据保护法 (LGPD)", content: "巴西的《通用数据保护法》(LGPD)与欧盟GDPR类似，对个人数据的收集、处理和存储做出了严格规定，违规将面临高额罚款。" },
+                    { title: "产品认证", content: "特定产品进入巴西市场前，必须获得相应认证。如电子产品需INMETRO认证，医疗健康产品需ANVISA注册。" },
+                ],
+                culture: [
+                    { title: "建立人际关系 (Relacionamento)", icon:"🤝", description: "巴西人倾向于与他们认识和信任的人做生意。在谈论正式业务前，花时间建立个人关系非常重要。" },
+                    { title: "灵活性与“Jeitinho”", icon:"💡", description: "“Jeitinho”指巴西人灵活变通、找到解决问题捷径的国民特性。在商业中，这意味着需要具备创造性和适应性来应对官僚障碍。" },
+                    { title: "沟通风格", icon:"🗣️", description: "沟通风格通常热情、非正式，并伴有丰富的手势。直接的“不”比较少见，需要从字里行间理解对方的真实意图。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与区域专属路线图",
+                intro: "巴西幅员辽阔，区域差异巨大。东南部的圣保罗是经济中心，而东北部则是快速增长的新兴消费市场。企业必须根据不同区域的特点和行业机遇，制定差异化的推广路线图。",
+                industries: {
+                    "agritech": { name: "农业科技", strategy: "巴西是全球农业巨头，对农业无人机、物联网设备、精准农业解决方案和生物技术有巨大需求。策略核心是提供能提高生产效率和可持续性的技术。" },
+                    "fintech-ecommerce": { name: "金融科技与电商", strategy: "巴西拥有全球增长最快的数字经济之一。以Pix支付系统为代表的金融创新，为电商、数字银行和信贷服务提供了广阔的增长空间。" },
+                    "renewable-energy": { name: "可再生能源", strategy: "巴西在水电、风能和太阳能领域拥有巨大潜力。策略核心是参与能源项目竞标，提供光伏组件、风力涡轮机等关键设备和技术解决方案。" },
+                    "consumer-goods": { name: "消费品", strategy: "巴西拥有超2亿人口的庞大市场。策略核心是通过强大的社交媒体营销和本地化的产品设计，抓住年轻、爱美、注重生活品质的消费群体。" }
+                },
+                regions: {
+                    "sao-paulo": { name: "圣保罗州", summary: "巴西的经济和金融心脏，GDP占全国三分之一。是设立拉美总部的首选，拥有最完善的基础设施和最多元的人才库。", chartData: { "经济实力": 10, "物流基建": 9, "科技创新": 9, "运营成本": 4, "市场竞争": 10 } },
+                    "rio-de-janeiro": { name: "里约热内卢州", summary: "巴西第二大经济体，在石油、天然气和文旅产业方面具有优势。消费者市场巨大，品牌推广价值高。", chartData: { "经济实力": 8, "物流基建": 8, "科技创新": 7, "运营成本": 5, "市场竞争": 8 } },
+                    "northeast": { name: "东北部地区", summary: "巴西近年来经济增长最快的地区之一，拥有庞大的新兴消费群体。市场潜力巨大，但物流和基建相对落后。", chartData: { "经济实力": 6, "物流基建": 5, "科技创新": 4, "运营成本": 8, "市场竞争": 6 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-green-700">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-green-800 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-green-700 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-green-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderTacticCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-green-600">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderTacticCard).join('');
+            const traditionalHtml = data.traditional.map(renderTacticCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-green-500 pb-2">数字渠道</h3>
+                        <div class="mt-4 space-y-4">${digitalHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-yellow-500 pb-2">传统与线下</h3>
+                        <div class="mt-4 space-y-4">${traditionalHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-green-700">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-yellow-600">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-green-500 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-yellow-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const regionOptions = Object.keys(data.regions).map(key => `<option value="${key}">${data.regions[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-green-700" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="region-select" class="block text-sm font-medium text-stone-700">选择区域</label>
+                            <select id="region-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md">
+                                ${regionOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-yellow-600" id="roadmap-region-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-region-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心区域特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="regionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('region-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const regionKey = document.getElementById('region-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-region-title').innerText = data.regions[regionKey].name;
+            document.getElementById('roadmap-region-content').innerText = data.regions[regionKey].summary;
+            
+            updateRegionChart();
+        }
+
+        function updateRegionChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedRegionKey = document.getElementById('region-select').value;
+            const data = reportData.roadmap.regions;
+            const chartData = {
+                labels: Object.keys(data['sao-paulo'].chartData),
+                datasets: [
+                    { label: data['sao-paulo'].name, data: Object.values(data['sao-paulo'].chartData), borderColor: '#16A34A', backgroundColor: 'rgba(22, 163, 74, 0.2)', hidden: selectedRegionKey !== 'sao-paulo' },
+                    { label: data['rio-de-janeiro'].name, data: Object.values(data['rio-de-janeiro'].chartData), borderColor: '#2563EB', backgroundColor: 'rgba(37, 99, 235, 0.2)', hidden: selectedRegionKey !== 'rio-de-janeiro' },
+                    { label: data.northeast.name, data: Object.values(data.northeast.chartData), borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.2)', hidden: selectedRegionKey !== 'northeast' },
+                    { label: data[selectedRegionKey].name + ' (选中)', data: Object.values(data[selectedRegionKey].chartData), borderColor: '#DC2626', backgroundColor: 'rgba(220, 38, 38, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('regionChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
+�
