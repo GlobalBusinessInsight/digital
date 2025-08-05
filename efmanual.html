@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸东非推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Savannah Gold -->
+    <!-- Application Structure Plan: 采用杂志式翻页布局，将复杂的东非市场战略分解为五个章节：战略概览、市场准入、推广战术、合规与文化、行业与国别。这种叙事性结构旨在引导用户沉浸式地探索东非市场的机遇与挑战，从“硅谷草原”的科技浪潮到本地化的商业实践，提供一个连贯且富有洞察力的决策框架。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示东非关键经济指标，特别是移动支付的普及。市场准入部分用流程图卡片阐释进入该区域的多元路径。推广战术和合规文化部分通过分栏对比，清晰展示数字与传统渠道、英美法系与本地文化的要点。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本和雷达图，为用户提供针对不同行业和核心国家（如肯尼亚、埃塞俄比亚、坦桑尼亚）的定制化战略。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #FFFAF0; /* FloralWhite, a warm off-white */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "东非篇：数字丝路与“硅谷草原”的机遇",
+                intro: "东非，作为“一带一路”倡议在非洲的重要支点，正经历着前所未有的经济与社会转型。以肯尼亚的“硅谷草原”（Silicon Savannah）为核心，一个由移动支付、数字信贷和青年创业精神驱动的新经济生态正在崛起。本战略旨在为中国企业揭示，如何在东非这片充满活力的土地上，抓住数字经济红利，并深度参与其工业化和城市化进程。",
+                stats: [
+                    { label: "中肯双边贸易额 (2023)", value: "89.7亿美元", icon: "🤝" },
+                    { label: "肯尼亚移动支付渗透率", value: "超90%", icon: "📱" },
+                    { label: "埃塞俄比亚人口", value: "超1.2亿", icon: "👨‍👩‍👧‍👦" },
+                    { label: "东非共同体(EAC)市场规模", value: "超3亿人", icon: "🌍" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '区域GDP平均增长率 (%)',
+                            data: [1.5, 5.1, 4.8, 5.5, 5.8],
+                            borderColor: '#D97706', // amber-600
+                            backgroundColor: 'rgba(217, 119, 6, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '互联网用户年增长率 (%)',
+                            data: [12, 15, 18, 22, 20],
+                            borderColor: '#059669', // emerald-600
+                            backgroundColor: 'rgba(5, 150, 105, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：构建“中心-辐射”式战略布局",
+                intro: "进入东非市场，关键在于理解其核心与外围的经济结构。以肯尼亚内罗毕为区域中心，辐射坦桑尼亚、乌干达乃至埃塞俄比亚，是一种被广泛验证的有效模式。企业应根据自身实力和行业特点，选择从轻资产试水到重资产投入的渐进式路径。",
+                steps: [
+                    { 
+                        title: "第一阶段：轻资产试水", 
+                        icon: "💧",
+                        methods: [
+                            { name: "跨境电商平台", description: "利用Jumia, Kilimall等本地电商平台进行销售，是测试产品市场接受度的低成本首选。" },
+                            { name: "寻找国别代理", description: "与在肯尼亚或坦桑尼亚有成熟渠道的本地代理商合作，快速将产品铺向市场。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：设立区域枢纽",
+                        icon: "🏢",
+                        methods: [
+                            { name: "在内罗毕设立区域办公室", description: "利用肯尼亚相对开放的商业环境、完善的金融服务和国际化人才，建立辐射整个东非的销售和营销中心。" },
+                            { name: "保税仓与海外仓", description: "在蒙巴萨港或达累斯萨拉姆港附近的保税区建立仓库，以优化物流成本和清关效率。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：深度本土化",
+                        icon: "🏭",
+                        methods: [
+                            { name: "本地化组装/制造", description: "在肯尼亚或埃塞俄比亚的工业园设立工厂，特别是针对手机、家电、摩托车等产品，可有效规避关税，并创造本地就业。" },
+                            { name: "参与基础设施项目", description: "与本地大型工程公司合作，参与“一带一路”框架下的铁路、港口、公路等基础设施建设，提供设备和技术支持。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：连接移动优先的年轻一代",
+                intro: "东非的消费者，特别是城市青年，是典型的“移动原住民”。他们的信息获取、社交娱乐和消费支付都高度集中在智能手机上。成功的推广策略必须以移动端为核心，融合社交媒体、网红营销和无处不在的移动支付。",
+                digital: [
+                    { title: "移动支付是基建", icon:"💸", description: "任何线上或线下业务都必须无缝集成M-Pesa等移动支付方式。这不仅是支付工具，更是信用体系和数字生态的入口。" },
+                    { title: "WhatsApp + Facebook", icon:"💬", description: "WhatsApp是事实上的商业沟通工具，用于客服和交易确认。Facebook则是品牌宣传和社群运营的主阵地。" },
+                    { title: "短视频与网红营销", icon:"⭐", description: "TikTok和Instagram在年轻人群中影响力巨大。与本地网红合作创作轻松、有趣、接地气的短视频内容，是品牌破圈的关键。" },
+                    { title: "本地化搜索引擎优化", icon:"🔍", description: "针对斯瓦希里语和本地英语俚语进行关键词优化，确保用户在谷歌搜索时能找到你的品牌。" }
+                ],
+                traditional: [
+                    { title: "户外广告(OOH)", icon:"🛣️", description: "在内罗毕、达市等主要城市的交通要道投放大型广告牌，依然是建立品牌知名度的有效方式。" },
+                    { title: "购物中心与商超", icon:"🏬", description: "进入Carrefour, Naivas等大型连锁超市和主流购物中心，是消费品触达中产阶级的核心渠道。" },
+                    { title: "行业展会", icon:"🎪", description: "参加东非国际贸易展（EAITE）等区域性综合展会，是B2B企业寻找本地合作伙伴和展示产品的重要平台。" },
+                    { title: "电台与口碑传播", icon:"📻", description: "在广大非城市地区，电台广播依然是重要的信息来源。同时，基于社群和家庭的口碑传播极具影响力。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：适应英伦法系与斯瓦希里文化",
+                intro: "东非的商业环境深受其殖民历史和多元文化的影响。在肯尼亚和坦桑尼亚，基于英美法系的商业法规相对透明；同时，企业必须学会尊重以斯瓦希里文化为代表的、融合了班图、阿拉伯和欧洲影响的独特社会规范。",
+                regulations: [
+                    { title: "公司注册与税务", content: "各国均有投资促进机构（如肯尼亚投资局KenInvest）提供一站式服务，但实际操作中仍需聘请本地律师和会计师。税务合规（如VAT增值税）是运营的重中之重。" },
+                    { title: "标准与认证", content: "进口产品必须符合各国的标准局要求（如肯尼亚标准局KEBS），获得相应的认证后方可销售。部分产品如食品、药品有更严格的规定。" },
+                    { title: "数据隐私法", content: "以肯尼亚的《2019年数据保护法》为代表，东非国家日益重视数据主权和个人隐私保护，对数据的收集和处理做出了明确规定。" },
+                ],
+                culture: [
+                    { title: "Harambee精神", icon:"🤝", description: "源于斯瓦希里语“大家一起来”，代表了肯尼亚人重视集体协作和社群互助的精神。在商业中，这意味着建立合作共赢的伙伴关系。" },
+                    { title: "尊重长者与等级", icon:"👨‍🦳", description: "社会等级和对长者的尊重根深蒂固。在商务会谈中，应首先问候在场职位最高或最年长的人。" },
+                    { title: "间接沟通与“面子”", icon:"😊", description: "直接拒绝或批评被认为是不礼貌的。人们倾向于使用委婉、间接的方式表达不同意见，维护对方的“面子”非常重要。" },
+                    { title: "宗教多元性", icon:"⛪🕌", description: "基督教和伊斯兰教是两大主要宗教。企业在营销活动和员工管理中，必须充分尊重不同的宗教节日（如复活节、开斋节）和文化习俗。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与国别专属路线图",
+                intro: "东非三国各具特色：肯尼亚是开放的区域枢纽，埃塞俄比亚是沉睡的人口巨人，坦桑尼亚是资源丰富的潜力之国。企业应根据不同国家的比较优势，制定差异化的投资和推广策略。",
+                industries: {
+                    "fintech-mobile": { name: "金融科技与移动应用", strategy: "基于M-Pesa等成熟的移动支付生态，开发小额信贷、数字保险、移动电商和各类生活服务App，市场潜力巨大。" },
+                    "light-manufacturing": { name: "轻工制造与组装", strategy: "利用埃塞俄比亚等国的人口红利和优惠政策，设立手机、家电、摩托车、建材等产品的组装和生产基地，满足本地及区域市场需求。" },
+                    "agritech": { name: "现代农业技术", strategy: "东非农业资源丰富但技术落后。提供节水灌溉、优良种子、农业无人机、农产品加工和冷链物流技术，是极具前景的蓝海市场。" },
+                    "infrastructure-construction": { name: "基建与工程承包", strategy: "在“一带一路”和各国发展规划的推动下，港口、铁路、公路、房地产和工业园区的建设需求旺盛，为工程机械和建材企业提供了广阔舞台。" }
+                },
+                countries: {
+                    "kenya": { name: "肯尼亚", summary: "东非的经济、金融和物流中心，商业环境相对开放，科技生态活跃。是设立区域总部的首选，但市场竞争也最为激烈。", chartData: { "区域枢纽地位": 10, "科技生态": 9, "经商便利度": 8, "基建水平": 8, "运营成本": 5 } },
+                    "ethiopia": { name: "埃塞俄比亚", summary: "非洲第二人口大国，国内市场潜力巨大，政府主导的工业化进程迅速。是发展制造业的理想之地，但外汇管制和官僚程序是主要挑战。", chartData: { "区域枢纽地位": 5, "科技生态": 4, "经商便利度": 4, "基建水平": 6, "运营成本": 9 } },
+                    "tanzania": { name: "坦桑尼亚", summary: "拥有丰富的自然资源（矿产、天然气）、优越的港口位置和巨大的旅游业潜力。商业环境持续改善，是资源开发和物流行业的战略要地。", chartData: { "区域枢纽地位": 7, "科技生态": 5, "经商便利度": 6, "基建水平": 7, "运营成本": 7 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-amber-700">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-amber-800 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-amber-700 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-amber-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderTacticCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-amber-600">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderTacticCard).join('');
+            const traditionalHtml = data.traditional.map(renderTacticCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">数字渠道</h3>
+                        <div class="mt-4 space-y-4">${digitalHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-emerald-500 pb-2">传统与线下</h3>
+                        <div class="mt-4 space-y-4">${traditionalHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-amber-700">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-emerald-600">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-emerald-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-amber-700" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择国家</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-emerald-600" id="roadmap-country-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-country-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心国家特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('country-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data.kenya.chartData),
+                datasets: [
+                    { label: data.kenya.name, data: Object.values(data.kenya.chartData), borderColor: '#D97706', backgroundColor: 'rgba(217, 119, 6, 0.2)', hidden: selectedCountryKey !== 'kenya' },
+                    { label: data.ethiopia.name, data: Object.values(data.ethiopia.chartData), borderColor: '#059669', backgroundColor: 'rgba(5, 150, 105, 0.2)', hidden: selectedCountryKey !== 'ethiopia' },
+                    { label: data.tanzania.name, data: Object.values(data.tanzania.chartData), borderColor: '#4F46E5', backgroundColor: 'rgba(79, 70, 229, 0.2)', hidden: selectedCountryKey !== 'tanzania' },
+                    { label: data[selectedCountryKey].name + ' (选中)', data: Object.values(data[selectedCountryKey].chartData), borderColor: '#DC2626', backgroundColor: 'rgba(220, 38, 38, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
