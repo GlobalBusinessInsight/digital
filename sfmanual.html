@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸南部非洲推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Mineral Earth -->
+    <!-- Application Structure Plan: 采用杂志式翻页布局，将复杂的南部非洲市场战略分解为五个章节：战略概览、市场准入、推广战术、合规与文化、行业与国别。这种叙事性结构旨在引导用户沉浸式地探索南部非洲市场的机遇与挑战，从南非的工业基础到“铜带省”的矿业价值链，提供一个连贯且富有洞察力的决策框架。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示南部非洲关键经济指标，特别是矿产价格与工业产出的关联。市场准入部分用流程图卡片阐释进入该区域的路径，突出以南非为枢纽的战略。推广战术和合规文化部分通过分栏对比，清晰展示B2B与B2C渠道、英美法系/葡语区法律与本地文化的要点。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本和雷达图，为用户提供针对不同行业和核心国家（如南非、赞比亚、安哥拉）的定制化战略。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #F5F5F4; /* A neutral, stone-like white */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "南部非洲篇：掘金工业基石与矿业走廊",
+                intro: "南部非洲，以其非洲最发达的工业经济体——南非为核心，以及赞比亚-刚果(金)铜带和安哥拉的油气资源为两翼，构成了非洲大陆的工业与资源心脏。本战略旨在揭示，成功的南部非洲战略必须深刻理解其“中心-腹地”的经济结构，抓住全球能源转型对关键矿产（铜、钴、锂）的巨大需求，并学会驾驭英语区与葡语区迥异的商业生态。",
+                stats: [
+                    { label: "中南双边贸易额 (2023)", value: "560亿美元", icon: "🤝" },
+                    { label: "赞比亚铜产量", value: "非洲第二", icon: "⛏️" },
+                    { label: "安哥拉石油产量", value: "非洲前列", icon: "🛢️" },
+                    { label: "南非GDP占全非比重", value: "约16%", icon: "🇿🇦" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '区域GDP平均增长率 (%)',
+                            data: [-5.8, 4.9, 2.5, 1.9, 2.2],
+                            borderColor: '#78716C', // stone-500
+                            backgroundColor: 'rgba(120, 113, 108, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '国际铜价指数 (LME)',
+                            data: [80, 120, 110, 95, 105],
+                            borderColor: '#CA8A04', // amber-600
+                            backgroundColor: 'rgba(202, 138, 4, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：构建以南非为枢纽的辐射网络",
+                intro: "进入南部非洲市场，最成熟的路径是利用南非作为“桥头堡”。南非拥有非洲最完善的金融、法律、物流和工业体系，是设立区域总部、管理周边国家业务的理想基地。企业应以南非为中心，逐步向赞比亚、安哥拉等资源型市场辐射。",
+                steps: [
+                    { 
+                        title: "第一阶段：立足南非", 
+                        icon: "🇿�",
+                        methods: [
+                            { name: "寻找南非代理/分销商", description: "与在南非有强大网络的分销商合作，快速将产品铺入非洲最成熟的消费市场。" },
+                            { name: "在约翰内斯堡设立公司", description: "成立南非子公司，直接面对市场，并为未来向北扩张打下法律和运营基础。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：向北辐射",
+                        icon: "🧭",
+                        methods: [
+                            { name: "以南非为基地服务邻国", description: "通过南非公司管理对赞比亚、津巴布韦、博茨瓦纳等英语区国家的销售和技术支持。" },
+                            { name: "针对葡语区设立据点", description: "考虑到语言和文化差异，可在安哥拉首都罗安达设立独立的联络处或与本地伙伴合作，专门负责葡语市场。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：深度参与",
+                        icon: "🔗",
+                        methods: [
+                            { name: "参与矿业供应链", description: "在赞比亚铜带省或安哥拉，为大型矿业公司提供设备、技术服务、备件供应和工程承包服务。" },
+                            { name: "投资基础设施", description: "参与连接矿区与港口的“洛比托走廊”等交通基础设施项目，或投资能源、通信等领域，以支持区域经济发展。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：B2B专业主义与B2C精准触达",
+                intro: "南部非洲的推广策略呈现显著的二元性。在矿业、工业和基建等B2B领域，专业性、可靠性和长期关系是核心；而在以南非为主的B2C市场，则需要通过精准的数字营销和线下渠道，触达一个高度分化但日益壮大的中产阶级消费群体。",
+                b2b: [
+                    { title: "行业展会与技术研讨会", icon:"🔧", description: "参加南非矿业投资大会(Mining Indaba)等顶级行业盛会，并通过举办专业技术研讨会，展示技术实力，建立行业权威。" },
+                    { title: "建立本地服务中心", icon:"⚙️", description: "在铜带省等矿业核心区建立备件仓库和技术服务中心，提供7x24小时支持，是赢得矿业客户信任的决定性因素。" },
+                    { title: "与大型国企建立关系", icon:"🏢", description: "在安哥拉等国，与国家石油公司(Sonangol)等大型国有企业建立高层联系和战略合作，是进入能源等核心领域的关键。" },
+                    { title: "提供融资解决方案", icon:"💰", description: "与中资银行或国际金融机构合作，为大型设备采购或基建项目提供一揽子融资方案，能极大提升项目中标率。" }
+                ],
+                b2c: [
+                    { title: "数字营销（南非）", icon:"📱", description: "在南非，Facebook, Instagram和Google是核心数字营销渠道。电商平台Takealot.com是线上销售的主要阵地。" },
+                    { title: "购物中心渠道", icon:"🛍️", description: "进入Sandton City（南非）等高端购物中心，是树立品牌形象、触达中高收入群体的关键。" },
+                    { title: "体育营销（橄榄球与足球）", icon:"🏉⚽", description: "在南非，赞助橄榄球“跳羚队”能引发国民自豪感；在赞比亚和安哥拉，足球则是最具影响力的体育运动。" },
+                    { title: "价格与支付灵活性", icon:"💳", description: "考虑到收入差距，推出不同价格梯度的产品线，并提供分期付款等灵活支付方式，是扩大市场覆盖面的有效策略。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：应对多元法律与社会期望",
+                intro: "在南部非洲，合规挑战不仅来自不同的法律体系（英美法系 vs. 葡语区的大陆法系），更来自深刻的社会议题，如南非的“黑人经济赋权”（B-BBEE）政策。企业必须将满足这些要求视为获得“社会经营许可”的必要投资。",
+                regulations: [
+                    { title: "黑人经济赋权 (B-BBEE)", content: "在南非，B-BBEE是一项旨在纠正历史不公的国策，它从股权、管理层、技能发展、采购等多个维度对企业进行评分。高分是获得政府合同和大型私企订单的必要条件。" },
+                    { title: "矿业与环境法规", content: "矿产开发必须遵守严格的环境影响评估（EIA）和社区发展协议。企业需投入资源进行环境保护，并确保矿区周边社区能从项目中受益。" },
+                    { title: "物流与基建瓶颈", content: "电力短缺（尤其在南非和赞比亚）和跨境物流效率低下是普遍的运营挑战。企业在做商业计划时，必须将这些外部风险因素纳入考量，并准备应急预案。" },
+                ],
+                culture: [
+                    { title: "关系与信任", icon:"🤝", description: "无论是英语区还是葡语区，建立在长期互动基础上的个人信任都至关重要。尤其在安哥拉，强大的本地伙伴是商业成功的关键。" },
+                    { title: "南非的“彩虹之国”", icon:"🌈", description: "南非是一个多元种族和文化的国家。企业内部管理和外部营销都必须体现出对这种多元性的充分尊重和包容。" },
+                    { title: "时间观念与谈判风格", icon:"🕒", description: "商业谈判的节奏可能比预想的要慢，尤其是在处理政府项目时。保持耐心，理解决策流程的复杂性，是必不可少的素质。" },
+                    { title: "后冲突地区的敏感性", icon:"🕊️", description: "在安哥拉等经历过长期内战的国家，商业活动应注意避开敏感的政治和历史话题，专注于商业合作和共同发展。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与国别专属路线图",
+                intro: "南部非洲的三大核心国家为中国企业提供了差异化的价值主张：南非是技术与资本的输出中心，赞比亚是绿色能源转型的原料基地，安哥拉是能源与基建的潜力市场。",
+                industries: {
+                    "mining-tech": { name: "矿业技术与设备", strategy: "为赞比亚的铜矿和安哥拉的钻石矿提供自动化、数字化和环保的采矿解决方案、重型设备及全生命周期服务。这是该区域B2B业务的核心赛道。" },
+                    "infrastructure-energy": { name: "基础设施与能源", strategy: "参与“洛比托走廊”等跨境交通项目，并为解决区域性电力短缺问题提供太阳能、风能等可再生能源解决方案和输变电工程服务。" },
+                    "agribusiness-food-processing": { name: "现代农业与食品加工", strategy: "利用赞比亚和安哥拉丰富的土地和水资源，发展大规模农业种植，并建立食品加工厂，满足本地市场需求并出口。" },
+                    "automotive-consumer-goods": { name: "汽车与消费品（南非市场）", strategy: "在南非设立汽车组装厂，并以此为基地向整个南部非洲关税同盟（SACU）市场销售。同时，针对南非成熟的消费市场，引入高性价比的家电、手机和快时尚品牌。" }
+                },
+                countries: {
+                    "south-africa": { name: "南非", summary: "非洲的工业、金融和技术中心，拥有最完善的基础设施和最多元化的经济。是进入非洲市场的理想门户和区域总部所在地，但面临增长缓慢和社会问题挑战。", chartData: { "工业基础": 10, "金融体系": 10, "市场成熟度": 9, "运营成本": 4, "社会稳定性": 5 } },
+                    "zambia": { name: "赞比亚", summary: "世界级的产铜大国，政治环境相对稳定。经济与国际铜价高度相关，在全球能源转型中战略地位凸显，对矿业技术和新能源有巨大需求。", chartData: { "工业基础": 4, "金融体系": 5, "市场成熟度": 4, "运营成本": 7, "社会稳定性": 7 } },
+                    "angola": { name: "安哥拉", summary: "非洲主要的石油出口国之一，正在努力推动经济多元化。战后重建带来了巨大的基础设施建设需求，但商业环境复杂，高度依赖本地伙伴关系。", chartData: { "工业基础": 3, "金融体系": 4, "市场成熟度": 3, "运营成本": 6, "社会稳定性": 6 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-stone-700">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-stone-800 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-stone-700 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-stone-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderB2BCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-stone-600">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const renderB2CCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-amber-700">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const b2bHtml = data.b2b.map(renderB2BCard).join('');
+            const b2cHtml = data.b2c.map(renderB2CCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-stone-500 pb-2">B2B: 专业主义与关系构建</h3>
+                        <div class="mt-4 space-y-4">${b2bHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">B2C: 精准定位与渠道下沉</h3>
+                        <div class="mt-4 space-y-4">${b2cHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-stone-700">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-amber-700">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-stone-500 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-stone-500 focus:border-stone-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-stone-700" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择国家</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-stone-500 focus:border-stone-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-amber-700" id="roadmap-country-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-country-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心国家特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('country-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data['south-africa'].chartData),
+                datasets: [
+                    { label: data['south-africa'].name, data: Object.values(data['south-africa'].chartData), borderColor: '#78716C', backgroundColor: 'rgba(120, 113, 108, 0.2)', hidden: selectedCountryKey !== 'south-africa' },
+                    { label: data.zambia.name, data: Object.values(data.zambia.chartData), borderColor: '#16A34A', backgroundColor: 'rgba(22, 163, 74, 0.2)', hidden: selectedCountryKey !== 'zambia' },
+                    { label: data.angola.name, data: Object.values(data.angola.chartData), borderColor: '#B45309', backgroundColor: 'rgba(180, 83, 9, 0.2)', hidden: selectedCountryKey !== 'angola' },
+                    { label: data[selectedCountryKey].name + ' (选中)', data: Object.values(data[selectedCountryKey].chartData), borderColor: '#DC2626', backgroundColor: 'rgba(220, 38, 38, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
+�
