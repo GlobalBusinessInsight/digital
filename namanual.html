@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸南亚推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Saffron Sun -->
+    <!-- Application Structure Plan: 采用杂志式翻页布局，将复杂的南亚市场战略分解为五个章节：战略概览、市场准入、推广战术、合规与文化、行业与国别。这种叙事性结构旨在引导用户沉浸式地探索南亚市场的机遇与挑战，从“印度引擎”的宏观动力到“Jugaad”创新的微观适应，提供一个连贯且富有洞察力的决策框架。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示南亚关键经济指标，特别是UPI引领的数字支付革命。市场准入部分用流程图卡片阐释进入该区域的路径，突出“印度制造”政策的影响。推广战术和合规文化部分通过分栏对比，清晰展示数字与传统渠道、多元法律与文化适应的要点。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本和雷达图，为用户提供针对不同行业和核心国家（如印度、巴基斯坦、孟加拉国）的定制化战略。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #FFFBEB; /* A warm, light yellow cream */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "南亚篇：拥抱“印度引擎”与次大陆的崛起",
+                intro: "南亚，以其超过18亿的庞大人口和全球增长最快的主要经济体——印度为核心，正成为21世纪全球经济版图中不可忽视的力量。本战略旨在揭示，成功的南亚战略必须深刻理解由“印度引擎”驱动的宏观机遇，驾驭由统一支付接口（UPI）引领的数字支付革命，并学会在这个语言、宗教、文化极度多元的次大陆上，找到与数亿年轻消费者共鸣的商业模式。",
+                stats: [
+                    { label: "中印双边贸易额 (2023)", value: "1362亿美元", icon: "🤝" },
+                    { label: "印度人口", value: "超14亿", icon: "👨‍👩‍👧‍👦" },
+                    { label: "印度UPI交易笔数 (月均)", value: "超100亿笔", icon: "💸" },
+                    { label: "孟加拉国服装出口额", value: "超470亿美元", icon: "👕" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '印度GDP年增长率 (%)',
+                            data: [-5.8, 9.1, 7.2, 7.8, 6.8],
+                            borderColor: '#F97316', // orange-500
+                            backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '区域智能手机用户年增长率 (%)',
+                            data: [8, 12, 10, 9, 8],
+                            borderColor: '#1D4ED8', // blue-700
+                            backgroundColor: 'rgba(29, 78, 216, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：应对保护主义与“印度制造”",
+                intro: "进入南亚市场，特别是印度，必须直面其日益增长的贸易保护主义倾向和“印度制造”（Make in India）的国家战略。单纯的贸易模式面临越来越高的关税壁垒和非关税壁垒。因此，与本地伙伴成立合资企业或直接在本地投资设厂，正从“可选项”变为“必选项”。",
+                steps: [
+                    { 
+                        title: "第一阶段：平台试水", 
+                        icon: "🌊",
+                        methods: [
+                            { name: "入驻本地电商平台", description: "利用Flipkart, Amazon.in (印度), Daraz (巴基斯坦/孟加拉) 等平台进行销售，是了解本地消费偏好的第一步。" },
+                            { name: "寻找国别进口商", description: "与拥有强大清关能力和全国分销网络的本地进口商合作，以应对复杂的官僚程序。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：合资合作",
+                        icon: "🤝",
+                        methods: [
+                            { name: "成立合资企业 (JV)", description: "与实力雄厚的印度本地企业集团成立合资公司，是应对政策不确定性、获取本地资源和市场准入许可的最有效方式。" },
+                            { name: "技术授权/转让", description: "向本地合作伙伴进行技术授权，由其负责在本地生产和销售，是一种轻资产的合作模式。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：本地制造",
+                        icon: "🇮🇳",
+                        methods: [
+                            { name: "响应“印度制造”", description: "在印度直接投资设厂，特别是在手机、家电、新能源汽车等受“生产关联激励计划”(PLI)支持的行业，可以享受政策红利并深度融入本地市场。" },
+                            { name: "建立区域供应链", description: "利用孟加拉国在服装制造、巴基斯坦在纺织领域的优势，建立辐射南亚乃至全球的区域性供应链。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：拥抱宝莱坞、板球与“Jugaad”创新",
+                intro: "南亚市场的推广，是一门深度融合文化、娱乐和移动互联网的艺术。宝莱坞的明星和板球的巨星是整个次大陆的“国民偶像”，拥有无与伦比的号召力。同时，消费者对性价比极度敏感，崇尚“Jugaad”（节俭的、灵活的 जुगाड़ 式创新）。成功的推广必须将品牌与顶级IP绑定，并通过移动端触达数亿用户。",
+                digital: [
+                    { title: "UPI支付生态", icon:"💳", description: "任何数字业务都必须深度集成UPI支付。它不仅是支付工具，更是信用评估、小额信贷和各类金融服务的基础设施。" },
+                    { title: "本地化社交媒体", icon:"📱", description: "除了WhatsApp, YouTube, Instagram，还需关注ShareChat, Moj等本土语言社交媒体平台，以触达更广泛的二三线城市用户。" },
+                    { title: "网红营销", icon:"⭐", description: "从宝莱坞巨星到各地方言的微型网红，构成了一个复杂的营销生态。与合适的网红合作，能快速建立品牌在特定社群中的信任度。" },
+                    { title: "移动端优先", icon:"📲", description: "得益于Reliance Jio等运营商掀起的数据革命，南亚是彻底的“移动优先”市场。所有网站、应用和营销活动都必须为低配置智能手机和不稳定的网络环境进行优化。" }
+                ],
+                traditional: [
+                    { title: "板球营销", icon:"🏏", description: "板球是南亚的“第一运动”，特别是印度板球超级联赛（IPL），是品牌获得亿万级曝光的黄金舞台。赞助球队或明星球员，是建立国民品牌的不二法门。" },
+                    { title: "宝莱坞IP合作", icon:"🎬", description: "与宝莱坞电影进行植入式广告合作，或签约顶级电影明星作为品牌代言人，能瞬间提升品牌的时尚感和吸引力。" },
+                    { title: "深入“基拉纳”小店", icon:"🏪", description: "遍布城乡的“基拉纳”（Kirana）夫妻老婆店，是快消品分销的“毛细血管”。建立能覆盖这些小店的强大分销网络，是决胜大众市场的关键。" },
+                    { title: "节庆营销", icon:"🎉", description: "紧抓排灯节（Diwali）、开斋节（Eid）、洒红节（Holi）等重要宗教和文化节日，推出大规模的促销活动，是拉动销售额的关键节点。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：应对官僚主义与文化多样性",
+                intro: "在南亚，商业环境的复杂性不仅来自于其多层次的官僚体系和善变的政策，更源于其内部令人惊叹的语言、宗教和种姓多样性。企业必须具备极大的耐心和文化敏感性，才能在这片土地上行稳致远。",
+                regulations: [
+                    { title: "复杂的税务体系", content: "以印度的商品与服务税（GST）为代表，南亚各国的税务体系仍在不断演进中。各邦/省之间也存在不同的地方法规，需要专业的本地税务顾问进行指导。" },
+                    { title: "政策不确定性", content: "政府可能会在无预警的情况下，出台针对特定行业的进口限制或提高关税（如对中国App的禁令）。这是在南亚经营必须考量的主要商业风险之一。" },
+                    { title: "基础设施瓶颈", content: "尽管正在快速改善，但电力供应不稳定、物流效率低下、交通拥堵等基础设施问题，仍是影响生产和供应链效率的现实挑战。" },
+                ],
+                culture: [
+                    { title: "语言与文化多样性", icon:"🗣️", description: "仅印度就有22种官方语言。成功的营销必须超越印地语和英语，为主要的目标区域市场提供本地语言内容。对不同宗教（印度教、伊斯兰教、锡克教等）的习俗必须给予最高度的尊重。" },
+                    { title: "“Jugaad”创新精神", icon:"💡", description: "“Jugaad”代表了南亚人民善于利用有限资源、通过灵活变通解决问题的精神。这意味着产品设计需要更注重耐用性、易维修性和高性价比，以适应本地市场的独特需求。" },
+                    { title: "等级与人际网络", icon:"🤝", description: "家庭、社群和（在印度）种姓等社会结构，对商业关系有深刻影响。与有影响力的本地家族或商业集团建立信任关系，往往比一份完美的商业计划书更重要。" },
+                    { title: "价格敏感性", icon:"💰", description: "南亚是全球对价格最敏感的市场之一。消费者追求“物有所值”（Value for Money）。定价策略、小包装和促销活动，是赢得市场的关键战术。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与国别专属路线图",
+                intro: "南亚三大核心国家提供了差异化的战略机遇：印度是全面的巨型市场，巴基斯坦是中巴经济走廊的枢纽，孟加拉国是世界级的纺织制造中心。",
+                industries: {
+                    "mobile-internet": { name: "移动互联网与应用", strategy: "面向数亿首次接触互联网的“下一个十亿用户”，提供娱乐、社交、教育、小额信贷等领域的移动应用。策略核心是极简的设计、支持方言、并能在低端手机上流畅运行。" },
+                    "manufacturing-supply-chain": { name: "制造业与供应链", strategy: "响应“印度制造”和PLI计划，在印度设立手机、家电、电动汽车及零部件的生产基地。同时，利用孟加拉国在服装制造领域的成熟生态系统，建立全球供应中心。" },
+                    "renewable-energy-infra": { name: "新能源与基础设施", strategy: "南亚各国对能源和基础设施有巨大需求。策略核心是参与大型太阳能电站、输变电网络、港口和铁路等项目的建设，提供设备、技术和工程总包服务。" },
+                    "pharmaceuticals-healthcare": { name: "制药与医疗健康", strategy: "印度是“世界药房”，在原料药（API）和仿制药领域有强大实力。策略核心是与印度药企进行合作，或向快速增长的中产阶级提供医疗设备和健康服务。" }
+                },
+                countries: {
+                    "india": { name: "印度", summary: "全球人口第一大国，一个充满无限机遇和同等挑战的复杂巨型市场。是所有行业都无法忽视的战略要地，但需要极大的耐心和深度本地化才能成功。", chartData: { "市场规模": 10, "人口红利": 10, "数字生态": 9, "基建水平": 6, "经商便利度": 5 } },
+                    "pakistan": { name: "巴基斯坦", summary: "世界第五人口大国，中巴经济走廊（CPEC）的枢纽。在基建、能源和农业领域有巨大潜力，但面临政治和安全挑战。", chartData: { "市场规模": 7, "人口红利": 9, "数字生态": 5, "基建水平": 5, "经商便利度": 4 } },
+                    "bangladesh": { name: "孟加拉国", summary: "近年来全球经济增长最快的国家之一，世界第二大服装出口国。制造业基础雄厚，是建立劳动密集型产业生产基地的理想选择。", chartData: { "市场规模": 6, "人口红利": 8, "数字生态": 6, "基建水平": 4, "经商便利度": 6 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-orange-600">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-orange-800 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-orange-700 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-orange-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderTacticCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-orange-600">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderTacticCard).join('');
+            const traditionalHtml = data.traditional.map(renderTacticCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-orange-500 pb-2">数字渠道</h3>
+                        <div class="mt-4 space-y-4">${digitalHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-blue-500 pb-2">传统与线下</h3>
+                        <div class="mt-4 space-y-4">${traditionalHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-orange-700">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-blue-600">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-orange-500 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-blue-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-orange-700" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择国家</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-blue-600" id="roadmap-country-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-country-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心国家特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('country-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data.india.chartData),
+                datasets: [
+                    { label: data.india.name, data: Object.values(data.india.chartData), borderColor: '#F97316', backgroundColor: 'rgba(249, 115, 22, 0.2)', hidden: selectedCountryKey !== 'india' },
+                    { label: data.pakistan.name, data: Object.values(data.pakistan.chartData), borderColor: '#16A34A', backgroundColor: 'rgba(22, 163, 74, 0.2)', hidden: selectedCountryKey !== 'pakistan' },
+                    { label: data.bangladesh.name, data: Object.values(data.bangladesh.chartData), borderColor: '#059669', backgroundColor: 'rgba(5, 150, 105, 0.2)', hidden: selectedCountryKey !== 'bangladesh' },
+                    { label: data[selectedCountryKey].name + ' (选中)', data: Object.values(data[selectedCountryKey].chartData), borderColor: '#DC2626', backgroundColor: 'rgba(220, 38, 38, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
