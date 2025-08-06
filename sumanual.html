@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸南欧推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Terracotta Sun -->
+    <!-- Application Structure Plan: 采用杂志式翻页布局，将复杂的南欧市场战略分解为五个章节：战略概览、市场准入、推广战术、合规与文化、行业与国别。这种叙事性结构旨在引导用户沉浸式地探索南欧市场的机遇与挑战，从意大利的产业集群到西班牙的能源转型，提供一个连贯且富有洞察力的决策框架。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示南欧关键经济指标，特别是旅游业复苏与消费信心的关联。市场准入部分用流程图卡片阐释进入该区域的路径，突出与本地中小企业集群合作的战略。推广战术和合规文化部分通过分栏对比，清晰展示生活方式营销与传统渠道、关系型商业文化与法律适应的要点。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本和雷达图，为用户提供针对不同行业和核心国家（意、西、葡）的定制化战略。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #FEFDFB; /* A warm, almost-white with a hint of terracotta */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "南欧篇：拥抱地中海的阳光、设计与生活",
+                intro: "南欧，以其充满活力的生活方式、深厚的设计底蕴和灵活的产业集群，为中国企业提供了一个与西欧核心市场截然不同的价值主张。本战略旨在揭示，成功的南欧战略是一场关于“融入”的艺术。企业必须学会欣赏并融入本地对美学、美食和美好生活（La Dolce Vita）的追求，与星罗棋布的中小企业建立基于信任的合作网络，并抓住由旅游业复苏和能源转型带来的结构性机遇。",
+                stats: [
+                    { label: "中意双边贸易额 (2023)", value: "717亿美元", icon: "🤝" },
+                    { label: "西班牙可再生能源发电占比", value: "超50%", icon: "☀️" },
+                    { label: "意大利“工业区”数量", value: "超100个", icon: "🏭" },
+                    { label: "葡萄牙“黄金签证”吸引投资", value: "超73亿欧元", icon: "💶" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '区域GDP平均增长率 (%)',
+                            data: [-8.5, 6.5, 5.8, 2.5, 1.2],
+                            borderColor: '#E11D48', // rose-600
+                            backgroundColor: 'rgba(225, 29, 72, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '国际游客数量恢复指数 (较2019年)',
+                            data: [30, 45, 80, 95, 102],
+                            borderColor: '#F59E0B', // amber-500
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：融入本地产业集群的艺术",
+                intro: "南欧的工业精髓在于其高度专业化、灵活且充满活力的中小企业产业集群（Industrial Districts）。与大型跨国公司主导的西欧核心市场不同，进入南欧的关键在于找到并融入这些“小而美”的生态系统。无论是意大利的时尚纺织、西班牙的陶瓷，还是葡萄牙的制鞋，与本地的家族企业建立信任与合作是成功的核心。",
+                steps: [
+                    { 
+                        title: "第一阶段：贸易与展会", 
+                        icon: "📦",
+                        methods: [
+                            { name: "参加专业贸易展会", description: "参加米兰时装周、博洛尼亚陶瓷卫浴展等顶级行业展会，是直接接触产业集群核心参与者的最高效方式。" },
+                            { name: "寻找专业代理商", description: "与深耕特定产业集群、拥有深厚人脉的本地代理商合作，是敲开家族企业合作大门的钥匙。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：供应链合作",
+                        icon: "🔗",
+                        methods: [
+                            { name: "成为本地品牌的供应商", description: "为意大利的奢侈品牌提供高品质面料，或为西班牙的汽车厂提供零部件，以供应商身份融入本地价值链。" },
+                            { name: "设立采购/设计中心", description: "在本地设立办公室，负责采购本地特色产品，或与本地设计师合作，将欧洲设计与中国制造相结合。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：直接投资",
+                        icon: "🇮🇹🇪🇸",
+                        methods: [
+                            { name: "并购本地中小企业", description: "通过收购拥有技术、品牌或渠道的本地家族企业，实现快速切入和深度整合。这需要极高的文化情商和对家族传承的尊重。" },
+                            { name: "投资物流与旅游基建", description: "投资比雷埃夫斯港（希腊）等关键物流枢纽，或投资酒店、度假村等旅游相关产业，分享区域增长红利。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：讲述关于生活方式的动人故事",
+                intro: "在南欧，消费者购买的不仅是产品，更是一种生活态度和文化认同。推广的核心在于将品牌与地中海地区阳光、家庭、美食、社交等核心文化元素深度绑定。一个能唤起“美好生活”向往的品牌故事，远比单纯的功能介绍更具杀伤力。",
+                digital: [
+                    { title: "视觉化社交媒体", icon:"📸", description: "Instagram是南欧生活方式营销的主战场。通过高品质的图片和短视频，展示产品在阳光、海滩、家庭聚会等场景中的应用，极具吸引力。" },
+                    { title: "WhatsApp的深度应用", icon:"💬", description: "不仅是沟通工具，更是许多中小企业完成客户服务、接受订单和维护老客户关系的核心平台。品牌需要适应这种高度个人化的沟通方式。" },
+                    { title: "网红即生活方式的化身", icon:"⭐", description: "与本地网红的合作，重点不在于“带货”，而在于展示一种令人向往的生活方式。选择那些能真实代表品牌精神的KOL进行内容共创。" },
+                    { title: "本地化电商", icon:"🛒", description: "除了亚马逊，各国都有强大的本地电商平台。同时，许多消费者习惯直接在品牌的独立站（DTC）或通过Instagram购物。" }
+                ],
+                traditional: [
+                    { title: "设计与美学是灵魂", icon:"🎨", description: "从产品工业设计到包装、店面陈列，每一个视觉细节都必须体现出卓越的审美。这是在意大利等设计国度赢得尊重的前提。" },
+                    { title: "建立个人关系 (Confianza)", icon:"🤝", description: "南欧的商业信任（Confianza）建立在长期的个人关系之上。一顿愉快的商务午餐，往往比一封正式的邮件更重要。" },
+                    { title: "赞助本地文化与体育", icon:"⚽🎭", description: "赞助本地的足球俱乐部（如西甲、意甲球队）、设计周、美食节或历史古迹修复项目，是品牌表达对本地文化尊重的最佳方式。" },
+                    { title: "利用旅游业的窗口效应", icon:"✈️", description: "通过在主要旅游城市和机场设立品牌体验店，不仅能直接面向数千万国际游客，更能将品牌与“度假”、“放松”等积极情绪绑定。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：驾驭关系型商业与官僚体系",
+                intro: "在南欧，商业环境的特点是成文法（大陆法系）的严谨性与商业实践中对人际关系的依赖性并存。企业必须学会在遵守复杂法规的同时，灵活地应对本地独特的商业文化和时有发生的官僚主义。",
+                regulations: [
+                    { title: "复杂的劳工法", content: "意大利和西班牙等国的劳动法对员工保护非常严格，解雇程序复杂且成本高昂。在雇佣员工前，必须进行周密的法律咨询。" },
+                    { title: "官僚主义与行政效率", content: "获得各类行政许可的流程可能比西欧核心国家更长、更不透明。拥有一个经验丰富、人脉广泛的本地合作伙伴或顾问至关重要。" },
+                    { title: "税务合规", content: "各国税务体系复杂，且税率较高。企业需要专业的本地会计师进行税务筹划，以确保合规并优化税务负担。" },
+                ],
+                culture: [
+                    { title: "家庭企业的逻辑", icon:"👨‍👩‍👧‍👦", description: "中小企业是经济的基石，其中许多是传承数代的家族企业。与他们打交道，需要理解其注重长期声誉、信任和家族荣誉而非短期利润最大化的决策逻辑。" },
+                    { title: "时间观念的差异", icon:"🕒", description: "南欧的商业节奏相对更放松。“Mañana”（明天）文化在西班牙意味着“事情会解决，但不必是今天”。需要对此有充分的耐心和心理准备。" },
+                    { title: "沟通的艺术", icon:"🗣️", description: "沟通风格热情、富有表现力，并伴有丰富的手势。对话往往是非线性的，在切入正题前会花大量时间建立融洽氛围。" },
+                    { title: "工作与生活的融合", icon:"🍷", description: "工作与个人生活之间的界限比较模糊。商务晚餐、家庭聚会都可能是建立信任和推进业务的重要场合。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与国别专属路线图",
+                intro: "南欧三国为中国企业提供了互补的战略机遇：意大利是设计与制造的殿堂，西班牙是可再生能源与消费市场的热土，葡萄牙是连接欧洲、非洲和美洲的门户。",
+                industries: {
+                    "design-lifestyle": { name: "设计与生活方式（家具、时尚）", strategy: "主攻意大利。策略核心是与本地设计工作室合作，或并购拥有精湛工艺的本地品牌，将意大利设计与中国的供应链优势相结合，打造面向全球市场的高端生活方式品牌。" },
+                    "renewable-energy": { name: "可再生能源", strategy: "主攻西班牙。利用其丰富的太阳能资源和政府的大力支持，投资太阳能电站项目，并提供光伏组件、逆变器和储能解决方案。" },
+                    "tourism-hospitality": { name: "旅游与酒店业", strategy: "在整个南欧地区，特别是葡萄牙和希腊，投资或运营精品酒店、度假村，并提供与中国市场联动的数字化旅游服务，以迎接全球旅游业的复苏。" },
+                    "agritech-food": { name: "农业科技与食品", strategy: "利用西班牙和意大利作为欧洲“菜篮子”的地位，提供节水灌溉、智能农业等技术，并与本地合作，将优质的橄榄油、葡萄酒、火腿等产品引入中国市场。" }
+                },
+                countries: {
+                    "italy": { name: "意大利", summary: "欧洲的制造业和设计强国，拥有无与伦比的产业集群和品牌美誉度。是时尚、奢侈品、家具和高端机械领域的战略高地。", chartData: { "产业集群": 10, "设计创新": 10, "品牌价值": 9, "经商便利度": 5, "市场规模": 8 } },
+                    "spain": { name: "西班牙", summary: "南欧最大的消费市场之一，在可再生能源、旅游和汽车制造业方面实力雄厚。市场开放，对新品牌接受度高。", chartData: { "产业集群": 7, "设计创新": 7, "品牌价值": 6, "经商便利度": 7, "市场规模": 9 } },
+                    "portugal": { name: "葡萄牙", summary: "连接欧洲、非洲和美洲的战略门户，营商环境持续改善，科技创业生态活跃。是设立近岸外包中心和辐射葡语系国家的理想基地。", chartData: { "产业集群": 6, "设计创新": 6, "品牌价值": 5, "经商便利度": 8, "市场规模": 6 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-rose-700">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-rose-800 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-rose-700 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-rose-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderDigitalCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-rose-600">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+             const renderTraditionalCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-amber-700">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderDigitalCard).join('');
+            const traditionalHtml = data.traditional.map(renderTraditionalCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-rose-500 pb-2">数字渠道</h3>
+                        <div class="mt-4 space-y-4">${digitalHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">传统与线下</h3>
+                        <div class="mt-4 space-y-4">${traditionalHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-rose-700">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-amber-600">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-rose-500 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-amber-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-rose-700" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择国家</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-amber-600" id="roadmap-country-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-country-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心国家特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('country-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data.italy.chartData),
+                datasets: [
+                    { label: data.italy.name, data: Object.values(data.italy.chartData), borderColor: '#BE123C', backgroundColor: 'rgba(190, 18, 60, 0.2)', hidden: selectedCountryKey !== 'italy' },
+                    { label: data.spain.name, data: Object.values(data.spain.chartData), borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.2)', hidden: selectedCountryKey !== 'spain' },
+                    { label: data.portugal.name, data: Object.values(data.portugal.chartData), borderColor: '#16A34A', backgroundColor: 'rgba(22, 163, 74, 0.2)', hidden: selectedCountryKey !== 'portugal' },
+                    { label: data[selectedCountryKey].name + ' (选中)', data: Object.values(data[selectedCountryKey].chartData), borderColor: '#1D4ED8', backgroundColor: 'rgba(29, 78, 216, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
