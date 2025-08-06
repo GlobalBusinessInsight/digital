@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国外贸东南亚推广战略（杂志版）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Tropical Bloom -->
+    <!-- Application Structure Plan: 采用杂志式翻页布局，将复杂的东南亚市场战略分解为五个章节：战略概览、市场准入、推广战术、合规与文化、行业与国别。这种叙事性结构旨在引导用户沉浸式地探索东南亚市场的机遇与挑战，从“超级应用”生态到多元文化的融合，提供一个连贯且富有洞察力的决策框架。 -->
+    <!-- Visualization & Content Choices: 概览页用数据卡片和Chart.js折线图展示东南亚关键经济指标，特别是数字经济的爆炸式增长。市场准入部分用流程图卡片阐释进入该区域的路径，突出以新加坡为枢纽的战略。推广战术和合规文化部分通过分栏对比，清晰展示数字与传统渠道、多元法律与文化适应的要点。最具交互性的“行业与国别”部分，通过下拉菜单联动更新文本和雷达图，为用户提供针对不同行业和核心国家（如印尼、越南、新加坡）的定制化战略。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #F3F4F6; /* gray-100 */
+            overflow: hidden;
+        }
+        #magazine-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page {
+            display: none;
+            width: 90%;
+            height: 90%;
+            max-width: 1200px;
+            max-height: 800px;
+            background-color: #F4FFFA; /* MintCream, a very light, fresh green */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        .page-content {
+            padding: 2rem 3rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 9999px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .nav-button.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        #prev-page { left: 1rem; }
+        #next-page { right: 1rem; }
+        #page-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 14px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="magazine-container">
+        <!-- Pages will be injected here -->
+    </div>
+
+    <button id="prev-page" class="nav-button">‹</button>
+    <button id="next-page" class="nav-button">›</button>
+    <div id="page-indicator"></div>
+
+    <script>
+        const reportData = {
+            overview: {
+                title: "东南亚篇：驾驭全球增长最快的数字经济体",
+                intro: "东南亚，一个拥有超过6.8亿人口、由11个国家组成的多元文化区域，正成为全球数字经济的增长引擎。本战略旨在揭示，成功的东南亚战略必须深刻理解其“移动优先”的数字生态，抓住由“超级应用”（Super-Apps）引领的商业模式变革，并学会在这个融合了中华、印度、伊斯兰和西方文化的复杂市场中，找到与年轻一代消费者共鸣的密码。",
+                stats: [
+                    { label: "中国-东盟贸易额 (2023)", value: "9117亿美元", icon: "🤝" },
+                    { label: "东南亚数字经济规模 (预测)", value: "2025年达3000亿美元", icon: "🚀" },
+                    { label: "印尼人口", value: "超2.8亿", icon: "👨‍👩‍👧‍👦" },
+                    { label: "区域互联网用户", value: "超4.6亿", icon: "📱" }
+                ],
+                chartData: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    datasets: [
+                        {
+                            label: '区域GDP平均增长率 (%)',
+                            data: [-3.2, 3.4, 5.6, 4.6, 4.7],
+                            borderColor: '#22C55E', // green-500
+                            backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '数字经济商品交易总额 (GMV) 增长率 (%)',
+                            data: [25, 40, 20, 15, 18],
+                            borderColor: '#EF4444', // red-500
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                }
+            },
+            market_entry: {
+                title: "市场准入决策矩阵：构建以新加坡为枢纽的“多国本地化”网络",
+                intro: "进入东南亚市场，最忌讳将其视为一个整体。各国语言、法规、宗教和消费水平差异巨大。最有效的策略是以新加坡作为区域金融、法律和人才中心，同时在印尼、越南、泰国等核心市场进行深度本地化运营，形成“一个总部，多个前线”的战略布局。",
+                steps: [
+                    { 
+                        title: "第一阶段：跨境电商先行", 
+                        icon: "🛒",
+                        methods: [
+                            { name: "入驻区域性电商平台", description: "利用Shopee, Lazada, TikTok Shop等平台，一次性触达多个国家市场，是测试产品和收集数据的最佳起点。" },
+                            { name: "利用社交媒体直销", description: "通过Facebook, Instagram直播和社群销售，直接与消费者互动，建立早期品牌认知。" }
+                        ]
+                    },
+                    {
+                        title: "第二阶段：设立区域枢纽",
+                        icon: "🇸🇬",
+                        methods: [
+                            { name: "在新加坡设立区域总部", description: "利用新加坡作为全球公认的商业中心，管理区域资金、法务、市场营销和高级人才招聘。" },
+                            { name: "建立国别运营团队", description: "在印尼、越南等关键市场，建立由本地人领导的运营团队，负责本地化的市场推广、渠道管理和客户服务。" }
+                        ]
+                    },
+                    {
+                        title: "第三阶段：深度本土化",
+                        icon: "🏭",
+                        methods: [
+                            { name: "本地化生产/组装", description: "在越南或印尼等国设立工厂，生产面向东盟市场的产品，可以有效利用东盟自由贸易区（AFTA）的关税优惠，并降低供应链成本。" },
+                            { name: "投资本地生态", description: "通过投资或并购本地的初创公司（如物流、金融科技、内容创作），深度融入本地创新生态，获取协同效应。" }
+                        ]
+                    }
+                ]
+            },
+            tactics: {
+                title: "推广战术手册：拥抱“超级应用”与网红经济",
+                intro: "东南亚是“超级应用”的全球试验场，Grab和GoTo等平台将出行、外卖、支付和各类生活服务集于一身，成为用户生活的操作系统。同时，这是一个由网红（KOL/KOC）主导消费潮流的市场。成功的推广必须深度融入这些超级应用生态，并娴熟地运用网红经济，实现品效合一。",
+                digital: [
+                    { title: "超级应用生态营销", icon:"📲", description: "与Grab, GoTo等平台合作，在其生态内进行品牌推广、派发优惠券、或提供联名服务，是触达海量活跃用户的捷径。" },
+                    { title: "直播电商与短视频", icon:"📹", description: "TikTok Shop在东南亚的成功证明了直播带货的巨大潜力。通过短视频内容引流，在直播中完成销售转化，是核心的数字营销链路。" },
+                    { title: "网红营销矩阵", icon:"⭐", description: "建立一个由头部明星、中腰部KOL和海量微型KOC组成的金字塔式网红矩阵。明星负责品牌造势，KOL负责专业背书，KOC负责社群渗透和口碑传播。" },
+                    { title: "即时通讯工具营销", icon:"💬", description: "利用WhatsApp, LINE, Zalo（越南）等工具建立品牌私域社群，进行客户关系维护和精准的促销信息推送。" }
+                ],
+                traditional: [
+                    { title: "现代渠道与便利店", icon:"🏪", description: "进入7-Eleven, FamilyMart等无处不在的便利店网络，以及大型连锁超市（如Big C, Lotte Mart），是快消品实现渠道下沉和品牌曝光的关键。" },
+                    { title: "购物中心 (Malls)", icon:"🛍️", description: "购物中心是东南亚中产阶级重要的社交和娱乐场所。在主要城市的标志性购物中心举办品牌活动或开设快闪店，能有效提升品牌形象。" },
+                    { title: "户外广告(OOH)", icon:"🛵", description: "在雅加达、曼谷等交通拥堵的城市，针对摩托车流的户外广告牌和数字屏幕，拥有极高的触达率。" },
+                    { title: "本地化节庆营销", icon:"🎉", description: "紧抓开斋节（印尼/马来西亚）、泼水节（泰国）、春节（新/马/越）等重要节日，推出符合本地文化习俗的营销活动，是与消费者建立情感连接的良机。" }
+                ]
+            },
+            compliance: {
+                title: "可持续成功的支柱：应对多元文化与善变法规",
+                intro: "在东南亚，合规与文化的复杂性源于其极致的多样性。企业需要同时应对大陆法系、英美法系和伊斯兰法并存的法律环境，并深刻理解华人、马来人、印度人等多元族群的文化习俗与商业逻辑。",
+                regulations: [
+                    { title: "清真认证 (Halal)", content: "在印尼和马来西亚这两个全球最大的穆斯林市场，食品、化妆品、药品甚至物流服务，都必须获得本地权威机构的清真认证，这是市场准入的绝对前提。" },
+                    { title: "数据隐私与主权", content: "各国正纷纷出台数据保护法规（如新加坡PDPA，泰国PDPA）。许多国家要求特定数据必须在本地存储，企业需制定合规的跨国数据管理策略。" },
+                    { title: "外资所有权限制", content: "越南、印尼等国在零售、媒体等特定行业对外资持股比例有限制。通过与本地伙伴成立合资公司，是规避这些限制的常见做法。" },
+                ],
+                culture: [
+                    { title: "华人经济圈", icon:"🤝", description: "东南亚华人经济网络深厚，在许多国家的商业领域占据主导地位。与本地华人商会和企业家建立良好关系，能极大提升商业效率和信任度。" },
+                    { title: "宗教与族群和谐", icon:"🙏", description: "这是一个多宗教（伊斯兰教、佛教、基督教）和多族群共存的地区。品牌营销必须极度审慎，避免触及任何可能引发宗教或族群敏感性的话题。" },
+                    { title: "非正式沟通", icon:"😊", description: "与正式的合同和邮件相比，东南亚商人更偏好通过即时通讯工具或面对面的方式进行沟通和决策。关系（Relationship）的建立是商业合作的核心。" },
+                    { title: "等级观念与“面子”", icon:"👨‍💼", description: "尊重长者和上级是普遍的社会规范。“给面子”和避免公开冲突，是维持和谐商业关系的关键。" }
+                ]
+            },
+            roadmap: {
+                title: "行业与国别专属路线图",
+                intro: "东南亚市场内部差异巨大。印尼是人口巨兽，越南是制造新星，新加坡是区域大脑，泰国是旅游王国。企业必须针对不同国家的禀赋，选择精准的赛道和打法。",
+                industries: {
+                    "digital-economy": { name: "数字经济（电商、金融、娱乐）", strategy: "这是东南亚最激动人心的赛道。策略核心是提供高度本地化的移动端产品，无论是垂直电商、数字支付、小额信贷，还是在线游戏和短视频内容，都拥有巨大的增长空间。" },
+                    "supply-chain-manufacturing": { name: "供应链与制造业", strategy: "利用越南、印尼和泰国作为新的“世界工厂”，设立电子产品、纺织服装、家具等产品的生产基地，服务于全球市场，同时利用RCEP等自贸协定开拓区域内市场。" },
+                    "renewable-energy-ev": { name: "新能源与电动汽车", strategy: "随着各国推动绿色转型，太阳能、风能项目以及电动汽车（特别是两轮电动车）市场需求激增。策略核心是提供高性价比的光伏组件、储能方案和电动车产品。" },
+                    "fmcg-food-beverage": { name: "快消品与食品饮料", strategy: "针对庞大且年轻的人口，提供符合本地口味和消费能力的食品、饮料和日用消费品。清真认证、小包装和强大的线下分销网络是成功的关键。" }
+                },
+                countries: {
+                    "indonesia": { name: "印度尼西亚", summary: "世界第四人口大国，东南亚最大的经济体，数字经济发展迅猛。是所有消费品和数字服务公司的必争之地，但物流和官僚效率是主要挑战。", chartData: { "市场规模": 10, "人口红利": 10, "数字生态": 8, "基建水平": 5, "经商便利度": 5 } },
+                    "vietnam": { name: "越南", summary: "全球供应链转移的最大受益者之一，制造业增长强劲，政治稳定。是设立生产基地的理想选择，同时其本土消费市场也在快速崛起。", chartData: { "市场规模": 7, "人口红利": 9, "数字生态": 7, "基建水平": 6, "经商便利度": 7 } },
+                    "singapore": { name: "新加坡", summary: "全球顶级的金融、法律和物流中心，营商环境世界一流。市场本身规模小，但作为区域总部，是管理和辐射整个东南亚业务的战略大脑。", chartData: { "市场规模": 3, "人口红利": 4, "数字生态": 10, "基建水平": 10, "经商便利度": 10 } }
+                }
+            }
+        };
+
+        const magazineContainer = document.getElementById('magazine-container');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageIndicator = document.getElementById('page-indicator');
+        
+        let currentPageIndex = 0;
+        let pages = [];
+        let activeChart = null;
+
+        function createPage(id, content) {
+            const pageDiv = document.createElement('div');
+            pageDiv.id = id;
+            pageDiv.className = 'page';
+            pageDiv.innerHTML = `<div class="page-content">${content}</div>`;
+            magazineContainer.appendChild(pageDiv);
+            return pageDiv;
+        }
+
+        function renderOverviewPage() {
+            const data = reportData.overview;
+            const statsHtml = data.stats.map(stat => `
+                <div class="bg-white/50 p-4 rounded-lg shadow-sm flex items-center border border-stone-200">
+                    <div class="text-4xl mr-4">${stat.icon}</div>
+                    <div>
+                        <p class="text-sm text-stone-600">${stat.label}</p>
+                        <p class="text-2xl font-bold text-green-600">${stat.value}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-5xl font-bold text-green-800 leading-tight">${data.title}</h1>
+                        <p class="mt-4 text-lg text-stone-700">${data.intro}</p>
+                        <div class="mt-8 grid grid-cols-2 gap-4">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center h-full">
+                        <div class="chart-container">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('overview', content);
+        }
+
+        function renderMarketEntryPage() {
+            const data = reportData.market_entry;
+            const stepsHtml = data.steps.map(step => `
+                <div class="bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 text-center flex-1">
+                    <div class="text-6xl mb-3">${step.icon}</div>
+                    <h3 class="text-2xl font-bold text-green-700 mb-4">${step.title}</h3>
+                    <div class="space-y-3 text-left">
+                        ${step.methods.map(method => `
+                            <div class="bg-stone-50 p-3 rounded-md">
+                                <p class="font-semibold">${method.name}</p>
+                                <p class="text-sm text-stone-600">${method.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('<div class="flex justify-center items-center text-4xl text-green-400 mx-4">→</div>');
+
+            const content = `
+                <div class="flex flex-col h-full">
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-bold">${data.title}</h2>
+                        <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                    </div>
+                    <div class="flex-grow flex items-center justify-center">
+                        <div class="flex flex-col md:flex-row justify-center items-stretch w-full gap-4">
+                            ${stepsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('market-entry', content);
+        }
+
+        function renderTacticsPage() {
+            const data = reportData.tactics;
+            const renderTacticCard = (tactic) => `
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start space-x-4 border border-stone-200">
+                    <div class="text-3xl mt-1 text-green-600">${tactic.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${tactic.title}</h4>
+                        <p class="text-sm text-stone-600">${tactic.description}</p>
+                    </div>
+                </div>
+            `;
+            const digitalHtml = data.digital.map(renderTacticCard).join('');
+            const traditionalHtml = data.traditional.map(renderTacticCard).join('');
+            
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-green-500 pb-2">数字渠道</h3>
+                        <div class="mt-4 space-y-4">${digitalHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-red-500 pb-2">传统与线下</h3>
+                        <div class="mt-4 space-y-4">${traditionalHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('tactics', content);
+        }
+
+        function renderCompliancePage() {
+            const data = reportData.compliance;
+            const regulationsHtml = data.regulations.map(reg => `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <h4 class="font-bold text-lg text-green-700">${reg.title}</h4>
+                    <p class="mt-1 text-sm text-stone-600">${reg.content}</p>
+                </div>
+            `).join('');
+            const cultureHtml = data.culture.map(item => `
+                 <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
+                    <div class="text-3xl text-red-600">${item.icon}</div>
+                    <div>
+                        <h4 class="font-bold text-lg">${item.title}</h4>
+                        <p class="text-sm text-stone-600">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-3xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-green-500 pb-2">关键合规领域</h3>
+                        <div class="mt-4 space-y-4">${regulationsHtml}</div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center border-b-2 border-red-500 pb-2">文化适应要点</h3>
+                        <div class="mt-4 space-y-4">${cultureHtml}</div>
+                    </div>
+                </div>
+            `;
+            return createPage('compliance', content);
+        }
+
+        function renderRoadmapPage() {
+            const data = reportData.roadmap;
+            const industryOptions = Object.keys(data.industries).map(key => `<option value="${key}">${data.industries[key].name}</option>`).join('');
+            const countryOptions = Object.keys(data.countries).map(key => `<option value="${key}">${data.countries[key].name}</option>`).join('');
+
+            const content = `
+                <div class="text-center mb-6">
+                    <h2 class="text-4xl font-bold">${data.title}</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-4xl mx-auto">${data.intro}</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 h-[calc(100%-120px)]">
+                    <div class="lg:col-span-2 flex flex-col justify-between bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200">
+                        <div>
+                            <label for="industry-select" class="block text-sm font-medium text-stone-700">选择行业</label>
+                            <select id="industry-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md">
+                                ${industryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-green-700" id="roadmap-industry-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-industry-content"></p>
+                            </div>
+                        </div>
+                        <hr class="my-4 border-stone-300">
+                        <div>
+                            <label for="country-select" class="block text-sm font-medium text-stone-700">选择国家</label>
+                            <select id="country-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-stone-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md">
+                                ${countryOptions}
+                            </select>
+                            <div class="mt-4">
+                                <h3 class="text-xl font-semibold text-red-600" id="roadmap-country-title"></h3>
+                                <p class="text-stone-600 mt-1" id="roadmap-country-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-3 bg-white/50 p-6 rounded-lg shadow-sm border border-stone-200 flex flex-col">
+                         <h3 class="text-xl font-semibold mb-2 text-center">核心国家特征对比</h3>
+                         <div class="flex-grow chart-container">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return createPage('roadmap', content);
+        }
+        
+        function showPage(index) {
+            if (index < 0 || index >= pages.length) return;
+
+            if (activeChart) {
+                activeChart.destroy();
+                activeChart = null;
+            }
+
+            pages.forEach((page, i) => {
+                page.classList.toggle('active', i === index);
+            });
+            currentPageIndex = index;
+
+            updateNavButtons();
+            
+            const pageId = pages[index].id;
+            if (pageId === 'overview') {
+                const ctx = document.getElementById('overviewChart').getContext('2d');
+                activeChart = new Chart(ctx, { type: 'line', data: reportData.overview.chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            } else if (pageId === 'roadmap') {
+                updateRoadmap();
+                document.getElementById('industry-select').addEventListener('change', updateRoadmap);
+                document.getElementById('country-select').addEventListener('change', updateRoadmap);
+            }
+        }
+
+        function updateNavButtons() {
+            prevButton.classList.toggle('disabled', currentPageIndex === 0);
+            nextButton.classList.toggle('disabled', currentPageIndex === pages.length - 1);
+            pageIndicator.textContent = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+        
+        function updateRoadmap() {
+            const industryKey = document.getElementById('industry-select').value;
+            const countryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap;
+
+            document.getElementById('roadmap-industry-title').innerText = data.industries[industryKey].name;
+            document.getElementById('roadmap-industry-content').innerText = data.industries[industryKey].strategy;
+            document.getElementById('roadmap-country-title').innerText = data.countries[countryKey].name;
+            document.getElementById('roadmap-country-content').innerText = data.countries[countryKey].summary;
+            
+            updateCountryChart();
+        }
+
+        function updateCountryChart() {
+            if (activeChart) {
+                activeChart.destroy();
+            }
+            const selectedCountryKey = document.getElementById('country-select').value;
+            const data = reportData.roadmap.countries;
+            const chartData = {
+                labels: Object.keys(data.indonesia.chartData),
+                datasets: [
+                    { label: data.indonesia.name, data: Object.values(data.indonesia.chartData), borderColor: '#22C55E', backgroundColor: 'rgba(34, 197, 94, 0.2)', hidden: selectedCountryKey !== 'indonesia' },
+                    { label: data.vietnam.name, data: Object.values(data.vietnam.chartData), borderColor: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', hidden: selectedCountryKey !== 'vietnam' },
+                    { label: data.singapore.name, data: Object.values(data.singapore.chartData), borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.2)', hidden: selectedCountryKey !== 'singapore' },
+                    { label: data[selectedCountryKey].name + ' (选中)', data: Object.values(data[selectedCountryKey].chartData), borderColor: '#F97316', backgroundColor: 'rgba(249, 115, 22, 0.4)', borderWidth: 2 }
+                ]
+            };
+            const ctx = document.getElementById('countryChart').getContext('2d');
+            activeChart = new Chart(ctx, { type: 'radar', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 10, pointLabels: { font: { size: 12 } } } } } });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pages = [
+                renderOverviewPage(),
+                renderMarketEntryPage(),
+                renderTacticsPage(),
+                renderCompliancePage(),
+                renderRoadmapPage()
+            ];
+            
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+
+            showPage(0);
+        });
+    </script>
+</body>
+</html>
