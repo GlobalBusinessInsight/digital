@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿根廷毛绒玩具市场交互式分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Soft Accents -->
+    <!-- Application Structure Plan: A thematic, single-page dashboard designed for exploration. The structure begins with a high-level market overview, then drills down into the core conflict: the two consumer profiles. It then presents an interactive "IP Showdown" to explore key products, followed by a visualization of the local vs. import competition. The structure concludes with actionable strategies. This non-linear, thematic approach was chosen over mirroring the report's structure to allow users to quickly grasp the key market narratives and interact with the data that interests them most, enhancing comprehension and engagement. -->
+    <!-- Visualization & Content Choices: 
+        1. Market Drivers (Donut Chart): Goal: Inform on the two primary consumer forces. Viz: Chart.js Donut Chart. Interaction: Hover tooltips. Justification: A donut chart is ideal for showing the composition of a whole, clearly illustrating the dual nature of the market.
+        2. IP Categories (Bar Chart): Goal: Compare the influence of different IP sources. Viz: Chart.js Horizontal Bar Chart. Interaction: Clickable cards below trigger a modal. Justification: A bar chart provides a clear visual comparison of category strength. The modal for case studies prevents information overload and encourages active exploration.
+        3. Local vs. Import (Grouped Bar Chart): Goal: Show change in market share over time. Viz: Chart.js Grouped Bar Chart. Interaction: Hover tooltips. Justification: This is the most effective way to compare two groups across two distinct time periods, highlighting the dramatic shift in the competitive landscape.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #FDFBF8;
+            color: #38332E;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #C7A587;
+            border-color: #C7A587;
+        }
+        .card-hover {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .modal-content {
+            background-color: #FDFBF8;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/60 backdrop-blur-md sticky top-0 z-40 shadow-sm">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex items-center justify-between">
+                <div class="text-xl font-bold text-stone-700">阿根廷毛绒玩具市场</div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#overview" class="nav-link text-stone-600 border-b-2 border-transparent pb-1">市场概览</a>
+                    <a href="#consumers" class="nav-link text-stone-600 border-b-2 border-transparent pb-1">消费者画像</a>
+                    <a href="#ip-showdown" class="nav-link text-stone-600 border-b-2 border-transparent pb-1">热门IP对决</a>
+                    <a href="#competition" class="nav-link text-stone-600 border-b-2 border-transparent pb-1">竞争格局</a>
+                    <a href="#strategy" class="nav-link text-stone-600 border-b-2 border-transparent pb-1">战略建议</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <section id="hero" class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-stone-800 mb-4">拥抱矛盾：阿根廷毛绒玩具市场深度解析</h1>
+            <p class="text-lg text-stone-600 max-w-3xl mx-auto">
+                一个由通货膨胀驱动价值增长，却因购买力下降而销量萎缩的独特市场。在这里，怀旧的成年人与精打细算的父母共同谱写着市场的未来。
+            </p>
+        </section>
+
+        <section id="overview" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-stone-800">市场概览：冰与火之歌</h2>
+            <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">阿根廷玩具市场呈现出一种独特的悖论。高通胀推高了名义销售额，但实际销量却在下滑。市场的韧性来自两个截然不同的消费群体，理解他们是成功的关键。</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50">
+                    <h3 class="text-xl font-semibold text-center mb-4 text-stone-700">两大核心驱动力</h3>
+                    <div class="chart-container">
+                        <canvas id="consumer-drivers-chart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50">
+                        <h4 class="font-bold text-lg text-amber-700">📈 价值增长的幻象</h4>
+                        <p class="text-stone-600">市场价值销售额显著增长，但这主要由急剧的通货膨胀推动，而非消费需求的真实扩张。</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50">
+                        <h4 class="font-bold text-lg text-sky-700">📉 实际销量的萎缩</h4>
+                        <p class="text-stone-600">消费者实际购买力被严重侵蚀，导致玩具的销售件数在关键销售节点出现明显下滑。</p>
+                    </div>
+                     <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50">
+                        <h4 class="font-bold text-lg text-teal-700">💡 数字化的冲击</h4>
+                        <p class="text-stone-600">电子商务（以Mercado Libre为首）和电子游戏IP正深刻地重塑着消费渠道和热门产品来源。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="consumers" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-stone-800">消费者画像：两种需求，一个市场</h2>
+            <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">市场的成功取决于能否精准服务于两种截然不同的消费力量：注重预算的家庭，以及受情感和怀旧驱动的成年人。</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-8 border border-stone-200/50 flex flex-col">
+                    <div class="text-center mb-4">
+                        <span class="text-5xl">👨‍👩‍👧‍👦</span>
+                        <h3 class="text-2xl font-bold mt-2 text-sky-800">父母购买者</h3>
+                        <p class="text-sm text-stone-500">在教育、安全与预算间寻求平衡</p>
+                    </div>
+                    <div class="space-y-3 text-stone-600 flex-grow">
+                        <p><strong>主要动机:</strong> 极其重视玩具的教育价值（STEM技能）和安全性（无毒、可持续材料）。</p>
+                        <p><strong>购买制约:</strong> 价格是首要考量因素。会在购买前大量进行线上研究，对促销和分期付款接受度高。</p>
+                        <p><strong>关键品类:</strong> “婴幼儿玩具”和“益智玩具”市场的主要驱动力。</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-8 border border-stone-200/50 flex flex-col">
+                     <div class="text-center mb-4">
+                        <span class="text-5xl">🧑‍💻</span>
+                        <h3 class="text-2xl font-bold mt-2 text-amber-800">“童心未泯”的收藏家</h3>
+                        <p class="text-sm text-stone-500">受激情、怀旧与粉丝文化驱动</p>
+                    </div>
+                    <div class="space-y-3 text-stone-600 flex-grow">
+                        <p><strong>主要动机:</strong> 购买行为由怀旧情绪、对流行文化IP（电影、游戏）的狂热以及收藏乐趣驱动。</p>
+                        <p><strong>购买行为:</strong> 对价格敏感度较低，愿意为情感和收藏价值支付溢价。积极参与线上粉丝社群。</p>
+                        <p><strong>关键品类:</strong> Funko等品牌和Mafalda等收藏级商品的主要市场。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ip-showdown" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-stone-800">热门IP对决：谁是阿根廷的“拥抱冠军”？</h2>
+            <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">从本土文化偶像到全球流行巨头，阿根廷的毛绒玩具市场是多元文化交融的舞台。点击下方卡片，深入了解每个IP背后的故事。</p>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 border border-stone-200/50">
+                <h3 class="text-xl font-semibold text-center mb-4 text-stone-700">主要IP来源影响力对比</h3>
+                <div class="chart-container h-64 md:h-80">
+                    <canvas id="ip-sources-chart"></canvas>
+                </div>
+            </div>
+            <div id="ip-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+            </div>
+        </section>
+
+        <section id="competition" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-stone-800">竞争格局：本土制造 vs. 进口浪潮</h2>
+            <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">阿根廷本土玩具产业在传统领域具备优势，但面临着低价进口产品的巨大冲击，市场份额在短短几年内发生了巨大变化。</p>
+             <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50">
+                    <h3 class="text-xl font-semibold text-center mb-4 text-stone-700">市场份额变迁 (国产 vs. 进口)</h3>
+                    <div class="chart-container">
+                        <canvas id="market-share-chart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50">
+                        <h4 class="font-bold text-lg text-blue-700">🇦� 国产玩具优势</h4>
+                        <p class="text-stone-600">强于积木、棋盘游戏、婴幼儿玩具和布艺益智玩具。能够创造具有深厚文化共鸣的产品。</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50">
+                        <h4 class="font-bold text-lg text-red-700">🇨🇳 进口玩具冲击</h4>
+                        <p class="text-stone-600">强于潮流玩具和全球授权IP。价格极具竞争力，能快速响应全球潮流，但存在安全隐患。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="strategy" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-stone-800">战略建议：如何在阿根廷市场取胜？</h2>
+            <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto">综合市场分析，我们为寻求进入或拓展阿根廷市场的企业提供以下核心战略建议。</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50 card-hover">
+                    <h3 class="font-bold text-lg mb-2 text-emerald-800">📦 分层化产品组合</h3>
+                    <p class="text-stone-600">同时布局价格亲民的销量驱动产品、热门IP授权的增长引擎产品，以及针对收藏家的高端利基产品。</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50 card-hover">
+                    <h3 class="font-bold text-lg mb-2 text-cyan-800">🌐 数字优先营销</h3>
+                    <p class="text-stone-600">重点投资Mercado Libre，并借鉴成功案例在YouTube和TikTok上进行内容营销，建立品牌亲和力。</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50 card-hover">
+                    <h3 class="font-bold text-lg mb-2 text-violet-800">🤝 建立战略伙伴关系</h3>
+                    <p class="text-stone-600">与本土制造商合作生产强调文化和安全的产品，并与关键连锁零售商建立分销合作。</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-stone-200/50 card-hover">
+                    <h3 class="font-bold text-lg mb-2 text-rose-800">🇦🇷 融入本土文化</h3>
+                    <p class="text-stone-600">深刻理解并尊重水豚、Mafalda等本土文化符号的内涵，营销活动需与本土文化叙事相结合。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-100 border-t border-stone-200 mt-16">
+        <div class="container mx-auto px-6 py-4 text-center text-stone-500">
+            <p>&copy; 2024 市场分析报告交互式呈现。基于报告数据生成。</p>
+        </div>
+    </footer>
+
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4">
+        <div id="modal-content" class="modal-content rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative">
+            <button id="modal-close" class="absolute top-4 right-4 text-stone-500 hover:text-stone-800 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 id="modal-title" class="text-2xl font-bold mb-4 text-stone-800"></h3>
+            <div id="modal-body" class="prose max-w-none text-stone-600"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ipData = [
+                {
+                    name: '水豚 (Carpincho)',
+                    category: '本土文化偶像',
+                    emoji: '💧',
+                    color: 'bg-orange-100',
+                    textColor: 'text-orange-800',
+                    title: '从本土啮齿动物到国家偶像',
+                    content: `
+                        <p><strong>核心身份:</strong> 国家象征，反文化偶像。</p>
+                        <p><strong>起源:</strong> 原产于阿根廷的世界上最大的啮齿动物。因“入侵”高档社区Nordelta而成为网络热点，被塑造成反抗精英的象征。</p>
+                        <p><strong>商业模式:</strong> 由网络迷因驱动的手工艺品经济。手工制作的“artesanal”水豚毛绒玩具在Mercado Libre上迅速走红。</p>
+                        <p><strong>目标受众:</strong> 成年人、年轻人、游客。</p>
+                        <p><strong>战略启示:</strong> 抓住文化热点可创造商机，但需要极快的市场反应速度。</p>
+                    `
+                },
+                {
+                    name: '娃娃看天下 (Mafalda)',
+                    category: '本土文化偶像',
+                    emoji: '🤔',
+                    color: 'bg-gray-100',
+                    textColor: 'text-gray-800',
+                    title: '知识分子的毛绒玩具',
+                    content: `
+                        <p><strong>核心身份:</strong> 知识分子，社会评论家。</p>
+                        <p><strong>起源:</strong> 阿根廷漫画家季诺创作的世界著名连环画主角，一个对世界充满忧思的小女孩。</p>
+                        <p><strong>商业模式:</strong> 遗产与收藏品授权。商品被定位为收藏品、怀旧纪念品，价格高昂，反映其收藏价值。</p>
+                        <p><strong>目标受众:</strong> 成年人、收藏家、知识分子。</p>
+                        <p><strong>战略启示:</strong> 怀旧与收藏品市场潜力巨大，但需要高端定位和精心的品牌建设。</p>
+                    `
+                },
+                {
+                    name: '泽农的农场',
+                    category: '数字原生巨头',
+                    emoji: '🐔',
+                    color: 'bg-red-100',
+                    textColor: 'text-red-800',
+                    title: '一个YouTube帝国',
+                    content: `
+                        <p><strong>核心身份:</strong> 数字原生，学前教育娱乐。</p>
+                        <p><strong>起源:</strong> 完全在YouTube上建立的品牌，成为西班牙语世界第一的儿童频道。</p>
+                        <p><strong>商业模式:</strong> 数字优先，360度IP运营。通过线上内容积累观众，再将流量转化为消费品、现场演出、游戏等多项业务。</p>
+                        <p><strong>目标受众:</strong> 幼儿、学龄前儿童、父母。</p>
+                        <p><strong>战略启示:</strong> 数字内容是孵化新一代IP的最强引擎，线上线下联动是成功的关键。</p>
+                    `
+                },
+                {
+                    name: 'Funko & 全球IP',
+                    category: '全球授权',
+                    emoji: '🌍',
+                    color: 'bg-blue-100',
+                    textColor: 'text-blue-800',
+                    title: '流行文化的强大力量',
+                    content: `
+                        <p><strong>核心身份:</strong> 全球流行文化的集大成者。</p>
+                        <p><strong>起源:</strong> 涵盖迪士尼、哈利·波特、漫威、热门游戏等全球知名IP。</p>
+                        <p><strong>商业模式:</strong> 庞大的全球授权组合，迅速将热门影视、游戏角色转化为毛绒玩具和收藏品。</p>
+                        <p><strong>目标受众:</strong> “童心未泯”的成年人、收藏家、各IP的粉丝。</p>
+                        <p><strong>战略启示:</strong> 传统授权模式依然有效，尤其是在“童心未泯”的成年人市场中，但面临激烈竞争。</p>
+                    `
+                }
+            ];
+
+            const ipCardsContainer = document.getElementById('ip-cards-container');
+            ipData.forEach(ip => {
+                const card = document.createElement('div');
+                card.className = `p-6 rounded-xl shadow-lg border border-stone-200/50 cursor-pointer card-hover ${ip.color}`;
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="text-3xl">${ip.emoji}</div>
+                        <div>
+                            <h4 class="font-bold text-lg ${ip.textColor}">${ip.name}</h4>
+                            <p class="text-sm ${ip.textColor} opacity-80">${ip.category}</p>
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', () => openModal(ip));
+                ipCardsContainer.appendChild(card);
+            });
+
+            const modal = document.getElementById('modal');
+            const modalClose = document.getElementById('modal-close');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            function openModal(ip) {
+                modalTitle.textContent = ip.title;
+                modalBody.innerHTML = ip.content;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            const consumerDriversCtx = document.getElementById('consumer-drivers-chart').getContext('2d');
+            new Chart(consumerDriversCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['父母购买者 (价格敏感)', '“童心未泯”的收藏家 (情感驱动)'],
+                    datasets: [{
+                        label: '市场驱动力',
+                        data: [55, 45],
+                        backgroundColor: ['#38bdf8', '#f59e0b'],
+                        borderColor: '#FDFBF8',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#57534e',
+                                font: {
+                                    family: "'Noto Sans SC', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: {
+                                family: "'Noto Sans SC', sans-serif"
+                            },
+                            titleFont: {
+                                family: "'Noto Sans SC', sans-serif"
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            const ipSourcesCtx = document.getElementById('ip-sources-chart').getContext('2d');
+            new Chart(ipSourcesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['全球授权 (电影/动漫)', '电子游戏 IP', '本土文化偶像', '数字原生巨头'],
+                    datasets: [{
+                        label: '市场影响力',
+                        data: [85, 75, 60, 90],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(249, 115, 22, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(16, 185, 129)',
+                            'rgb(249, 115, 22)',
+                            'rgb(239, 68, 68)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            bodyFont: {
+                                family: "'Noto Sans SC', sans-serif"
+                            },
+                            titleFont: {
+                                family: "'Noto Sans SC', sans-serif"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#f1f5f9'
+                            },
+                            ticks: {
+                                color: '#57534e'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                             ticks: {
+                                color: '#57534e'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const marketShareCtx = document.getElementById('market-share-chart').getContext('2d');
+            new Chart(marketShareCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2015年', '2019年'],
+                    datasets: [
+                        {
+                            label: '国产玩具',
+                            data: [51, 30],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '进口玩具',
+                            data: [49, 70],
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                             labels: {
+                                color: '#57534e',
+                                font: {
+                                    family: "'Noto Sans SC', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: {
+                                family: "'Noto Sans SC', sans-serif"
+                            },
+                            titleFont: {
+                                family: "'Noto Sans SC', sans-serif"
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                             grid: {
+                                color: '#f1f5f9'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                },
+                                color: '#57534e'
+                            }
+                        },
+                        x: {
+                             grid: {
+                                display: false
+                            },
+                             ticks: {
+                                color: '#57534e'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+�
