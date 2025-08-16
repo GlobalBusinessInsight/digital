@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互式分析：安克雷奇峰会</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: A thematic, single-page dashboard structure was chosen over a linear report format to enhance user engagement and comprehension. The flow is designed to be non-linear, allowing users to explore different facets of the summit via a sticky navigation bar. The structure starts with a high-level overview ("峰会概览"), moves to the core conflict ("议程对决"), presents a clear outcome analysis ("战略计分卡"), and concludes with the consequences ("后续影响"). This thematic grouping helps users build a mental model of the event by focusing on 'what happened,' 'why it happened,' 'who won,' and 'what's next,' which is more intuitive than following the original report's chapter sequence. Key interactions include clickable cards and a dynamic chart to make data exploration active rather than passive. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Summit's key visual moments (red carpet, etc.). Goal: Inform & Engage. Viz/Method: Interactive HTML/CSS cards. Interaction: Click to reveal analysis. Justification: Breaks down dense text into digestible, user-initiated chunks. Library: Vanilla JS + Tailwind CSS.
+        2. Report Info: Conflicting US/Russia agendas. Goal: Compare. Viz/Method: Side-by-side two-column text layout. Interaction: Static visual comparison. Justification: Directly highlights the fundamental disagreement that led to the summit's failure, making the core issue immediately apparent. Library: Tailwind CSS.
+        3. Report Info: Strategic outcomes for all parties (Table 1). Goal: Compare & Analyze. Viz/Method: Horizontal Bar Chart. Interaction: Chart provides an immediate visual summary of winners and losers. Justification: A chart is more impactful and easier to interpret at a glance than a text table, effectively communicating the report's central thesis about the strategic imbalance of the outcomes. Library: Chart.js (Canvas).
+        4. Report Info: New diplomatic process post-summit. Goal: Organize & Explain. Viz/Method: Flowchart-style diagram. Interaction: Static visual guide. Justification: Visually clarifies the new, complex diplomatic sequence and Ukraine's sidelined position more effectively than a paragraph of text. Library: HTML + Tailwind CSS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #FDFBF7;
+            color: #333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #C0392B;
+            border-bottom-color: #C0392B;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .content-section {
+            scroll-margin-top: 80px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-[#2C3E50]">安克雷奇峰会分析</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link font-medium text-gray-600 pb-1">峰会概览</a>
+                <a href="#agendas" class="nav-link font-medium text-gray-600 pb-1">议程对决</a>
+                <a href="#scorecard" class="nav-link font-medium text-gray-600 pb-1">战略计分卡</a>
+                <a href="#aftermath" class="nav-link font-medium text-gray-600 pb-1">后续影响</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="#overview">峰会概览</option>
+                    <option value="#agendas">议程对决</option>
+                    <option value="#scorecard">战略计分卡</option>
+                    <option value="#aftermath">后续影响</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <section id="hero" class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-bold text-[#2C3E50] mb-4">盛景与僵局</h2>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                2025年安克雷奇峰会呈现出一幅尖锐的矛盾图景：公开场合气氛热烈，宣称“极富成效”，闭门会谈却未能达成任何实质性协议。本应用旨在剖析这场精心编排的外交大戏，揭示其象征意义如何压倒了实质内容。
+            </p>
+        </section>
+
+        <section id="overview" class="content-section mb-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center text-[#2C3E50] mb-4">权力剧场：解构外交编排</h3>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">峰会的视觉呈现并非偶然，而是其战略实质的核心。双方都精心管理了这些场面，以投射特定的叙事。点击下方卡片，探索每个精心设计的瞬间背后的战略意图。</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="card bg-white p-6 rounded-xl shadow-lg cursor-pointer" data-content="overview-1">
+                    <h4 class="font-bold text-xl mb-2 text-[#2980B9]">🤝 红毯与军威</h4>
+                    <p class="text-gray-700">通常为亲密盟友保留的欢迎仪式，包括红地毯和B-2轰炸机飞越致意，旨在向世界展示普京并非孤立无援。</p>
+                </div>
+                <div class="card bg-white p-6 rounded-xl shadow-lg cursor-pointer" data-content="overview-2">
+                    <h4 class="font-bold text-xl mb-2 text-[#2980B9]">🚗 “野兽”车内密谈</h4>
+                    <p class="text-gray-700">普京与特朗普共乘总统专车“野兽”，这一罕见特权提供了私下交流的机会，并成为俄罗斯媒体的绝佳宣传素材。</p>
+                </div>
+                <div class="card bg-white p-6 rounded-xl shadow-lg cursor-pointer" data-content="overview-3">
+                    <h4 class="font-bold text-xl mb-2 text-[#2980B9]">⏱️ 仓促的结局</h4>
+                    <p class="text-gray-700">会议时长不足三小时，远短于预期的七小时，并取消了官方午宴，这强烈暗示了谈判遇到了不可调和的僵局。</p>
+                </div>
+                <div class="card bg-white p-6 rounded-xl shadow-lg cursor-pointer" data-content="overview-4">
+                    <h4 class="font-bold text-xl mb-2 text-[#2980B9]">🎤 受控的发布会</h4>
+                    <p class="text-gray-700">两位领导人只发表了简短声明且不接受提问，有效避免了任何对细节的追究，从而牢牢掌控了最终的公开叙事。</p>
+                </div>
+            </div>
+            <div id="overview-content-display" class="mt-8 p-6 bg-gray-100 rounded-lg text-gray-800 text-lg hidden min-h-[100px]">
+                <p id="overview-text">请点击上方卡片查看详细分析。</p>
+            </div>
+        </section>
+
+        <section id="agendas" class="content-section mb-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center text-[#2C3E50] mb-4">议程对决：无法弥合的分歧</h3>
+             <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">峰会的失败根植于双方根本不相容的目标。特朗普寻求一个具体的交易性成果，而普京则要求一个根本性的变革性成果。这种目标错位使得达成协议从一开始就不可能。</p>
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+                <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-[#2980B9]">
+                    <h4 class="text-2xl font-bold mb-4">🇺🇸 特朗普的单一焦点：停火</h4>
+                    <p class="text-lg text-gray-700 mb-4">特朗普的首要目标明确而直接：确保乌克兰实现停火。他将此视为一个可以迅速达成的交易，是解决整个问题的关键第一步。</p>
+                    <blockquote class="border-l-4 border-gray-300 pl-4 italic text-gray-600">
+                        “如果我离开时没有达成某种形式的停火，我不会高兴。”
+                    </blockquote>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg border-l-4 border-[#C0392B]">
+                    <h4 class="text-2xl font-bold mb-4">🇷🇺 普京的宏大博弈：重塑秩序</h4>
+                    <p class="text-lg text-gray-700 mb-4">普京的议程则宏大得多，他要求解决冲突的“根源问题”——即建立一个新的欧洲安全秩序，包括一个中立的乌克兰和北约停止东扩。</p>
+                    <blockquote class="border-l-4 border-gray-300 pl-4 italic text-gray-600">
+                        “要达成持久解决方案，就必须消除冲突的‘主要根源’。”
+                    </blockquote>
+                </div>
+            </div>
+        </section>
+
+        <section id="scorecard" class="content-section mb-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center text-[#2C3E50] mb-4">战略计分卡：赢家与输家</h3>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">峰会的结果对各方来说并非均等。对俄罗斯而言是一次明确的胜利，对美国是一次失败，而对乌克兰及其欧洲盟友则是一个令人不安的进展。下图直观地展示了各方的战略得失。</p>
+            <div class="bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="scorecardChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="aftermath" class="content-section">
+            <h3 class="text-2xl md:text-3xl font-bold text-center text-[#2C3E50] mb-4">涟漪效应：会后余波与新路径</h3>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">安克雷奇峰会开辟了一条由美国主导的新外交轨道，从根本上改变了和平进程的结构，并将压力巧妙地从莫斯科转移到了基辅。</p>
+            <div class="grid lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h4 class="text-xl font-bold mb-4">新的外交顺序</h4>
+                    <div class="flex flex-col space-y-4">
+                        <div class="flex items-center">
+                            <div class="bg-[#C0392B] text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">1</div>
+                            <div class="ml-4">
+                                <p class="font-semibold">美俄双边会谈 (安克雷奇)</p>
+                                <p class="text-sm text-gray-600">设定议程框架，乌克兰缺席。</p>
+                            </div>
+                        </div>
+                        <div class="h-8 w-px bg-gray-300 ml-5"></div>
+                        <div class="flex items-center">
+                            <div class="bg-[#2980B9] text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">2</div>
+                            <div class="ml-4">
+                                <p class="font-semibold">美乌双边会谈 (华盛顿)</p>
+                                <p class="text-sm text-gray-600">向乌克兰通报美俄讨论结果。</p>
+                            </div>
+                        </div>
+                         <div class="h-8 w-px bg-gray-300 ml-5"></div>
+                        <div class="flex items-center">
+                            <div class="bg-gray-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">3</div>
+                            <div class="ml-4">
+                                <p class="font-semibold">潜在三方峰会</p>
+                                <p class="text-sm text-gray-600">乌克兰在框架已定的情况下加入。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h4 class="font-bold text-lg mb-2">⚖️ 压力转移</h4>
+                        <p class="text-gray-700">特朗普暂停制裁威胁，并公开表示“现在取决于泽连斯基”，这极大地削弱了对俄的筹码，同时将达成协议的责任推给了乌克兰。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h4 class="font-bold text-lg mb-2">📉 乌克兰被边缘化</h4>
+                        <p class="text-gray-700">“没有乌克兰的参与，就不能谈论乌克兰问题”的原则被打破。新的外交路径使乌克兰从平等的谈判伙伴降级为被动的信息接收方。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-100 mt-20">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-600">
+            <p class="font-semibold text-lg mb-2">结论：一场象征意义压倒实质内容的峰会</p>
+            <p class="max-w-4xl mx-auto">安克雷奇峰会最终成为一场政治大戏，为普京带来了重大的战略胜利。它建立了一个危险的新外交框架，在这个框架下，乌克兰的命运可能由大国交易决定，使其在“最后的边疆”会晤后，陷入了更加岌岌可危的境地。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const overviewContent = {
+                'overview-1': '这场精心设计的欢迎仪式是美国的一项战略让步，它为普京总统提供了此次峰会最主要的回报：结束其外交孤立。在美国领土上享受全套礼遇，为克里姆林宫提供了强有力的视觉宣传材料，以与美国总统平等的身份重返全球舞台。',
+                'overview-2': '这是极少给予外国领导人的特权，并为两位领导人提供了一个远离助手、没有会议记录的私下交谈机会。镜头捕捉到普京在车内微笑的画面，这成为俄罗斯媒体可以大加利用的素材，塑造了亲密的个人关系。',
+                'overview-3': '在外交上，取消代表团之间的既定餐会通常表明会谈已经失败或无更多可谈。这一程序上的现实与两位领导人关于“极富成效”的公开声明形成冲突，表明双方迅速发现了不可调和的分歧。',
+                'overview-4': '通过避免任何即兴的诘问或对细节的追究，两位领导人成功地掩盖了会谈的失败，并向世界呈现了一个经过精心修饰的、积极的会议叙事，尽管缺乏任何具体成果。'
+            };
+
+            const cards = document.querySelectorAll('.card[data-content]');
+            const contentDisplay = document.getElementById('overview-content-display');
+            const contentText = document.getElementById('overview-text');
+
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const contentKey = card.getAttribute('data-content');
+                    contentText.textContent = overviewContent[contentKey];
+                    contentDisplay.classList.remove('hidden');
+                });
+            });
+
+            const scorecardCtx = document.getElementById('scorecardChart').getContext('2d');
+            const scorecardChart = new Chart(scorecardCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['俄罗斯 (普京)', '美国 (特朗普)', '欧洲盟友', '乌克兰 (泽连斯基)'],
+                    datasets: [{
+                        label: '战略成果评估',
+                        data: [2, -1, -1, -2],
+                        backgroundColor: [
+                            'rgba(192, 57, 43, 0.7)',
+                            'rgba(41, 128, 185, 0.7)',
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(241, 196, 15, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(192, 57, 43, 1)',
+                            'rgba(41, 128, 185, 1)',
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(241, 196, 15, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    const labels = {
+                                        '-2': '高度负面',
+                                        '-1': '负面',
+                                        '0': '中性',
+                                        '1': '正面',
+                                        '2': '高度正面'
+                                    };
+                                    return labels[value] || '';
+                                }
+                            },
+                            grid: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.raw;
+                                    const labels = {
+                                        '-2': '高度负面: 在外交上被边缘化，并面临来自美国要求其达成协议的更大压力。',
+                                        '-1': '负面: 未能实现首要停火目标，并将压力转移至盟友，削弱了自身筹码。',
+                                        '2': '高度正面: 实现了所有主要目标：打破孤立、获得合法性、避免制裁，且未做出任何让步。'
+                                    };
+                                    if(context.label === '欧洲盟友') return '负面: 被排除在直接会谈之外，美俄双边渠道削弱了欧洲的影响力。'
+                                    return labels[value] || '';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            sections.forEach(section => observer.observe(section));
+            
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            mobileNav.addEventListener('change', function(e) {
+                const targetId = e.target.value;
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
