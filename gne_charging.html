@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深度洞察：中国重卡充电新蓝海（纯充电模式）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Industrial Tech -->
+    <!-- Application Structure Plan: 本应用采用叙事性结构，为投资者和决策者提供从宏观到微观的分析路径。1. **市场机遇**：开篇用三张核心卡片（TCO驱动、场景为王、技术跨越）迅速定义重卡充电市场的独特性。2. **核心投资模型**：这是应用的核心，将报告中的财务测算模型视觉化。通过交互式图表展示600万投资的构成、收入与成本的对比，并动态突出2.55年的惊人投资回报期，让用户直观感受其盈利能力。3. **市场对标**：通过与传统加油站的并排对比，突出重卡充电站在投资额、回报期和估值逻辑上的压倒性优势。4. **竞争格局**：采用交互式网格布局，用户可点击不同类型的玩家，探索其战略定位，理解市场的多元化竞争。5. **估值启示**：以中石化案例收尾，提炼出“网络价值”和“服务升级”是未来估值的核心，升华整个报告的主题。此结构旨在将复杂的财务报告转化为一个有说服力的、数据驱动的投资故事。 -->
+    <!-- Visualization & Content Choices: 1. **财务模型**: (目标: 告知/说服) -> (可视化: Chart.js条形图和饼图) -> (交互: 图表加载动画，关键数据高亮) -> (理由: 静态数字表格不够直观，用图表拆解600万的投资构成和385万的年收入来源，能让非财务背景的用户迅速理解模型的关键要素。动态展示2.55年的回收期比纯文本更具冲击力) -> (库: Chart.js)。2. **对标加油站**: (目标: 比较) -> (可视化: 结构化HTML/CSS对比卡片) -> (交互: 鼠标悬浮高亮效果) -> (理由: 对于多维度对比，清晰的并列卡片结构最有效。交互效果引导用户逐项比较，增强信息吸收) -> (方法: Tailwind CSS)。3. **竞争格局**: (目标: 组织/探索) -> (可视化: 交互式网格卡片) -> (交互: 点击卡片，在下方信息面板中显示对应玩家的详细策略) -> (理由: 避免信息过载，让用户可以按需探索，比一个冗长的静态表格更具吸引力) -> (方法: JavaScript)。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f0f4f8; }
+        .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card-hover:hover { transform: translateY(-6px); box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1); }
+        .fade-in { animation: fadeIn 0.6s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .competitor-card-active { transform: scale(1.05); border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5); }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 280px; sm:height: 300px; max-height: 350px; }
+        .input-label { font-weight: 500; color: #4b5563; }
+        .input-field { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; text-align: right; font-weight: 600; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">重卡充电新蓝海</h1>
+            <p class="text-base sm:text-lg text-blue-700 font-semibold">纯充电模式下的投资价值分析</p>
+        </header>
+
+        <main>
+            <section id="intro" class="mb-16">
+                <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">一个完全不同的赛道</h2>
+                <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                    重卡充电市场并非乘用车市场的简单放大，而是一个由经济性驱动、场景高度定制化的全新领域。其商业逻辑、技术要求和玩家构成都截然不同，成功取决于运营深度而非网络广度。
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                        <div class="text-4xl mb-3">💰</div>
+                        <h3 class="text-xl font-bold text-gray-900">TCO是核心</h3>
+                        <p class="text-gray-600 mt-2">全生命周期成本优势，而非便利性，是商业化的唯一驱动力。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                        <div class="text-4xl mb-3">🎯</div>
+                        <h3 class="text-xl font-bold text-gray-900">场景决定模式</h3>
+                        <p class="text-gray-600 mt-2">围绕港口、矿山等特定场景构建专用网络，而非广泛的公共设施。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                        <div class="text-4xl mb-3">⚡️</div>
+                        <h3 class="text-xl font-bold text-gray-900">技术代际跨越</h3>
+                        <p class="text-gray-600 mt-2">从“快充”到“兆瓦级充电”，对电力和设备提出巨大挑战。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="financial-model" class="mb-16 bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-xl">
+                <h2 class="text-2xl font-bold text-center mb-2 text-gray-800">核心投资模型：单站财务测算</h2>
+                <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                    基于最新的市场数据，一个标准的20桩重卡充电站展现出极具吸引力的盈利能力。调整下方参数，实时测算不同情景下的投资回报。
+                </p>
+                
+                <div class="border-b pb-8 mb-8">
+                    <h3 class="text-xl font-bold text-center mb-6 text-gray-800">模型输入参数</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-4 text-sm">
+                        <div>
+                            <label for="input-capex" class="input-label">初始投资 (万元)</label>
+                            <input type="number" id="input-capex" class="input-field" value="600">
+                        </div>
+                        <div>
+                            <label for="input-vehicles" class="input-label">日服务车辆 (辆)</label>
+                            <input type="number" id="input-vehicles" class="input-field" value="100">
+                        </div>
+                        <div>
+                            <label for="input-utilization" class="input-label">稳定期利用率 (%)</label>
+                            <input type="number" id="input-utilization" class="input-field" value="80">
+                        </div>
+                        <div>
+                            <label for="input-charge-amount" class="input-label">单车补电量 (kWh)</label>
+                            <input type="number" id="input-charge-amount" class="input-field" value="250">
+                        </div>
+                        <div>
+                            <label for="input-service-fee" class="input-label">充电服务费 (元/kWh)</label>
+                            <input type="number" id="input-service-fee" class="input-field" value="0.3" step="0.01">
+                        </div>
+                        <div>
+                            <label for="input-vas" class="input-label">年增值收入 (万元)</label>
+                            <input type="number" id="input-vas" class="input-field" value="20">
+                        </div>
+                        <div>
+                            <label for="input-opex" class="input-label">年运营成本 (万元)</label>
+                            <input type="number" id="input-opex" class="input-field" value="150">
+                        </div>
+                        <div>
+                            <label for="input-depreciation-period" class="input-label">折旧年限 (年)</label>
+                            <input type="number" id="input-depreciation-period" class="input-field" value="10">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div class="text-center lg:text-left">
+                        <div class="mb-6">
+                            <p class="text-lg text-gray-500">稳定期年均EBITDA</p>
+                            <p class="text-4xl sm:text-5xl font-bold text-green-600"><span id="output-ebitda">0</span> <span class="text-2xl sm:text-3xl">万元</span></p>
+                        </div>
+                        <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded-r-lg">
+                            <p class="text-lg text-yellow-800">静态投资回收期</p>
+                            <p class="text-4xl sm:text-5xl font-bold text-yellow-700"><span id="output-payback">0</span> <span class="text-2xl sm:text-3xl">年</span></p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="capexChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="mt-12 border-t pt-8">
+                    <h3 class="text-xl font-bold text-center mb-6 text-gray-800">年化财务测算逻辑（实时更新）</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                        <div class="bg-gray-50 p-4 rounded-lg border-t-4 border-green-500">
+                            <h4 class="font-bold text-lg mb-3 text-green-700">① 年收入测算</h4>
+                            <p>年服务车次 <span id="output-trips" class="font-mono float-right">0 次</span></p>
+                            <p>年总充电量 <span id="output-kwh" class="font-mono float-right">0 kWh</span></p>
+                            <hr class="my-2">
+                            <p>充电服务费收入 <span id="output-fee-revenue" class="font-mono float-right">0 万元</span></p>
+                            <p>增值服务收入 <span id="output-vas-revenue" class="font-mono float-right">0 万元</span></p>
+                            <hr class="my-2 border-green-600">
+                            <p class="font-bold">总收入 <span id="output-total-revenue" class="font-mono float-right">0 万元</span></p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border-t-4 border-red-500">
+                            <h4 class="font-bold text-lg mb-3 text-red-700">② 年成本测算</h4>
+                            <p>运营成本(不含折旧) <span id="output-opex" class="font-mono float-right">0 万元</span></p>
+                            <hr class="my-2">
+                            <p>设备折旧 <span id="output-depreciation" class="font-mono float-right">0 万元</span></p>
+                            <hr class="my-2 border-red-600">
+                            <p class="font-bold">总运营成本 <span id="output-total-opex" class="font-mono float-right">0 万元</span></p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border-t-4 border-blue-500">
+                            <h4 class="font-bold text-lg mb-3 text-blue-700">③ 年盈利能力</h4>
+                            <p>总收入 <span id="output-profit-revenue" class="font-mono float-right">0 万元</span></p>
+                            <p>(-) 运营成本 <span id="output-profit-opex" class="font-mono float-right">0 万元</span></p>
+                            <hr class="my-2 border-blue-600">
+                            <p class="font-bold">EBITDA <span id="output-profit-ebitda" class="font-mono float-right">0 万元</span></p>
+                            <hr class="my-2">
+                            <p>(-) 折旧 <span id="output-profit-depreciation" class="font-mono float-right">0 万元</span></p>
+                            <hr class="my-2 border-blue-600">
+                            <p class="font-bold">税前利润 <span id="output-pretax-profit" class="font-mono float-right">0 万元</span></p>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                         <div class="chart-container">
+                             <canvas id="incomeChart"></canvas>
+                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="comparison" class="mb-16">
+                <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">对标分析：压倒性的模式优势</h2>
+                <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                    与传统中型加油站相比，重卡充电站在初始投资、盈利模式、回报周期及未来潜力等所有关键维度上，均展现出显著优势。
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg border-t-4 border-blue-500">
+                        <h3 class="text-xl sm:text-2xl font-bold text-center mb-4">🚚 重卡充电站</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start"><span class="text-blue-500 font-bold mr-2">▶</span><div><strong>初始投资:</strong> <span class="text-blue-600 font-semibold">中等 (约600万)</span></div></li>
+                            <li class="flex items-start"><span class="text-blue-500 font-bold mr-2">▶</span><div><strong>核心收入:</strong> <span class="text-green-600 font-semibold">高毛利服务费 (>70%)</span></div></li>
+                            <li class="flex items-start"><span class="text-blue-500 font-bold mr-2">▶</span><div><strong>回收周期:</strong> <span class="text-yellow-600 font-semibold">短 (可调)</span></div></li>
+                            <li class="flex items-start"><span class="text-blue-500 font-bold mr-2">▶</span><div><strong>资产属性:</strong> <span class="font-semibold">成长性科技资产</span></div></li>
+                             <li class="flex items-start"><span class="text-blue-500 font-bold mr-2">▶</span><div><strong>政策前景:</strong> <span class="text-green-600 font-semibold">顺风 (ESG友好)</span></div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-800 text-white p-6 rounded-lg shadow-lg border-t-4 border-gray-500">
+                        <h3 class="text-xl sm:text-2xl font-bold text-center mb-4">⛽ 中型加油站</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start"><span class="text-gray-500 font-bold mr-2">▶</span><div><strong>初始投资:</strong> <span class="text-red-400 font-semibold">极高 (2000万+)</span></div></li>
+                            <li class="flex items-start"><span class="text-gray-500 font-bold mr-2">▶</span><div><strong>核心收入:</strong> <span class="font-semibold">低毛利油品价差 (10-20%)</span></div></li>
+                            <li class="flex items-start"><span class="text-gray-500 font-bold mr-2">▶</span><div><strong>回收周期:</strong> <span class="text-red-400 font-semibold">长 (8-12年)</span></div></li>
+                            <li class="flex items-start"><span class="text-gray-500 font-bold mr-2">▶</span><div><strong>资产属性:</strong> <span class="font-semibold">成熟公用事业资产</span></div></li>
+                            <li class="flex items-start"><span class="text-gray-500 font-bold mr-2">▶</span><div><strong>政策前景:</strong> <span class="text-red-400 font-semibold">逆风 (碳中和压力)</span></div></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="competitors" class="mb-16">
+                <h2 class="text-2xl font-bold text-center mb-2 text-gray-800">竞争格局：跨界巨头的竞技场</h2>
+                 <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                    重卡补能市场的玩家背景更多元，竞争维度更复杂。点击下方不同类型的参与者，查看其核心优势与战略打法。
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6" id="competitor-buttons">
+                </div>
+                <div id="competitor-details" class="bg-white p-6 rounded-lg shadow-lg min-h-[150px]">
+                </div>
+            </section>
+
+            <section id="valuation-logic">
+                <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">估值启示：超越单站，决胜网络</h2>
+                 <p class="max-w-3xl mx-auto text-center text-gray-600 mb-8">
+                    中石化销售公司2014年的混改案例提供了宝贵参照：能源零售网络的真正价值，在于其网络节点的卡位价值和基于此衍生的综合服务能力。
+                </p>
+                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-lg text-center">
+                    <div class="max-w-md mx-auto mb-6">
+                        <p class="text-gray-500 text-lg mb-2">调整估值倍数 (EV/EBITDA)</p>
+                        <div class="flex items-center justify-center gap-4">
+                            <input type="number" id="input-ebitda-min" class="input-field w-24" value="8">
+                            <span class="text-gray-500">至</span>
+                            <input type="number" id="input-ebitda-max" class="input-field w-24" value="10">
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-lg mb-2">单站估值</p>
+                    <p class="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 mb-6" id="output-valuation">0万 ~ 0万</p>
+                    <p class="text-base sm:text-lg text-gray-800 max-w-2xl mx-auto">
+                        最终，一个成功的重卡充电网络的估值，将取决于它能否从单纯的“补能点”，进化为一个服务于车队司机的“<strong class="text-green-600">综合物流服务港</strong>”和参与电网调度的“<strong class="text-yellow-600">分布式能源节点</strong>”。
+                    </p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 pt-6 border-t border-gray-300">
+            <div class="mb-4 text-sm sm:text-base">
+                <a href="https://globalbusinessinsight.github.io/quotation.html" target="_blank" class="text-blue-600 hover:underline mx-2 sm:mx-4">电动重卡成本计算</a>
+                <span class="text-gray-400">|</span>
+                <a href="https://globalbusinessinsight.github.io/network.html" target="_blank" class="text-blue-600 hover:underline mx-2 sm:mx-4">充电网络</a>
+                <span class="text-gray-400">|</span>
+                <a href="https://globalbusinessinsight.github.io/lxny.html" target="_blank" class="text-blue-600 hover:underline mx-2 sm:mx-4">绿新能源</a>
+            </div>
+            <p class="text-sm text-gray-500">基于《中国重卡充电市场深度分析与财务估值（纯充电模式）》报告生成</p>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const competitorData = {
+        '传统运营商': { icon: '🔄', companies: '特来电、星星充电', advantage: '拥有充电网络运营经验和技术积累。', strategy: '从乘用车网络向商用车大功率充电延伸，提供园区整体解决方案。' },
+        '能源巨头': { icon: '⛽', companies: '国家电网、中石化', advantage: '掌握电网、场站资源和雄厚资本。', strategy: '建设高速干线充电走廊，改造现有加油站网络。' },
+        '电池与技术公司': { icon: '🔋', companies: '宁德时代', advantage: '掌握核心电池技术。', strategy: '提供适配大功率充电的电池产品和储能解决方案，赋能运营商。' },
+        '主机厂': { icon: '🚚', companies: '三一重工、徐工集团', advantage: '深刻理解车辆和场景，拥有客户资源。', strategy: '优化整车充电性能，与运营商合作，将补能服务作为销售配套。' },
+        '物流与场景方': { icon: '📦', companies: '头部物流公司、港口集团', advantage: '掌握核心场景和确定性运力需求。', strategy: '自建或合建补能设施，保障自身车队运营并对外开放。' }
+    };
+
+    const inputs = {
+        capex: document.getElementById('input-capex'),
+        vehicles: document.getElementById('input-vehicles'),
+        utilization: document.getElementById('input-utilization'),
+        chargeAmount: document.getElementById('input-charge-amount'),
+        serviceFee: document.getElementById('input-service-fee'),
+        vas: document.getElementById('input-vas'),
+        opex: document.getElementById('input-opex'),
+        depreciationPeriod: document.getElementById('input-depreciation-period'),
+        ebitdaMin: document.getElementById('input-ebitda-min'),
+        ebitdaMax: document.getElementById('input-ebitda-max')
+    };
+
+    const outputs = {
+        ebitda: document.getElementById('output-ebitda'),
+        payback: document.getElementById('output-payback'),
+        trips: document.getElementById('output-trips'),
+        kwh: document.getElementById('output-kwh'),
+        feeRevenue: document.getElementById('output-fee-revenue'),
+        vasRevenue: document.getElementById('output-vas-revenue'),
+        totalRevenue: document.getElementById('output-total-revenue'),
+        opex: document.getElementById('output-opex'),
+        depreciation: document.getElementById('output-depreciation'),
+        totalOpex: document.getElementById('output-total-opex'),
+        profitRevenue: document.getElementById('output-profit-revenue'),
+        profitOpex: document.getElementById('output-profit-opex'),
+        profitEbitda: document.getElementById('output-profit-ebitda'),
+        profitDepreciation: document.getElementById('output-profit-depreciation'),
+        pretaxProfit: document.getElementById('output-pretax-profit'),
+        valuation: document.getElementById('output-valuation')
+    };
+
+    let capexChart, incomeChart;
+
+    function formatNumber(num, decimals = 0) {
+        if (isNaN(num) || !isFinite(num)) {
+            return 'N/A';
+        }
+        return num.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
+
+    function calculateFinancials() {
+        const capexVal = parseFloat(inputs.capex.value) || 0;
+        const vehiclesVal = parseFloat(inputs.vehicles.value) || 0;
+        const utilizationVal = parseFloat(inputs.utilization.value) || 0;
+        const chargeAmountVal = parseFloat(inputs.chargeAmount.value) || 0;
+        const serviceFeeVal = parseFloat(inputs.serviceFee.value) || 0;
+        const vasVal = parseFloat(inputs.vas.value) || 0;
+        const opexVal = parseFloat(inputs.opex.value) || 0;
+        const depreciationPeriodVal = parseFloat(inputs.depreciationPeriod.value) || 1;
+        const ebitdaMinVal = parseFloat(inputs.ebitdaMin.value) || 0;
+        const ebitdaMaxVal = parseFloat(inputs.ebitdaMax.value) || 0;
+
+        const annualTrips = vehiclesVal * 365 * (utilizationVal / 100);
+        const annualKwh = annualTrips * chargeAmountVal;
+        const feeRevenue = (annualKwh * serviceFeeVal) / 10000;
+        const totalRevenue = feeRevenue + vasVal;
+        const depreciation = capexVal / depreciationPeriodVal;
+        const totalOpex = opexVal + depreciation;
+        const ebitda = totalRevenue - opexVal;
+        const pretaxProfit = ebitda - depreciation;
+        const payback = capexVal > 0 && ebitda > 0 ? capexVal / ebitda : 0;
+        
+        outputs.trips.textContent = `${formatNumber(annualTrips)} 次`;
+        outputs.kwh.textContent = `${formatNumber(annualKwh)} kWh`;
+        outputs.feeRevenue.textContent = `${formatNumber(feeRevenue, 2)} 万元`;
+        outputs.vasRevenue.textContent = `${formatNumber(vasVal, 2)} 万元`;
+        outputs.totalRevenue.textContent = `${formatNumber(totalRevenue, 2)} 万元`;
+        
+        outputs.opex.textContent = `${formatNumber(opexVal, 2)} 万元`;
+        outputs.depreciation.textContent = `${formatNumber(depreciation, 2)} 万元`;
+        outputs.totalOpex.textContent = `${formatNumber(totalOpex, 2)} 万元`;
+
+        outputs.profitRevenue.textContent = `${formatNumber(totalRevenue, 2)} 万元`;
+        outputs.profitOpex.textContent = `${formatNumber(opexVal, 2)} 万元`;
+        outputs.profitEbitda.textContent = `${formatNumber(ebitda, 2)} 万元`;
+        outputs.profitDepreciation.textContent = `${formatNumber(depreciation, 2)} 万元`;
+        outputs.pretaxProfit.textContent = `${formatNumber(pretaxProfit, 2)} 万元`;
+
+        outputs.ebitda.textContent = formatNumber(ebitda, 2);
+        outputs.payback.textContent = formatNumber(payback, 2);
+        
+        const valuationMin = ebitda * ebitdaMinVal;
+        const valuationMax = ebitda * ebitdaMaxVal;
+        outputs.valuation.textContent = `${formatNumber(valuationMin, 0)}万 ~ ${formatNumber(valuationMax, 0)}万`;
+
+        updateCapexChart(capexVal);
+        updateIncomeChart(totalRevenue, opexVal, ebitda);
+    }
+
+    function updateCapexChart(capexVal) {
+        const breakdown = [capexVal * 0.2, capexVal * 0.5, capexVal * 0.3]; // 20%, 50%, 30% breakdown
+        capexChart.data.datasets[0].data = breakdown;
+        capexChart.update();
+    }
+    
+    function updateIncomeChart(totalRevenue, opex, ebitda) {
+        incomeChart.data.datasets[0].data[0] = totalRevenue;
+        incomeChart.data.datasets[1].data[0] = opex;
+        incomeChart.data.datasets[2].data[0] = ebitda;
+        incomeChart.update();
+    }
+
+    function renderCapexChart() {
+        const ctx = document.getElementById('capexChart').getContext('2d');
+        capexChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['充电桩设备', '变压器与电缆', '建安及其他'],
+                datasets: [{
+                    data: [120, 300, 180],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f97316'],
+                    borderColor: '#f0f4f8',
+                    borderWidth: 4,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: '初始投资构成估算 (万元)', font: { size: 16 } },
+                    legend: { position: 'bottom' },
+                    tooltip: { callbacks: { label: (context) => `${context.label}: ${formatNumber(context.raw, 0)}万` } }
+                }
+            }
+        });
+    }
+
+    function renderIncomeChart() {
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        incomeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [''],
+                datasets: [
+                    { label: '总收入', data: [0], backgroundColor: '#22c55e' },
+                    { label: '运营成本(不含折旧)', data: [0], backgroundColor: '#f97316' },
+                    { label: 'EBITDA', data: [0], backgroundColor: '#3b82f6' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: '稳定期年化财务结构 (单位: 万元)', font: { size: 16 } },
+                    tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${formatNumber(context.raw, 2)}万` } }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: '金额 (万元)' } }
+                }
+            }
+        });
+    }
+    
+    Object.values(inputs).forEach(input => {
+        input.addEventListener('input', calculateFinancials);
+    });
+
+    const competitorButtonsContainer = document.getElementById('competitor-buttons');
+    const competitorDetailsContainer = document.getElementById('competitor-details');
+    let activeCompetitorButton = null;
+
+    function renderCompetitorDetails(name) {
+        const data = competitorData[name];
+        competitorDetailsContainer.innerHTML = `
+            <div class="fade-in">
+                <h3 class="text-xl font-bold mb-3 flex items-center"><span class="text-2xl mr-3">${data.icon}</span> ${name}</h3>
+                <p class="text-sm text-gray-500 mb-3"><strong>代表企业:</strong> ${data.companies}</p>
+                <div class="space-y-2">
+                    <p><strong class="font-semibold text-blue-700">核心优势:</strong> ${data.advantage}</p>
+                    <p><strong class="font-semibold text-blue-700">战略打法:</strong> ${data.strategy}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    Object.keys(competitorData).forEach(name => {
+        const data = competitorData[name];
+        const button = document.createElement('button');
+        button.className = 'competitor-btn text-center p-3 bg-white rounded-lg shadow-md card-hover border-2 border-transparent';
+        button.innerHTML = `<div class="text-3xl">${data.icon}</div><div class="mt-2 text-sm font-semibold">${name}</div>`;
+        
+        button.addEventListener('click', () => {
+            if (activeCompetitorButton) {
+                activeCompetitorButton.classList.remove('competitor-card-active');
+            }
+            button.classList.add('competitor-card-active');
+            activeCompetitorButton = button;
+            renderCompetitorDetails(name);
+        });
+        
+        competitorButtonsContainer.appendChild(button);
+    });
+
+    renderCapexChart();
+    renderIncomeChart();
+    calculateFinancials(); 
+    
+    const firstCompetitorButton = competitorButtonsContainer.querySelector('.competitor-btn');
+    if (firstCompetitorButton) {
+        firstCompetitorButton.click();
+    }
+});
+</script>
+</body>
+</html>
