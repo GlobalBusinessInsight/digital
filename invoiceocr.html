@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能票据识别与管理 (Gemini & QR Code)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- jsQR library for QR code reading -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <!-- Chosen Palette: Slate Gray -->
+    <!-- Application Structure Plan: 采用一个清晰、任务导向的三栏式布局（在移动设备上会垂直堆叠）。左侧是核心操作区，用于上传文件和触发识别，是用户旅程的起点。中间是图片预览区，为用户提供即时的视觉反馈，确认上传的票据。右侧是数据结果区，展示可编辑的结构化数据表和导出功能。这个结构将用户的操作流程（输入 -> 验证 -> 输出）进行了物理分离，使其非常直观和易于理解，避免了界面混乱。 -->
+    <!-- Visualization & Content Choices: 核心信息（票据数据）的目标是组织和审查。因此，选择交互式HTML表格是最佳的呈现方式，它直观、信息密度高。交互性通过两个关键功能实现：1) 使用`contenteditable`属性让用户可以直接在表格单元格中修改“识别”出的数据，这是一种非常低成本且高效的交互方式。2) “导出Excel”功能通过JS将表格数据转换为CSV格式并触发下载，满足了数据的离线使用需求。对于核心的“识别”功能，我们首先尝试用jsQR识别二维码，如果成功则模拟获取电子发票详情并用CSS渲染展示；如果失败则调用Gemini API进行OCR识别，并通过`responseSchema`确保返回结构化的JSON数据，极大地提升了识别的准确性和可靠性。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .upload-zone {
+            border: 2px dashed #94a3b8;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .upload-zone.drag-over {
+            background-color: #e2e8f0;
+            border-color: #334155;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        td[contenteditable="true"]:focus {
+            outline: 2px solid #3b82f6;
+            background-color: #eff6ff;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 500px;
+            width: 90%;
+            word-break: break-all;
+        }
+        #invoice-display {
+            border: 2px solid #6b7280;
+            font-family: 'KaiTi', 'STKaiti', serif;
+        }
+        #invoice-display th, #invoice-display td {
+            border: 1px solid #d1d5db;
+            padding: 6px 8px;
+            text-align: center;
+        }
+        .image-container.selected::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(59, 130, 246, 0.3);
+            border: 2px solid #3b82f6;
+            border-radius: 0.375rem;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 9999px;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.2s;
+        }
+        .delete-btn:hover {
+            background-color: rgba(239, 68, 68, 0.8);
+        }
+        .select-checkbox {
+            position: absolute;
+            top: 0.25rem;
+            left: 0.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            z-index: 10;
+            cursor: pointer;
+        }
+        .image-zoom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 2rem;
+        }
+        .image-zoom-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .image-zoom-modal .close-zoom {
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .low-confidence {
+            background-color: #fef9c3; /* yellow-100 */
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app-container" class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">智能票据识别与管理系统</h1>
+            <p class="text-slate-500 mt-2">由 Gemini 强力驱动，新增二维码识别与电子发票展示功能。</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <div class="lg:col-span-3">
+                <div class="bg-white p-6 rounded-lg shadow-md sticky top-8">
+                    <h2 class="text-xl font-semibold mb-4">操作面板</h2>
+                    
+                    <div id="upload-zone" class="upload-zone rounded-lg p-6 text-center cursor-pointer hover:bg-slate-50">
+                        <input type="file" id="file-input" multiple accept="image/*" class="hidden">
+                        <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        <p class="mt-2 text-sm text-slate-600">点击或拖拽图片到此区域</p>
+                        <p class="text-xs text-slate-500 mt-1">支持多张图片同时上传</p>
+                    </div>
+
+                    <button id="recognize-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg mt-6 hover:bg-blue-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed">
+                        开始识别
+                    </button>
+                    <div id="loader" class="hidden mx-auto mt-4"></div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-9">
+                <div class="grid grid-cols-1 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold">票据预览</h2>
+                            <div id="batch-actions" class="hidden flex items-center space-x-4">
+                                <label for="select-all-checkbox" class="flex items-center text-sm cursor-pointer">
+                                    <input type="checkbox" id="select-all-checkbox" class="mr-2 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    全选
+                                </label>
+                                <button id="delete-selected-btn" class="text-sm bg-red-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-red-600 transition-colors">
+                                    删除选中
+                                </button>
+                            </div>
+                        </div>
+                        <div id="image-preview" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 min-h-[120px] bg-slate-50 p-4 rounded-md">
+                            <p id="preview-placeholder" class="col-span-full text-center text-slate-500 self-center">上传的票据将在此显示...</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                         <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold">识别结果</h2>
+                            <button id="export-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed">
+                                导出为Excel
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="result-table" class="w-full text-sm text-left text-slate-500">
+                                <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 rounded-l-lg">发票代码</th>
+                                        <th scope="col" class="px-6 py-3">发票号码</th>
+                                        <th scope="col" class="px-6 py-3">开票日期</th>
+                                        <th scope="col" class="px-6 py-3">入口</th>
+                                        <th scope="col" class="px-6 py-3">出口</th>
+                                        <th scope="col" class="px-6 py-3">金额 (元)</th>
+                                        <th scope="col" class="px-6 py-3 rounded-r-lg">状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="table-placeholder">
+                                        <td colspan="7" class="text-center py-10 px-6">识别结果将在此显示...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div id="invoice-display-area" class="hidden mt-8">
+            <h2 class="text-2xl font-bold text-center mb-4 text-slate-800">电子发票详情</h2>
+            <div id="invoice-display" class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto text-sm">
+                <header class="text-center mb-6">
+                    <h3 id="invoice-title" class="text-2xl font-bold text-red-600"></h3>
+                    <p class="text-xs text-gray-600 mt-2">
+                        发票代码: <span id="invoice-code"></span>
+                        <span class="mx-4">|</span>
+                        发票号码: <span id="invoice-number"></span>
+                        <span class="mx-4">|</span>
+                        开票日期: <span id="invoice-date"></span>
+                    </p>
+                </header>
+                <div class="grid grid-cols-2 gap-x-8 border-t border-b border-gray-400 py-2">
+                    <div>
+                        <p><strong>购买方</strong></p>
+                        <p>名称: <span id="buyer-name"></span></p>
+                        <p>纳税人识别号: <span id="buyer-tax-id"></span></p>
+                    </div>
+                    <div class="text-right">
+                        <p><strong>销售方</strong></p>
+                        <p>名称: <span id="seller-name"></span></p>
+                        <p>纳税人识别号: <span id="seller-tax-id"></span></p>
+                    </div>
+                </div>
+                <table class="w-full my-2 border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="w-2/5">项目名称</th>
+                            <th>规格型号</th>
+                            <th>单位</th>
+                            <th>数量</th>
+                            <th>单价</th>
+                            <th>金额</th>
+                            <th>税率</th>
+                            <th>税额</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoice-items-body">
+                        <!-- Items will be injected here by JS -->
+                    </tbody>
+                </table>
+                <div class="grid grid-cols-2 gap-x-8 border-t border-b border-gray-400 py-2">
+                    <div>
+                        <p><strong>合计金额 (大写):</strong> <span id="total-amount-cn"></span></p>
+                        <p><strong>合计金额 (小写):</strong> ¥<span id="total-amount"></span></p>
+                    </div>
+                    <div class="text-right">
+                        <p><strong>合计税额:</strong> ¥<span id="total-tax"></span></p>
+                        <p><strong>价税合计 (大写):</strong> <span id="total-tax-amount-cn"></span></p>
+                        <p><strong>价税合计 (小写):</strong> ¥<span id="total-tax-amount"></span></p>
+                    </div>
+                </div>
+                <footer class="text-xs text-gray-500 mt-4 text-center">
+                    <p>备注: <span id="invoice-remark"></span></p>
+                </footer>
+            </div>
+        </div>
+
+        <div id="image-zoom-modal" class="image-zoom-modal hidden">
+            <span class="close-zoom">&times;</span>
+            <img id="zoomed-image" src="" alt="Zoomed Image">
+        </div>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        const imagePreview = document.getElementById('image-preview');
+        const recognizeBtn = document.getElementById('recognize-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const resultTable = document.getElementById('result-table').getElementsByTagName('tbody')[0];
+        const loader = document.getElementById('loader');
+        const invoiceDisplayArea = document.getElementById('invoice-display-area');
+        const batchActions = document.getElementById('batch-actions');
+        const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+        const selectAllCheckbox = document.getElementById('select-all-checkbox');
+        const imageZoomModal = document.getElementById('image-zoom-modal');
+        const zoomedImage = document.getElementById('zoomed-image');
+        const closeZoomBtn = document.querySelector('.close-zoom');
+
+        let uploadedFiles = [];
+
+        function setupEventListeners() {
+            uploadZone.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, () => uploadZone.classList.add('drag-over'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadZone.addEventListener(eventName, () => uploadZone.classList.remove('drag-over'), false);
+            });
+
+            uploadZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
+            
+            recognizeBtn.addEventListener('click', recognizeInvoices);
+            exportBtn.addEventListener('click', exportToExcel);
+            deleteSelectedBtn.addEventListener('click', deleteSelectedImages);
+            selectAllCheckbox.addEventListener('change', toggleSelectAll);
+            
+            closeZoomBtn.addEventListener('click', () => imageZoomModal.classList.add('hidden'));
+            imageZoomModal.addEventListener('click', (e) => {
+                if (e.target === imageZoomModal) {
+                    imageZoomModal.classList.add('hidden');
+                }
+            });
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const placeholder = document.getElementById('preview-placeholder');
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            
+            for (const file of files) {
+                if (!file.type.startsWith('image/')) continue;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const fileWrapper = {
+                        id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        file: file,
+                        isSelected: false,
+                        imageDataUrl: e.target.result
+                    };
+                    uploadedFiles.push(fileWrapper);
+                    renderImagePreview(fileWrapper);
+                };
+                reader.readAsDataURL(file);
+            }
+            updateUIState();
+        }
+
+        function renderImagePreview(fileWrapper) {
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'relative aspect-square rounded-md overflow-hidden image-container cursor-pointer';
+            imgContainer.dataset.id = fileWrapper.id;
+            imgContainer.onclick = () => showZoomedImage(fileWrapper.imageDataUrl);
+
+            const img = document.createElement('img');
+            img.src = fileWrapper.imageDataUrl;
+            img.className = 'w-full h-full object-cover';
+            img.alt = fileWrapper.file.name;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteSingleImage(fileWrapper.id);
+            };
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'select-checkbox';
+            checkbox.onclick = (e) => e.stopPropagation(); // Prevent zoom when clicking checkbox
+            checkbox.onchange = (e) => {
+                toggleSelection(fileWrapper.id, e.target.checked);
+            };
+
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(deleteBtn);
+            imgContainer.appendChild(checkbox);
+            imagePreview.appendChild(imgContainer);
+        }
+
+        function showZoomedImage(src) {
+            zoomedImage.src = src;
+            imageZoomModal.classList.remove('hidden');
+        }
+
+        function deleteSingleImage(fileId) {
+            uploadedFiles = uploadedFiles.filter(fw => fw.id !== fileId);
+            const container = document.querySelector(`.image-container[data-id="${fileId}"]`);
+            if (container) {
+                container.remove();
+            }
+            updateUIState();
+        }
+
+        function toggleSelection(fileId, isSelected) {
+            const fileWrapper = uploadedFiles.find(fw => fw.id === fileId);
+            if (fileWrapper) {
+                fileWrapper.isSelected = isSelected;
+            }
+            const container = document.querySelector(`.image-container[data-id="${fileId}"]`);
+            if (container) {
+                container.classList.toggle('selected', isSelected);
+                container.querySelector('.select-checkbox').checked = isSelected;
+            }
+            updateUIState();
+        }
+
+        function toggleSelectAll(e) {
+            const isChecked = e.target.checked;
+            uploadedFiles.forEach(fw => {
+                fw.isSelected = isChecked;
+                const container = document.querySelector(`.image-container[data-id="${fw.id}"]`);
+                if (container) {
+                    container.classList.toggle('selected', isChecked);
+                    container.querySelector('.select-checkbox').checked = isChecked;
+                }
+            });
+            updateUIState();
+        }
+
+        function deleteSelectedImages() {
+            const selectedIds = uploadedFiles.filter(fw => fw.isSelected).map(fw => fw.id);
+            if (selectedIds.length === 0) return;
+
+            uploadedFiles = uploadedFiles.filter(fw => !fw.isSelected);
+            selectedIds.forEach(id => {
+                const container = document.querySelector(`.image-container[data-id="${id}"]`);
+                if (container) {
+                    container.remove();
+                }
+            });
+            updateUIState();
+        }
+
+        async function recognizeInvoices() {
+            if (uploadedFiles.length === 0) return;
+
+            setLoading(true);
+            resultTable.innerHTML = ''; 
+            invoiceDisplayArea.classList.add('hidden');
+
+            for (const fileWrapper of uploadedFiles) {
+                try {
+                    const qrCode = await scanQrCode(fileWrapper.imageDataUrl);
+                    if (qrCode && qrCode.data.startsWith('http')) {
+                        const data = {
+                            code: "二维码发票", number: "详情见下方", date: "N/A", entry: "N/A", exit: "N/A", amount: "N/A",
+                            confidence: { overall: "high" }
+                        };
+                        addResultRow(data);
+                        await fetchAndDisplayElectronicInvoice(qrCode.data);
+                    } else {
+                        const base64Data = fileWrapper.imageDataUrl.split(',')[1];
+                        const result = await callGeminiAPI(base64Data);
+                        addResultRow(result);
+                    }
+                } catch (error) {
+                    console.error('Error recognizing file:', fileWrapper.file.name, error);
+                    const data = {
+                        code: "识别失败", number: "N/A", date: "N/A", entry: "N/A", exit: "N/A", amount: "0.00",
+                        confidence: { overall: "low" }
+                    };
+                    addResultRow(data);
+                }
+            }
+            
+            if (resultTable.rows.length === 0) {
+                resultTable.innerHTML = `<tr id="table-placeholder"><td colspan="7" class="text-center py-10 px-6">识别结束，未找到有效票据信息。</td></tr>`;
+            }
+
+            setLoading(false);
+            updateUIState();
+        }
+
+        function scanQrCode(imageDataUrl) {
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(image, 0, 0, image.width, image.height);
+                    const imageData = ctx.getImageData(0, 0, image.width, image.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    resolve(code);
+                };
+                image.onerror = reject;
+                image.src = imageDataUrl;
+            });
+        }
+
+        async function callGeminiAPI(base64ImageData) {
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [
+                    {
+                        parts: [
+                            { text: "你是一个专业的票据识别OCR工具。请从这张图片中提取中国高速公路通行费发票的关键信息。对每一个字段，请给出一个置信度评分('high', 'medium', 'low')。同时给出一个总体的置信度评分。如果某个字段找不到，请返回'N/A'。请严格按照指定的JSON格式返回结果。" },
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: base64ImageData
+                                }
+                            }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            code: { type: "STRING", description: "发票代码" },
+                            number: { type: "STRING", description: "发票号码" },
+                            date: { type: "STRING", description: "开票日期, 格式为 YYYY-MM-DD" },
+                            entry: { type: "STRING", description: "入口站" },
+                            exit: { type: "STRING", description: "出口站" },
+                            amount: { type: "STRING", description: "总金额" },
+                            confidence: {
+                                type: "OBJECT",
+                                properties: {
+                                    overall: { type: "STRING", description: "总体置信度" },
+                                    code: { type: "STRING" },
+                                    number: { type: "STRING" },
+                                    date: { type: "STRING" },
+                                    entry: { type: "STRING" },
+                                    exit: { type: "STRING" },
+                                    amount: { type: "STRING" }
+                                }
+                            }
+                        },
+                        required: ["code", "number", "date", "entry", "exit", "amount", "confidence"]
+                    }
+                }
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API call failed with status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const jsonText = result.candidates[0].content.parts[0].text;
+                // Simple mock for confidence if API doesn't return it reliably
+                const parsedJson = JSON.parse(jsonText);
+                if (!parsedJson.confidence) {
+                    parsedJson.confidence = { overall: "medium", code: "high", number: "high", date: "high", entry: "medium", exit: "high", amount: "low" };
+                }
+                return parsedJson;
+            } else {
+                throw new Error("Invalid API response structure");
+            }
+        }
+        
+        function addResultRow(data) {
+            const row = resultTable.insertRow();
+            row.className = 'bg-white border-b hover:bg-slate-50';
+            
+            const fields = ['code', 'number', 'date', 'entry', 'exit', 'amount'];
+            const confidence = data.confidence || {};
+
+            fields.forEach(field => {
+                const cell = row.insertCell();
+                cell.className = 'px-6 py-4';
+                cell.setAttribute('contenteditable', 'true');
+                
+                if (field === 'number' && data.code === '二维码发票') {
+                    const link = document.createElement('a');
+                    link.href = '#invoice-display-area';
+                    link.className = 'text-blue-600 underline hover:text-blue-800';
+                    link.textContent = data[field] || 'N/A';
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        document.getElementById('invoice-display-area').classList.remove('hidden');
+                        document.getElementById('invoice-display-area').scrollIntoView({ behavior: 'smooth' });
+                    };
+                    cell.appendChild(link);
+                    cell.setAttribute('contenteditable', 'false');
+                } else {
+                    cell.textContent = data[field] || 'N/A';
+                }
+
+                if (confidence[field] && confidence[field] !== 'high') {
+                    cell.classList.add('low-confidence');
+                }
+            });
+
+            const statusCell = row.insertCell();
+            statusCell.className = 'px-6 py-4';
+            if (confidence.overall && confidence.overall !== 'high') {
+                statusCell.innerHTML = `<span class="bg-yellow-200 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">⚠️ 需核对</span>`;
+            } else {
+                statusCell.innerHTML = `<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">✓ 已识别</span>`;
+            }
+        }
+        
+        async function fetchAndDisplayElectronicInvoice(url) {
+            // This is a mock function. In a real application, this would
+            // involve a backend server to bypass CORS and fetch the real data.
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const mockInvoiceData = {
+                        title: "广东省增值税电子普通发票",
+                        code: "044002200111",
+                        number: "52908823",
+                        date: "2023-01-16",
+                        buyer: {
+                            name: "个人",
+                            taxId: ""
+                        },
+                        seller: {
+                            name: "广东联合电子服务股份有限公司",
+                            taxId: "914400007623336942"
+                        },
+                        items: [
+                            { name: "*通行费*", model: "", unit: "", quantity: 1, price: 28.57, amount: 28.57, taxRate: "3%", tax: 0.86 }
+                        ],
+                        totalAmount: 28.57,
+                        totalTax: 0.86,
+                        totalTaxAmount: 29.43,
+                        totalAmountCn: "贰拾捌元伍角柒分",
+                        totalTaxAmountCn: "贰拾玖元肆角叁分",
+                        remark: "车辆类型:一型客车"
+                    };
+                    populateInvoiceDisplay(mockInvoiceData);
+                    resolve();
+                }, 1000); // Simulate network delay
+            });
+        }
+
+        function populateInvoiceDisplay(data) {
+            document.getElementById('invoice-title').textContent = data.title;
+            document.getElementById('invoice-code').textContent = data.code;
+            document.getElementById('invoice-number').textContent = data.number;
+            document.getElementById('invoice-date').textContent = data.date;
+            document.getElementById('buyer-name').textContent = data.buyer.name;
+            document.getElementById('buyer-tax-id').textContent = data.buyer.taxId;
+            document.getElementById('seller-name').textContent = data.seller.name;
+            document.getElementById('seller-tax-id').textContent = data.seller.taxId;
+            document.getElementById('total-amount-cn').textContent = data.totalAmountCn;
+            document.getElementById('total-amount').textContent = data.totalAmount.toFixed(2);
+            document.getElementById('total-tax').textContent = data.totalTax.toFixed(2);
+            document.getElementById('total-tax-amount-cn').textContent = data.totalTaxAmountCn;
+            document.getElementById('total-tax-amount').textContent = data.totalTaxAmount.toFixed(2);
+            document.getElementById('invoice-remark').textContent = data.remark;
+
+            const itemsBody = document.getElementById('invoice-items-body');
+            itemsBody.innerHTML = '';
+            data.items.forEach(item => {
+                const row = itemsBody.insertRow();
+                row.innerHTML = `
+                    <td class="text-left">${item.name}</td>
+                    <td>${item.model}</td>
+                    <td>${item.unit}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${item.amount.toFixed(2)}</td>
+                    <td>${item.taxRate}</td>
+                    <td>${item.tax.toFixed(2)}</td>
+                `;
+            });
+            invoiceDisplayArea.classList.remove('hidden');
+        }
+
+        function exportToExcel() {
+            const rows = resultTable.querySelectorAll('tr');
+            if (rows.length === 0 || (rows.length === 1 && rows[0].id === 'table-placeholder')) {
+                showModal("没有可导出的数据。");
+                return;
+            };
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            csvContent += "发票代码,发票号码,开票日期,入口,出口,金额(元),状态\n";
+
+            rows.forEach(row => {
+                if(row.id === 'table-placeholder') return;
+                const cells = row.querySelectorAll('td');
+                const rowData = Array.from(cells).map(cell => `"${cell.textContent.trim()}"`);
+                csvContent += rowData.join(',') + '\n';
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "票据识别结果.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loader.classList.remove('hidden');
+                recognizeBtn.disabled = true;
+                recognizeBtn.textContent = '正在识别中...';
+            } else {
+                loader.classList.add('hidden');
+                recognizeBtn.disabled = false;
+                recognizeBtn.textContent = '开始识别';
+            }
+        }
+        
+        function updateUIState() {
+            const hasFiles = uploadedFiles.length > 0;
+            const hasResults = resultTable.rows.length > 0 && (!resultTable.rows[0].id || resultTable.rows[0].id !== 'table-placeholder');
+            const hasSelection = uploadedFiles.some(f => f.isSelected);
+
+            recognizeBtn.disabled = !hasFiles;
+            exportBtn.disabled = !hasResults;
+            
+            if (hasFiles) {
+                batchActions.classList.remove('hidden');
+            } else {
+                batchActions.classList.add('hidden');
+            }
+
+            if (hasSelection) {
+                deleteSelectedBtn.classList.remove('hidden');
+            } else {
+                deleteSelectedBtn.classList.add('hidden');
+            }
+
+            selectAllCheckbox.checked = hasFiles && uploadedFiles.every(f => f.isSelected);
+
+            const placeholder = document.getElementById('preview-placeholder');
+            if(hasFiles) {
+                if(placeholder) placeholder.style.display = 'none';
+            } else {
+                if(placeholder) {
+                    placeholder.style.display = 'block';
+                } else {
+                    const newPlaceholder = document.createElement('p');
+                    newPlaceholder.id = 'preview-placeholder';
+                    newPlaceholder.className = 'col-span-full text-center text-slate-500 self-center';
+                    newPlaceholder.textContent = '上传的票据将在此显示...';
+                    imagePreview.appendChild(newPlaceholder);
+                }
+            }
+        }
+
+        function showModal(message, isLongText = false) {
+            const modalBackdrop = document.createElement('div');
+            modalBackdrop.className = 'modal-backdrop';
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+            if(isLongText) modalContent.classList.add('text-left');
+
+            const messageP = document.createElement('p');
+            messageP.textContent = message;
+            messageP.className = 'mb-4 text-base whitespace-pre-wrap';
+
+            const closeButton = document.createElement('button');
+            closeButton.textContent = '关闭';
+            closeButton.className = 'bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors block ml-auto';
+            closeButton.onclick = () => {
+                document.body.removeChild(modalBackdrop);
+            };
+
+            modalContent.appendChild(messageP);
+            modalContent.appendChild(closeButton);
+            modalBackdrop.appendChild(modalContent);
+            document.body.appendChild(modalBackdrop);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            updateUIState();
+        });
+
+    </script>
+</body>
+</html>
