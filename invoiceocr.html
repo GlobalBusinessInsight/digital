@@ -173,7 +173,7 @@
             <div class="lg:col-span-3">
                 <div class="bg-white p-6 rounded-lg shadow-md sticky top-8">
                     <h2 class="text-xl font-semibold mb-4">操作面板</h2>
-                    
+
                     <div class="mb-4">
                         <label for="driver-select" class="block text-sm font-medium text-gray-700 mb-1">选择司机</label>
                         <select id="driver-select" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -368,6 +368,7 @@
         
         // Obfuscated API Key
         const OBFUSCATED_KEY = 'QUl6YVN5Qm8wWFJhYmNOR0U1NHJsMTg5eV9ReWlMWWczTjdpRHhz';
+        const PROXY_URL = 'https://gemini-proxy.zuisong.workers.dev';
 
         let uploadedFiles = [];
         let drivers = [];
@@ -423,7 +424,7 @@
             e.preventDefault();
             e.stopPropagation();
         }
-
+        
         function loadDrivers() {
             const storedDrivers = localStorage.getItem('invoiceAppDrivers');
             if (storedDrivers) {
@@ -735,7 +736,10 @@
 
         async function callGeminiAPI(base64ImageData) {
             const apiKey = atob(OBFUSCATED_KEY);
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const googleApiBase = 'https://generativelen/guage.googleapis.com';
+            
+            const originalUrl = new URL(`${googleApiBase}/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`);
+            const finalApiUrl = new URL(originalUrl.pathname + originalUrl.search, PROXY_URL).href;
 
             const payload = {
                 contents: [
@@ -802,7 +806,7 @@
                 }
             };
 
-            const response = await fetch(apiUrl, {
+            const response = await fetch(finalApiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1036,7 +1040,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // No longer need to load API key from storage, it's embedded.
             loadDrivers();
             setupEventListeners();
             updateUIState();
