@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加拿大睡衣及浴袍市场交互式仪表板 (2020-2024)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Warm Beige, Dark Slate, Muted Teal, Soft Terracotta) -->
+    <!-- Application Structure Plan: The application is designed as a top-down interactive dashboard. It starts with a macro view (overall market growth), then drills down into key segments: geography (provincial sales), consumer trends (style evolution and market share), and supply chain (sourcing). This thematic structure guides the user through a logical discovery path, from "how big" to "where," "what," and "from where." Interactivity is used to connect quantitative data with qualitative insights, making the dense report information more digestible. The final section provides actionable links for further exploration. This design prioritizes user-driven exploration and synthesis of information. -->
+    <!-- Visualization & Content Choices: 1. Market Growth: Line chart (Chart.js) to clearly show the trend over time. 2. Provincial Sales: Bar chart (Chart.js) for easy comparison between provinces. Interaction: Clickable bars update a text panel with region-specific qualitative data. 3. Style Evolution: An interactive HTML timeline for qualitative trends. 4. Style Market Share (NEW): Two Doughnut charts (Chart.js) to show proportions of sleepwear and bathrobe styles. Goal: Show Proportions. 5. Sourcing: A toggleable Donut chart (Chart.js) for import sources and local vs. import share. 6. Style Showcase: A card-based HTML gallery for visual appeal and external links. All choices use Canvas-based Chart.js, structured HTML/CSS, and JS interactions, adhering to the NO SVG/Mermaid constraint. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #FDFBF5;
+            color: #3C4043;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 800px;
+            height: 40vh;
+            max-height: 450px;
+        }
+        .active-tab {
+            background-color: #4682B4;
+            color: #FFFFFF;
+            border-color: #4682B4;
+        }
+        .inactive-tab {
+            background-color: #FFFFFF;
+            color: #4682B4;
+            border-color: #4682B4;
+        }
+        .active-pill {
+            background-color: #D87093;
+            color: white;
+        }
+        .inactive-pill {
+            background-color: #F0F0F0;
+            color: #3C4043;
+        }
+        .card-hover-effect {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">加拿大睡衣及浴袍市场深度洞察</h1>
+            <p class="text-lg md:text-xl text-gray-600">2020-2024年交互式分析报告</p>
+        </header>
+
+        <main class="space-y-16">
+
+            <section id="market-growth" class="bg-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold text-center mb-1 text-gray-700">1. 市场宏观增长趋势</h2>
+                <p class="text-center text-gray-500 mb-6">“舒适经济”推动市场稳步扩张，消费者支出向居家品类转移。</p>
+                <div class="chart-container">
+                    <canvas id="marketSizeChart"></canvas>
+                </div>
+            </section>
+
+            <section id="provincial-sales" class="bg-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold text-center mb-1 text-gray-700">2. 省级市场深度剖析</h2>
+                <p class="text-center text-gray-500 mb-6">点击图表中的省份，探索各地的独特消费偏好。图表数据基于2024年市场估算。</p>
+                <div class="text-center mb-6">
+                    <button id="showSalesBtn" class="active-tab text-sm sm:text-base font-semibold py-2 px-4 rounded-l-lg border-2">销售额 (百万加元)</button>
+                    <button id="showShareBtn" class="inactive-tab text-sm sm:text-base font-semibold py-2 px-4 rounded-r-lg border-2 border-l-0">市场份额 (%)</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div class="chart-container h-[50vh] max-h-[500px]">
+                            <canvas id="provincialSalesChart"></canvas>
+                        </div>
+                    </div>
+                    <div id="province-info" class="bg-stone-50 p-6 rounded-xl border border-stone-200 flex flex-col justify-center min-h-[300px]">
+                        <h3 id="province-title" class="text-xl font-bold text-gray-800 mb-3">安大略省 (ON)</h3>
+                        <p id="province-text" class="text-gray-600">作为最大、最多元化的市场，安大略省的消费需求覆盖了从大众化到高端奢侈的全部价格区间。多伦多等大都市是“睡衣外穿”潮流的主要策源地，时尚属性被放大。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="style-evolution" class="bg-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold text-center mb-1 text-gray-700">3. 款式与材质的五年演变</h2>
+                 <p class="text-center text-gray-500 mb-8">选择年份，查看主流趋势如何从纯粹舒适演变为生活方式的表达。</p>
+                <div class="flex justify-center flex-wrap gap-2 mb-8">
+                    <button class="year-pill inactive-pill font-semibold py-2 px-5 rounded-full transition-colors" data-year="2020">2020</button>
+                    <button class="year-pill inactive-pill font-semibold py-2 px-5 rounded-full transition-colors" data-year="2021">2021</button>
+                    <button class="year-pill inactive-pill font-semibold py-2 px-5 rounded-full transition-colors" data-year="2022">2022</button>
+                    <button class="year-pill inactive-pill font-semibold py-2 px-5 rounded-full transition-colors" data-year="2023">2023</button>
+                    <button class="year-pill active-pill font-semibold py-2 px-5 rounded-full transition-colors" data-year="2024">2024</button>
+                </div>
+                <div id="style-info" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                </div>
+            </section>
+
+            <section id="style-share" class="bg-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold text-center mb-1 text-gray-700">4. 主流款式市场份额分析</h2>
+                <p class="text-center text-gray-500 mb-6">套装是市场的绝对主力，但消费者的选择正日益多元化。</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-xl font-bold text-center text-gray-800 mb-3">睡衣品类份额 (2024)</h3>
+                        <div class="chart-container h-[40vh] max-h-[350px]">
+                            <canvas id="sleepwearShareChart"></canvas>
+                        </div>
+                        <p class="text-center text-gray-600 mt-4 px-4">套装占据主导地位，满足了消费者对搭配完整性的需求。然而，为满足个性化尺码和混搭需求的“单品”市场，以及兼具舒适与优雅的“睡裙”，正成为重要的增长点。</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-center text-gray-800 mb-3">浴袍品类份额 (2024)</h3>
+                        <div class="chart-container h-[40vh] max-h-[350px]">
+                            <canvas id="bathrobeShareChart"></canvas>
+                        </div>
+                         <p class="text-center text-gray-600 mt-4 px-4">追求“居家奢华体验”的消费者推动了厚重酒店式浴袍的流行。同时，更轻便、快干的华夫格浴袍因其功能性而广受欢迎，而时尚罩袍则满足了消费者对家居时尚感的追求。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sourcing" class="bg-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-2xl font-bold text-center mb-1 text-gray-700">5. 采购与贸易动态</h2>
+                <p class="text-center text-gray-500 mb-6">市场高度依赖进口，供应链呈现多元化趋势。</p>
+                 <div class="text-center mb-6">
+                    <button id="showImportSourceBtn" class="active-tab text-sm sm:text-base font-semibold py-2 px-4 rounded-l-lg border-2">主要进口来源国</button>
+                    <button id="showLocalImportBtn" class="inactive-tab text-sm sm:text-base font-semibold py-2 px-4 rounded-r-lg border-2 border-l-0">本土 vs. 进口</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div class="chart-container h-[40vh] max-h-[400px]">
+                        <canvas id="sourcingChart"></canvas>
+                    </div>
+                    <div id="sourcing-info" class="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                         <h3 class="text-xl font-bold text-gray-800 mb-3">“中国+1”策略</h3>
+                         <p class="text-gray-600">尽管中国仍是主要供应国，但为应对地缘政治风险和成本上涨，加拿大进口商正积极将部分订单转移至越南、孟加拉国等新兴制造中心，构建更具韧性的全球供应网络。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="style-showcase">
+                <h2 class="text-2xl font-bold text-center mb-1 text-gray-700">6. 款式探索与品牌链接</h2>
+                <p class="text-center text-gray-500 mb-8">点击下方卡片，查看不同风格的睡衣和浴袍实例。</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover-effect text-center">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">经典舒适套装</h3>
+                        <p class="text-gray-600 mb-4 h-12">永不过时的选择，主打棉、莫代尔等亲肤面料。</p>
+                        <a href="https://www.lavieenrose.com/en/pajamas" target="_blank" class="inline-block bg-pink-500 text-white font-bold py-2 px-6 rounded-full hover:bg-pink-600 transition-colors">查看实例</a>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover-effect text-center">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">保暖法兰绒</h3>
+                        <p class="text-gray-600 mb-4 h-12">草原省份和寒冷冬季的理想之选，提供极致温暖。</p>
+                        <a href="https://www.eddiebauer.ca/s/flannel-pajamas?keyword=flannel+pajamas" target="_blank" class="inline-block bg-teal-500 text-white font-bold py-2 px-6 rounded-full hover:bg-teal-600 transition-colors">查看实例</a>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover-effect text-center">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">轻薄竹纤维</h3>
+                        <p class="text-gray-600 mb-4 h-12">BC省消费者的最爱，柔软、透气且可持续。</p>
+                        <a href="https://thisisj.com/" target="_blank" class="inline-block bg-green-500 text-white font-bold py-2 px-6 rounded-full hover:bg-green-600 transition-colors">查看实例</a>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-lg card-hover-effect text-center">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">酒店风浴袍</h3>
+                        <p class="text-gray-600 mb-4 h-12">采用厚实的毛圈布，在家重现五星级酒店体验。</p>
+                        <a href="https://canada.fairmontstore.com/collections/robes" target="_blank" class="inline-block bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition-colors">查看实例</a>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-lg card-hover-effect text-center">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">轻便华夫格浴袍</h3>
+                        <p class="text-gray-600 mb-4 h-12">轻便、快干，适合沐浴后或温暖季节使用。</p>
+                        <a href="https://www.simons.ca/en/women-underwear/robes--6567" target="_blank" class="inline-block bg-indigo-500 text-white font-bold py-2 px-6 rounded-full hover:bg-indigo-600 transition-colors">查看实例</a>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-lg card-hover-effect text-center">
+                        <h3 class="text-xl font-semibold mb-3 text-gray-800">加拿大本土品牌</h3>
+                        <p class="text-gray-600 mb-4 h-12">探索专注于高品质、独特设计和本地制造的品牌。</p>
+                        <a href="https://www.49thapparel.com/" target="_blank" class="inline-block bg-red-500 text-white font-bold py-2 px-6 rounded-full hover:bg-red-600 transition-colors">查看实例</a>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-200">
+            <p class="text-gray-500">数据来源：基于报告《加拿大睡衣及浴袍市场深度分析报告（2020-2024）》</p>
+            <p class="text-gray-400 text-sm mt-1">交互式仪表板由人工智能生成</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const chartColors = {
+                primary: 'rgba(70, 130, 180, 0.8)',
+                primaryLight: 'rgba(70, 130, 180, 0.2)',
+                secondary: 'rgba(216, 112, 147, 0.8)',
+                accent1: 'rgba(72, 61, 139, 0.8)',
+                accent2: 'rgba(0, 128, 128, 0.8)',
+                accent3: 'rgba(255, 140, 0, 0.8)',
+                accent4: 'rgba(128, 0, 128, 0.8)',
+                accent5: 'rgba(107, 142, 35, 0.8)',
+                accent6: 'rgba(210, 105, 30, 0.8)',
+                accent7: 'rgba(119, 136, 153, 0.8)',
+                accent8: 'rgba(188, 143, 143, 0.8)',
+            };
+
+            const globalChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                family: "'Noto Sans SC', sans-serif",
+                                size: 12,
+                            },
+                            color: '#3C4043',
+                            padding: 20,
+                        }
+                    },
+                    tooltip: {
+                        titleFont: {
+                            family: "'Noto Sans SC', sans-serif",
+                            size: 14,
+                            weight: 'bold',
+                        },
+                        bodyFont: {
+                            family: "'Noto Sans SC', sans-serif",
+                            size: 12,
+                        },
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        padding: 10,
+                        cornerRadius: 5,
+                        callbacks: {
+                            label: function(context) {
+                                return ' ' + context.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            font: {
+                                family: "'Noto Sans SC', sans-serif",
+                                size: 12
+                            },
+                            color: '#3C4043'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            font: {
+                                family: "'Noto Sans SC', sans-serif",
+                                size: 12
+                            },
+                            color: '#3C4043'
+                        },
+                        grid: {
+                            color: '#E0E0E0'
+                        }
+                    }
+                }
+            };
+            
+            let provincialSalesChartInstance;
+            let sourcingChartInstance;
+
+            const marketData = {
+                years: ['2020', '2021', '2022', '2023', '2024'],
+                sales: [1050, 1220, 1380, 1510, 1630]
+            };
+
+            const provincialData = {
+                labels: ['安大略省', '魁北克省', '不列颠哥伦比亚省', '阿尔伯塔省', '大西洋省份', '其他地区', '萨斯喀彻温省', '曼尼托巴省'],
+                sales: [626, 375, 212, 178, 91, 58, 44, 46],
+                share: [38.4, 23.0, 13.0, 10.9, 5.6, 3.6, 2.7, 2.8],
+                info: {
+                    '安大略省': '作为最大、最多元化的市场，安大略省的消费需求覆盖了从大众化到高端奢侈的全部价格区间。多伦多等大都市是“睡衣外穿”潮流的主要策源地，时尚属性被放大。',
+                    '魁北克省': '拥有独特的时尚文化和强大的本土品牌。消费者在追求舒适的同时，也十分注重产品的设计感和时尚度，偏爱设计更为精致、优雅的款式。',
+                    '不列颠哥伦比亚省': '得益于温和的海洋性气候，消费者更青睐轻薄、透气的睡衣材质，如竹纤维和皮马棉。市场对轻量化、功能性产品的需求旺盛。',
+                    '阿尔伯塔省': '冬季漫长而严寒，消费者对保暖性能的需求尤为突出。法兰绒睡衣、加厚抓绒浴袍等保暖材质产品在此区域拥有更高的市场需求。',
+                    '萨斯喀彻温省': '与阿尔伯塔省类似，冬季严寒，保暖是首要考虑因素。法兰绒等传统保暖材质在此地深受欢迎，消费动机更偏向实用功能。',
+                    '曼尼托巴省': '气候特征决定了保暖型睡衣和家居服是市场主流。消费者偏好舒适、耐用的产品，以应对寒冷的冬季。',
+                    '大西洋省份': '市场需求较为综合，受海洋性气候影响，既有对保暖的需求，也有对轻便款式的青睐。消费趋势与加拿大东部主流市场保持一致。',
+                    '其他地区': '包括育空、西北地区和努纳武特，由于气候极度寒冷，对功能性、极度保暖的服装需求最高，市场规模虽小但特点鲜明。',
+                }
+            };
+
+            const styleData = {
+                '2020': {
+                    title: '核心主题：极致舒适',
+                    items: [
+                        { icon: '🛌', name: '主流睡衣', desc: '超大廓形套装、懒人裙' },
+                        { icon: '🛁', name: '主流浴袍', desc: '基础款抓绒、毛圈布' },
+                        { icon: '🌿', name: '关键材质', desc: '棉、抓绒' }
+                    ]
+                },
+                '2021': {
+                    title: '核心主题：居家舒适升级',
+                    items: [
+                        { icon: '👕', name: '主流睡衣', desc: '罗纹针织套装、基础套装' },
+                        { icon: '🏨', name: '主流浴袍', desc: '酒店式厚重浴袍' },
+                        { icon: '🌱', name: '关键材质', desc: '有机棉、莫代尔' }
+                    ]
+                },
+                '2022': {
+                    title: '核心主题：优雅居家',
+                    items: [
+                        { icon: '👗', name: '主流睡衣', desc: '精致剪裁套装、衬衫裙' },
+                        { icon: '🧇', name: '主流浴袍', desc: '华夫格浴袍、轻质罩袍' },
+                        { icon: '🎍', name: '关键材质', desc: '竹纤维、天丝' }
+                    ]
+                },
+                '2023': {
+                    title: '核心主题：时尚融合',
+                    items: [
+                        { icon: '🌺', name: '主流睡衣', desc: '印花套装、短款套装' },
+                        { icon: '👘', name: '主流浴袍', desc: '时尚印花和服式浴袍' },
+                        { icon: '✨', name: '关键材质', desc: '丝绸、缎面、再生面料' }
+                    ]
+                },
+                '2024': {
+                    title: '核心主题：多功能与可持续',
+                    items: [
+                        { icon: '🏙️', name: '主流睡衣', desc: '“睡衣外穿”套装、吊带裙' },
+                        { icon: '🎨', name: '主流浴袍', desc: '多材质混搭、设计感浴袍' },
+                        { icon: '♻️', name: '关键材质', desc: '功能性面料、竹纤维' }
+                    ]
+                }
+            };
+            
+            const styleShareData = {
+                sleepwear: {
+                    labels: ['套装', '单品', '睡裙/衬衫裙', '其他'],
+                    data: [65, 15, 12, 8],
+                    colors: [chartColors.primary, chartColors.accent1, chartColors.accent2, chartColors.accent7]
+                },
+                bathrobe: {
+                    labels: ['酒店式厚重浴袍', '轻便华夫格浴袍', '时尚罩袍/和服式', '其他'],
+                    data: [45, 30, 20, 5],
+                    colors: [chartColors.secondary, chartColors.accent3, chartColors.accent5, chartColors.accent8]
+                }
+            };
+
+            const sourcingData = {
+                importSource: {
+                    labels: ['中国', '美国', '越南', '孟加拉国', '柬埔寨', '其他'],
+                    data: [28.5, 12.5, 11.1, 9.7, 7.2, 31.0],
+                    colors: [chartColors.primary, chartColors.secondary, chartColors.accent1, chartColors.accent2, chartColors.accent3, chartColors.accent7]
+                },
+                localVsImport: {
+                    labels: ['进口', '本土制造'],
+                    data: [94, 6],
+                    colors: [chartColors.primary, chartColors.secondary]
+                }
+            };
+            
+            function createMarketSizeChart() {
+                const ctx = document.getElementById('marketSizeChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: marketData.years,
+                        datasets: [{
+                            label: '市场规模估值 (百万加元)',
+                            data: marketData.sales,
+                            borderColor: chartColors.primary,
+                            backgroundColor: chartColors.primaryLight,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: chartColors.primary,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        ...globalChartOptions,
+                        plugins: { ...globalChartOptions.plugins, legend: { display: true, position: 'top' } },
+                        scales: { ...globalChartOptions.scales }
+                    }
+                });
+            }
+
+            function createOrUpdateProvincialSalesChart(dataType = 'sales') {
+                const ctx = document.getElementById('provincialSalesChart').getContext('2d');
+                const data = dataType === 'sales' ? provincialData.sales : provincialData.share;
+                const label = dataType === 'sales' ? '2024年销售额 (百万加元)' : '2024年市场份额 (%)';
+                const suffix = dataType === 'sales' ? ' 百万加元' : '%';
+
+                if (provincialSalesChartInstance) {
+                    provincialSalesChartInstance.destroy();
+                }
+
+                provincialSalesChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: provincialData.labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            backgroundColor: [
+                                chartColors.primary, chartColors.secondary, chartColors.accent1, chartColors.accent2,
+                                chartColors.accent3, chartColors.accent4, chartColors.accent5, chartColors.accent6
+                            ],
+                            borderColor: '#ffffff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        ...globalChartOptions,
+                        indexAxis: 'y',
+                        plugins: {
+                            ...globalChartOptions.plugins,
+                            legend: { display: false },
+                            tooltip: {
+                                ...globalChartOptions.plugins.tooltip,
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.raw + suffix;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const province = provincialData.labels[index];
+                                updateProvinceInfo(province);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function updateProvinceInfo(province) {
+                const titleEl = document.getElementById('province-title');
+                const textEl = document.getElementById('province-text');
+                titleEl.textContent = province;
+                textEl.textContent = provincialData.info[province];
+            }
+
+            function updateStyleInfo(year) {
+                const container = document.getElementById('style-info');
+                const data = styleData[year];
+                container.innerHTML = `
+                    <div class="col-span-1 md:col-span-2 lg:col-span-4 text-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">${data.title}</h3>
+                    </div>
+                    ${data.items.map(item => `
+                        <div class="bg-stone-50 p-4 rounded-xl border border-stone-200">
+                            <div class="text-4xl mb-2">${item.icon}</div>
+                            <h4 class="font-bold text-lg text-gray-700">${item.name}</h4>
+                            <p class="text-gray-600">${item.desc}</p>
+                        </div>
+                    `).join('')}
+                `;
+            }
+
+            function createStyleShareCharts() {
+                const sleepwearCtx = document.getElementById('sleepwearShareChart').getContext('2d');
+                new Chart(sleepwearCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: styleShareData.sleepwear.labels,
+                        datasets: [{
+                            data: styleShareData.sleepwear.data,
+                            backgroundColor: styleShareData.sleepwear.colors,
+                            borderColor: '#FDFBF5',
+                            borderWidth: 4,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: { ...globalChartOptions, cutout: '60%' }
+                });
+
+                const bathrobeCtx = document.getElementById('bathrobeShareChart').getContext('2d');
+                new Chart(bathrobeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: styleShareData.bathrobe.labels,
+                        datasets: [{
+                            data: styleShareData.bathrobe.data,
+                            backgroundColor: styleShareData.bathrobe.colors,
+                            borderColor: '#FDFBF5',
+                            borderWidth: 4,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: { ...globalChartOptions, cutout: '60%' }
+                });
+            }
+
+            function createOrUpdateSourcingChart(dataType = 'importSource') {
+                const ctx = document.getElementById('sourcingChart').getContext('2d');
+                const data = sourcingData[dataType];
+                
+                if (sourcingChartInstance) {
+                    sourcingChartInstance.destroy();
+                }
+                
+                sourcingChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.data,
+                            backgroundColor: data.colors,
+                            borderColor: '#FDFBF5',
+                            borderWidth: 4,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        ...globalChartOptions,
+                        cutout: '60%',
+                        plugins: {
+                           ...globalChartOptions.plugins,
+                           legend: {
+                               ...globalChartOptions.plugins.legend,
+                               position: 'right',
+                           },
+                           tooltip: { ...globalChartOptions.plugins.tooltip }
+                        },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        }
+                    }
+                });
+            }
+
+            const showSalesBtn = document.getElementById('showSalesBtn');
+            const showShareBtn = document.getElementById('showShareBtn');
+            showSalesBtn.addEventListener('click', () => {
+                createOrUpdateProvincialSalesChart('sales');
+                showSalesBtn.classList.replace('inactive-tab', 'active-tab');
+                showShareBtn.classList.replace('active-tab', 'inactive-tab');
+            });
+            showShareBtn.addEventListener('click', () => {
+                createOrUpdateProvincialSalesChart('share');
+                showShareBtn.classList.replace('inactive-tab', 'active-tab');
+                showSalesBtn.classList.replace('active-tab', 'inactive-tab');
+            });
+            
+            const yearPills = document.querySelectorAll('.year-pill');
+            yearPills.forEach(pill => {
+                pill.addEventListener('click', () => {
+                    yearPills.forEach(p => p.classList.replace('active-pill', 'inactive-pill'));
+                    pill.classList.replace('inactive-pill', 'active-pill');
+                    updateStyleInfo(pill.dataset.year);
+                });
+            });
+
+            const showImportSourceBtn = document.getElementById('showImportSourceBtn');
+            const showLocalImportBtn = document.getElementById('showLocalImportBtn');
+            showImportSourceBtn.addEventListener('click', () => {
+                createOrUpdateSourcingChart('importSource');
+                showImportSourceBtn.classList.replace('inactive-tab', 'active-tab');
+                showLocalImportBtn.classList.replace('active-tab', 'inactive-tab');
+            });
+            showLocalImportBtn.addEventListener('click', () => {
+                createOrUpdateSourcingChart('localVsImport');
+                showLocalImportBtn.classList.replace('inactive-tab', 'active-tab');
+                showImportSourceBtn.classList.replace('active-tab', 'inactive-tab');
+            });
+
+            createMarketSizeChart();
+            createOrUpdateProvincialSalesChart('sales');
+            updateStyleInfo('2024');
+            createStyleShareCharts();
+            createOrUpdateSourcingChart('importSource');
+        });
+    </script>
+</body>
+</html>
