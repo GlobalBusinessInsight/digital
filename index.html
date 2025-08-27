@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanG - 全球增长战略伙伴</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #1c3934; 
+            --color-secondary: #261311;
+            --color-accent: #c3955b;
+            --color-background: #F9F6F2;
+            --color-card: #FFFFFF;
+            --color-text: #261311;
+            --color-text-muted: #5d5d5d;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text);
+        }
+        h1, h2, h3, h4, h5, h6, .font-display { font-family: 'Montserrat', sans-serif; }
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--color-primary);
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            font-weight: 400;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem auto;
+            color: var(--color-text-muted);
+        }
+        .nav-link {
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--color-accent);
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        .advantage-card {
+            border: 1px solid #e6c8b7;
+            background-color: var(--color-card);
+        }
+        .pricing-table th, .pricing-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+        .pricing-table thead th {
+            background-color: #f8f9fa;
+        }
+        .pricing-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .checkmark {
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+    <!-- Chosen Palette: 尊尚顾问 (Prestige Consultant) -->
+    <!-- Application Structure Plan: 本应用的结构设计旨在将所有分散的信息整合成一个连贯的、具有说服力的品牌叙事。1. **英雄区域:** 建立高端品牌第一印象。2. **数据亮点:** 用关键数据快速建立信任感。3. **产品介绍 (核心服务):** 详细展开四大服务支柱的具体内容。4. **竞争优势:** 直观对比PlanG与市场的差异。5. **成功案例:** 展示实际案例，将服务能力具象化。6. **价格与方案:** 清晰展示成本与价值。7. **关于我们:** 传递品牌理念与使命。这个流程完整地引导用户从认知、信任、了解到决策，构成一个完整的销售漏斗。 -->
+    <!-- Visualization & Content Choices: 1. **数据亮点:** 报告内容 -> 关键绩效指标。目标 -> 快速建立信任。呈现方式 -> 动态数字滚动效果。交互 -> 滚动到该区域时触发动画。理由 -> 动态数据比静态数字更具吸引力。2. **成功案例:** 报告内容 -> 客户成功故事。目标 -> 验证服务效果。呈现方式 -> 卡片式图文布局。理由 -> 图文并茂的案例更具说服力。3. **价格与方案:** 报告内容 -> 服务层级。目标 -> 清晰展示价格与价值。呈现方式 -> 响应式HTML表格。理由 -> 表格是呈现多维度对比数据的最佳方式。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md fixed top-0 left-0 w-full z-50 shadow-sm transition-all duration-300">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="font-display text-2xl font-bold text-primary">PlanG</div>
+                <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold tracking-wider uppercase">
+                    <a href="#services" class="nav-link text-gray-600 hover:text-primary">产品介绍</a>
+                    <a href="#advantage" class="nav-link text-gray-600 hover:text-primary">竞争优势</a>
+                    <a href="#cases" class="nav-link text-gray-600 hover:text-primary">成功案例</a>
+                    <a href="#pricing" class="nav-link text-gray-600 hover:text-primary">价格列表</a>
+                    <a href="#about" class="nav-link text-gray-600 hover:text-primary">关于我们</a>
+                </nav>
+                <a href="#contact" class="hidden md:inline-block bg-primary text-white font-semibold py-2 px-6 rounded-full hover:bg-accent transition-colors duration-300">
+                    预约咨询
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="h-screen min-h-[700px] flex items-center justify-center text-center px-4 pt-16">
+            <div class="max-w-4xl">
+                <h1 class="font-display text-5xl md:text-7xl font-bold text-primary leading-tight mb-6">
+                    开启全球增长。<br class="hidden md:block">智慧之道。
+                </h1>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto text-text-muted font-light">
+                    PlanG 融合全球平台专长与人工智能，构筑您的市场领导力。
+                </p>
+            </div>
+        </section>
+
+        <section id="stats" class="py-20 bg-white fade-in-section">
+            <div class="container mx-auto px-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <div>
+                        <p class="text-4xl md:text-5xl font-bold text-primary" data-count="500">0</p>
+                        <p class="mt-2 text-text-muted">服务企业+</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl md:text-5xl font-bold text-primary" data-count="8000">0</p>
+                        <p class="mt-2 text-text-muted">广告消耗(万美金)+</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl md:text-5xl font-bold text-primary" data-count="98">0</p>
+                        <p class="mt-2 text-text-muted">客户满意度(%)</p>
+                    </div>
+                    <div>
+                        <p class="text-4xl md:text-5xl font-bold text-primary" data-count="10">0</p>
+                        <p class="mt-2 text-text-muted">专注行业(年)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="services" class="py-20 md:py-28 fade-in-section">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">产品介绍：一体化增长引擎</h2>
+                <p class="section-subtitle">
+                    我们将复杂的服务解构并重组为四大协同增效的解决方案支柱，为您的全球化增长提供全面动力。
+                </p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-lg border-t-4 border-accent shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4 text-primary">效果营销与市场准入</h3>
+                        <p class="text-text-muted font-light">整合 Google Ads 与博客内容营销，以数据驱动的精准投放，高效获取全球高价值客户。</p>
+                        <ul class="mt-4 space-y-2 text-sm text-text-muted list-disc list-inside">
+                            <li>关键词研究与广告策略</li>
+                            <li>SEO优化与高质量内容创作</li>
+                            <li>广告系列管理与A/B测试</li>
+                            <li>转化跟踪与效果报告</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg border-t-4 border-accent shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4 text-primary">社交电商与社群构建</h3>
+                        <p class="text-text-muted font-light">融合 TikTok, Facebook, YouTube 平台运营，构建从内容吸引到商业转化的完整闭环。</p>
+                         <ul class="mt-4 space-y-2 text-sm text-text-muted list-disc list-inside">
+                            <li>短视频创意与内容制作</li>
+                            <li>社交账户日常运营与互动</li>
+                            <li>社群管理与粉丝增长</li>
+                            <li>社交平台广告投放与优化</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg border-t-4 border-accent shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4 text-primary">专业网络影响力</h3>
+                        <p class="text-text-muted font-light">专注于 LinkedIn 平台，通过战略性 B2B 网络布局与高管思想领导力，建立行业绝对权威。</p>
+                         <ul class="mt-4 space-y-2 text-sm text-text-muted list-disc list-inside">
+                            <li>公司主页优化与内容发布</li>
+                            <li>高管个人品牌形象塑造</li>
+                            <li>B2B广告精准定位</li>
+                            <li>潜在客户开发与关系维护</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg border-t-4 border-accent shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4 text-primary">人工智能驱动的策略</h3>
+                        <p class="text-text-muted font-light">以 AI 作为技术内核赋能每一次决策，通过自动化与深度分析，实现营销效率的指数级提升。</p>
+                         <ul class="mt-4 space-y-2 text-sm text-text-muted list-disc list-inside">
+                            <li>AI辅助内容生成与优化</li>
+                            <li>市场趋势AI预测分析</li>
+                            <li>广告投放智能优化</li>
+                            <li>自动化数据洞察与报告</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="advantage" class="py-20 md:py-28 bg-white fade-in-section">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">竞争优势分析</h2>
+                <p class="section-subtitle">
+                    我们系统性地阐明 PlanG 在内容、质量和价格三个维度的独特优势，清晰定义我们的价值定位。
+                </p>
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="advantage-card rounded-lg p-8 text-center">
+                        <h3 class="text-2xl font-bold text-primary mb-4">内容优势</h3>
+                        <p class="text-text-muted mb-6 font-semibold">一体化增长引擎</p>
+                        <div class="text-sm space-y-4">
+                           <div>
+                                <h4 class="font-bold text-gray-500">市场现状</h4>
+                                <p>客户需自行整合零散服务，渠道间缺乏协同，管理成本高。</p>
+                           </div>
+                           <hr class="my-4">
+                           <div>
+                                <h4 class="font-bold text-primary">PlanG 优势</h4>
+                                <p>提供由AI驱动的一体化解决方案，确保所有营销渠道协同增效，构成一个能自我学习的完整增长体系。</p>
+                           </div>
+                        </div>
+                    </div>
+                    <div class="advantage-card rounded-lg p-8 text-center">
+                        <h3 class="text-2xl font-bold text-primary mb-4">质量优势</h3>
+                        <p class="text-text-muted mb-6 font-semibold">战略合作伙伴</p>
+                        <div class="text-sm space-y-4">
+                            <div>
+                                <h4 class="font-bold text-gray-500">市场现状</h4>
+                                <p>多数机构关注执行层面指标，而非客户的最终商业成功。</p>
+                           </div>
+                           <hr class="my-4">
+                           <div>
+                                <h4 class="font-bold text-primary">PlanG 优势</h4>
+                                <p>以最终商业成果为导向，提供基于深刻洞察的战略咨询，与客户建立长期的、共同成长的伙伴关系。</p>
+                           </div>
+                        </div>
+                    </div>
+                    <div class="advantage-card rounded-lg p-8 text-center">
+                        <h3 class="text-2xl font-bold text-primary mb-4">价格优势</h3>
+                        <p class="text-text-muted mb-6 font-semibold">可扩展的价值投资</p>
+                         <div class="text-sm space-y-4">
+                            <div>
+                                <h4 class="font-bold text-gray-500">市场现状</h4>
+                                <p>固定的高昂月费构成进入门槛，价值与价格关系模糊。</p>
+                           </div>
+                           <hr class="my-4">
+                           <div>
+                                <h4 class="font-bold text-primary">PlanG 优势</h4>
+                                <p>提供低门槛进入方案和清晰的价值阶梯，服务是与客户增长同步的可扩展投资，确保各阶段ROI最大化。</p>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cases" class="py-20 md:py-28 fade-in-section">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">成功案例</h2>
+                <p class="section-subtitle">
+                    我们通过实际案例，将服务能力具象化，展示我们为客户创造的真实价值。
+                </p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-t-4 border-accent flex flex-col">
+                        <h3 class="text-xl font-semibold text-primary mb-2">某高端制造业品牌出海</h3>
+                        <p class="text-text-muted text-sm mb-4 flex-grow">通过 LinkedIn 精准定位与思想领导力内容，成功建立行业权威，获取大量高质量 B2B 询盘。</p>
+                        <span class="text-sm font-bold text-accent mt-auto">询盘成本降低 40%</span>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-t-4 border-accent flex flex-col">
+                        <h3 class="text-xl font-semibold text-primary mb-2">某快时尚品牌社交电商</h3>
+                        <p class="text-text-muted text-sm mb-4 flex-grow">利用 TikTok 短视频矩阵和直播带货，实现品牌声量与销售额双重爆发式增长。</p>
+                        <span class="text-sm font-bold text-accent mt-auto">ROI 提升 300%</span>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-t-4 border-accent flex flex-col">
+                        <h3 class="text-xl font-semibold text-primary mb-2">某科技初创公司AI营销</h3>
+                        <p class="text-text-muted text-sm mb-4 flex-grow">运用 AI 驱动的 Google Ads 策略，智能优化广告投放，以更低预算获得超预期市场回报。</p>
+                        <span class="text-sm font-bold text-accent mt-auto">转化率提升 150%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="pricing" class="py-20 md:py-28 bg-white fade-in-section">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">价格列表与对比分析</h2>
+                <p class="section-subtitle">
+                    我们提供透明、灵活的定价方案，以匹配您业务发展的不同阶段。所有价格均为月度服务费，不含广告预算。
+                </p>
+                
+                <div class="shadow-xl rounded-lg overflow-x-auto">
+                    <table class="w-full text-sm lg:text-base pricing-table">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="w-1/3">服务项目</th>
+                                <th class="text-center">体验版<br><span class="font-normal text-text-muted">¥1,000/月</span></th>
+                                <th class="text-center">基础版<br><span class="font-normal text-text-muted">¥2,000/月</span></th>
+                                <th class="text-center">专业版<br><span class="font-normal text-text-muted">¥5,000/月</span></th>
+                                <th class="text-center">旗舰版<br><span class="font-normal text-text-muted">¥10,000/月</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-gray-100"><td colspan="5" class="font-bold text-primary">核心平台管理</td></tr>
+                            <tr>
+                                <td>管理平台数量</td>
+                                <td class="text-center">任选 1 个</td>
+                                <td class="text-center">任选 2 个</td>
+                                <td class="text-center">最多 4 个</td>
+                                <td class="text-center">全平台</td>
+                            </tr>
+                             <tr>
+                                <td>Google Ads & 博客营销</td>
+                                <td class="text-center checkmark">✔</td>
+                                <td class="text-center checkmark">✔</td>
+                                <td class="text-center checkmark">✔</td>
+                                <td class="text-center checkmark">✔</td>
+                            </tr>
+                            <tr>
+                                <td>TikTok, Facebook & YouTube</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center checkmark">✔</td>
+                                <td class="text-center checkmark">✔</td>
+                                <td class="text-center checkmark">✔</td>
+                            </tr>
+                            <tr>
+                                <td>LinkedIn B2B 营销</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center checkmark">✔</td>
+                                <td class="text-center checkmark">✔</td>
+                            </tr>
+                            <tr class="bg-gray-100"><td colspan="5" class="font-bold text-primary">内容与策略</td></tr>
+                            <tr>
+                                <td>内容发布频率</td>
+                                <td class="text-center">基础 (每月2次)</td>
+                                <td class="text-center">常规 (每周1-2次)</td>
+                                <td class="text-center">全面 (高频)</td>
+                                <td class="text-center">定制化</td>
+                            </tr>
+                            <tr>
+                                <td>内容策略</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center">基础</td>
+                                <td class="text-center">全面</td>
+                                <td class="text-center">定制化品牌战略</td>
+                            </tr>
+                             <tr class="bg-gray-100"><td colspan="5" class="font-bold text-primary">AI 赋能与报告</td></tr>
+                             <tr>
+                                <td>AI 辅助策略优化</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center checkmark">✔</td>
+                                <td class="text-center checkmark">✔</td>
+                            </tr>
+                            <tr>
+                                <td>报告级别</td>
+                                <td class="text-center">基础数据</td>
+                                <td class="text-center">标准效果</td>
+                                <td class="text-center">深度分析</td>
+                                <td class="text-center">商业智能 (BI)</td>
+                            </tr>
+                            <tr class="bg-gray-100"><td colspan="5" class="font-bold text-primary">客户服务</td></tr>
+                            <tr>
+                                <td>专属客户经理</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center text-gray-400">-</td>
+                                <td class="text-center checkmark">✔</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="text-center py-6"><a href="#contact" class="bg-primary text-white font-semibold py-2 px-6 rounded-full text-sm">选择</a></td>
+                                <td class="text-center py-6"><a href="#contact" class="bg-primary text-white font-semibold py-2 px-6 rounded-full text-sm">选择</a></td>
+                                <td class="text-center py-6"><a href="#contact" class="bg-accent text-primary font-semibold py-2 px-6 rounded-full text-sm">推荐</a></td>
+                                <td class="text-center py-6"><a href="#contact" class="bg-primary text-white font-semibold py-2 px-6 rounded-full text-sm">选择</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-20 md:py-28 fade-in-section">
+            <div class="container mx-auto px-6 text-center">
+                 <h2 class="section-title">关于我们</h2>
+                 <p class="section-subtitle">
+                    我们不仅仅是营销执行者，更是您值得信赖的全球增长战略伙伴。
+                </p>
+                <div class="max-w-3xl mx-auto bg-white p-10 rounded-lg shadow-lg">
+                    <p class="text-text-muted leading-relaxed">
+                        在 PlanG，我们的使命是帮助富有远见的企业打破地域界限，实现全球化增长。我们坚信，真正的市场领导力源于深刻的战略洞察与卓越的技术执行的完美结合。因此，我们摒弃了传统营销机构零散的服务模式，构建了一个由 AI 驱动的一体化增长引擎。我们致力于与客户建立长期的战略合作伙伴关系，深入理解其商业目标，并以最终的商业成果为我们唯一的衡量标准。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-20 md:py-28 bg-primary text-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">准备好开启您的全球增长之旅了吗？</h2>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto font-light opacity-80 mb-12">
+                    让我们共同探讨如何为您量身定制战略，构筑持久的市场领导力。
+                </p>
+                <a href="#" class="bg-accent text-primary font-bold py-4 px-12 rounded-full hover:opacity-90 transition-opacity duration-300 text-lg">
+                    立即预约战略咨询
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-card py-6">
+        <div class="container mx-auto px-6 text-center text-gray-500 text-sm">
+            <p>&copy; 2024 PlanG. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Header scroll effect
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('py-2');
+                    header.classList.remove('py-4');
+                } else {
+                    header.classList.add('py-4');
+                    header.classList.remove('py-2');
+                }
+            });
+
+            // Intersection Observer for animations
+            const sections = document.querySelectorAll('.fade-in-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        if(entry.target.id === 'stats') {
+                            startCounters();
+                        }
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // Counter animation
+            function startCounters() {
+                const counters = document.querySelectorAll('[data-count]');
+                counters.forEach(counter => {
+                    const target = +counter.getAttribute('data-count');
+                    let current = 0;
+                    const increment = target / 100;
+
+                    const updateCounter = () => {
+                        if (current < target) {
+                            current += increment;
+                            counter.innerText = Math.ceil(current);
+                            requestAnimationFrame(updateCounter);
+                        } else {
+                            counter.innerText = target;
+                        }
+                    };
+                    updateCounter();
+                });
+            }
+            
+            // Nav link active state on scroll
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pageSections = document.querySelectorAll('main section');
+
+            const activateNavOnScroll = () => {
+                let currentSection = '';
+                pageSections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${currentSection}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+            window.addEventListener('scroll', activateNavOnScroll);
+
+        });
+    </script>
+</body>
+</html>
