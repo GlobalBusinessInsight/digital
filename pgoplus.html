@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProcessGo Plus™ | 多语言数字手册</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', 'Noto Sans SC', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        #magazine-container {
+            perspective: 2500px;
+        }
+
+        .page {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: none; 
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            z-index: 1;
+        }
+
+        .page.active {
+            display: block;
+            z-index: 10;
+        }
+        
+        .page.flipping {
+            z-index: 20;
+            animation: flip-out 1.5s ease-in-out forwards; 
+            transform-origin: left center;
+        }
+
+        @keyframes flip-out {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(-180deg); }
+        }
+
+        .a4-container {
+            width: 100%;
+            aspect-ratio: 210 / 297;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .type-container .cursor {
+            display: inline-block;
+            background-color: #0057FF;
+            width: 0.15em;
+            height: 1.2em;
+            margin-left: 0.1em;
+            vertical-align: text-bottom;
+            animation: blink-caret .75s step-end infinite;
+        }
+        
+        @keyframes blink-caret {
+            from, to { background-color: transparent }
+            50% { background-color: #0057FF; }
+        }
+
+        .font-jp { font-family: 'Noto Sans JP', sans-serif; }
+        .font-sc { font-family: 'Noto Sans SC', sans-serif; }
+        .font-tc { font-family: 'Noto Sans TC', sans-serif; }
+        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="relative min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
+        
+        <div id="magazine-container" class="relative w-full max-w-3xl mx-auto" style="aspect-ratio: 210 / 297;">
+            <!-- Page 1: 简体中文 -->
+            <div class="page font-sc" data-lang="简体中文">
+                <div class="bg-white rounded-lg shadow-2xl a4-container">
+                    <div class="p-8 md:p-12 lg:p-16 flex-grow flex flex-col">
+                        <header class="flex justify-between items-start pb-6 mb-8">
+                            <div>
+                                <h2 class="font-montserrat text-xl sm:text-2xl font-bold tracking-wider text-gray-900">INOSSEM</h2>
+                                <h1 class="font-montserrat text-2xl sm:text-3xl font-semibold text-blue-600 tracking-wide">ProcessGo Plus™</h1>
+                            </div>
+                            <div class="bg-[#0057FF] p-3 rounded-lg inline-block">
+                                <img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="INOSSEM Logo" class="w-20 h-auto">
+                            </div>
+                        </header>
+                        <main class="flex-grow">
+                            <h3 class="text-3xl md:text-5xl font-bold leading-tight md:leading-snug mb-6 text-gray-900 type-container">化繁为简，<br class="hidden md:block">以集成之力驱动业务增长。</h3>
+                            <p class="text-base md:text-lg text-gray-600 leading-relaxed max-w-3xl mb-12 type-container">在全球化运营的浪潮中，ProcessGo Plus™ 作为一套全面的企业流程自动化套件，为您连接分散的系统，打破数据壁垒，实现端到端的流程可视化与实时协作，将挑战转化为机遇。</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">财务与税务</h4><p class="text-gray-500 type-container">实现财务收付、电子发票与税务合规的自动化运营。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">薪酬与费控</h4><p class="text-gray-500 type-container">简化薪酬福利计算与员工报销支付流程。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">供应链</h4><p class="text-gray-500 type-container">打通仓储、物流与ERP系统，提升供应链协同效率。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">集成平台</h4><p class="text-gray-500 type-container">连接内外部核心系统，构建统一、实时的数字中枢。</p></div>
+                            </div>
+                        </main>
+                    </div>
+                    <footer class="bg-gray-50 p-8 md:px-12 md:py-8 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-6 text-center">深受全球行业领导者信赖</h4><div class="text-center space-y-3"><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">AEOLUS</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SAILUN</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">CFMOTO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SEGWAY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">NAVIMOW</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">MEDSUP</span></div><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">PHOENIX PAPER</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">WANHUA</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SANY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">DELI</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">COSCO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">LOREX</span></div></div></footer>
+                </div>
+            </div>
+
+            <!-- Page 2: English -->
+             <div class="page hidden font-montserrat" data-lang="English">
+                <div class="bg-white rounded-lg shadow-2xl a4-container">
+                    <div class="p-8 md:p-12 lg:p-16 flex-grow flex flex-col">
+                        <header class="flex justify-between items-start pb-6 mb-8">
+                            <div><h2 class="text-xl sm:text-2xl font-bold tracking-wider text-gray-900">INOSSEM</h2><h1 class="text-2xl sm:text-3xl font-semibold text-blue-600 tracking-wide">ProcessGo Plus™</h1></div>
+                            <div class="bg-[#0057FF] p-3 rounded-lg inline-block"><img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="INOSSEM Logo" class="w-20 h-auto"></div>
+                        </header>
+                        <main class="flex-grow">
+                            <h3 class="text-3xl md:text-5xl font-bold leading-tight mb-6 text-gray-900 type-container">From complexity to simplicity.<br class="hidden md:block">Accelerate your growth with the power of integration.</h3>
+                            <p class="text-base md:text-lg text-gray-600 leading-relaxed max-w-3xl mb-12 type-container">Facing the challenges of globalization, ProcessGo Plus™ is a comprehensive automation suite that connects your disparate systems, eliminates data silos, and provides end-to-end visibility to turn challenges into opportunities.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Finance & Tax</h4><p class="text-gray-500 type-container">Automate financial payments, e-invoicing, and tax compliance operations.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Payroll & Expense</h4><p class="text-gray-500 type-container">Simplify payroll, benefits calculation, and employee expense reimbursement.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Supply Chain</h4><p class="text-gray-500 type-container">Integrate warehousing, logistics, and ERP systems to enhance supply chain efficiency.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Integration Platform</h4><p class="text-gray-500 type-container">Connect internal and external core systems to build a unified, real-time digital hub.</p></div>
+                            </div>
+                        </main>
+                    </div>
+                    <footer class="bg-gray-50 p-8 md:px-12 md:py-8 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-6 text-center">Trusted by Global Industry Leaders</h4><div class="text-center space-y-3"><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">AEOLUS</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SAILUN</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">CFMOTO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SEGWAY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">NAVIMOW</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">MEDSUP</span></div><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">PHOENIX PAPER</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">WANHUA</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SANY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">DELI</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">COSCO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">LOREX</span></div></div></footer>
+                </div>
+            </div>
+            <!-- Page 3: Français -->
+            <div class="page hidden font-montserrat" data-lang="Français">
+                <div class="bg-white rounded-lg shadow-2xl a4-container">
+                     <div class="p-8 md:p-12 lg:p-16 flex-grow flex flex-col">
+                        <header class="flex justify-between items-start pb-6 mb-8">
+                            <div><h2 class="text-xl sm:text-2xl font-bold tracking-wider text-gray-900">INOSSEM</h2><h1 class="text-2xl sm:text-3xl font-semibold text-blue-600 tracking-wide">ProcessGo Plus™</h1></div>
+                             <div class="bg-[#0057FF] p-3 rounded-lg inline-block"><img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="INOSSEM Logo" class="w-20 h-auto"></div>
+                        </header>
+                        <main class="flex-grow">
+                            <h3 class="text-3xl md:text-5xl font-bold leading-tight mb-6 text-gray-900 type-container">De la complexité à la simplicité.<br class="hidden md:block">Accélérez votre croissance par le pouvoir de l'intégration.</h3>
+                            <p class="text-base md:text-lg text-gray-600 leading-relaxed max-w-3xl mb-12 type-container">Face aux défis de la mondialisation, ProcessGo Plus™ est une suite complète d'automatisation qui connecte vos systèmes dispersés, élimine les silos de données et offre une visibilité de bout en bout pour transformer les défis en opportunités.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Finance et Fiscalité</h4><p class="text-gray-500 type-container">Automatisez les paiements, la facturation électronique et la conformité fiscale.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Paie et Dépenses</h4><p class="text-gray-500 type-container">Simplifiez le calcul de la paie et le remboursement des dépenses des employés.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Chaîne d'approvisionnement</h4><p class="text-gray-500 type-container">Intégrez l'entreposage, la logistique et les systèmes ERP pour une meilleure efficacité.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Plateforme d'intégration</h4><p class="text-gray-500 type-container">Connectez vos systèmes pour construire un hub numérique unifié et en temps réel.</p></div>
+                            </div>
+                        </main>
+                    </div>
+                    <footer class="bg-gray-50 p-8 md:px-12 md:py-8 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-6 text-center">La confiance des leaders mondiaux</h4><div class="text-center space-y-3"><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">AEOLUS</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SAILUN</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">CFMOTO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SEGWAY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">NAVIMOW</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">MEDSUP</span></div><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">PHOENIX PAPER</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">WANHUA</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SANY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">DELI</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">COSCO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">LOREX</span></div></div></footer>
+                </div>
+            </div>
+             <!-- Page 4: Español -->
+            <div class="page hidden font-montserrat" data-lang="Español">
+                <div class="bg-white rounded-lg shadow-2xl a4-container">
+                    <div class="p-8 md:p-12 lg:p-16 flex-grow flex flex-col">
+                         <header class="flex justify-between items-start pb-6 mb-8">
+                            <div><h2 class="text-xl sm:text-2xl font-bold tracking-wider text-gray-900">INOSSEM</h2><h1 class="text-2xl sm:text-3xl font-semibold text-blue-600 tracking-wide">ProcessGo Plus™</h1></div>
+                             <div class="bg-[#0057FF] p-3 rounded-lg inline-block"><img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="INOSSEM Logo" class="w-20 h-auto"></div>
+                        </header>
+                        <main class="flex-grow">
+                            <h3 class="text-3xl md:text-5xl font-bold leading-tight mb-6 text-gray-900 type-container">De la complejidad a la simplicidad.<br class="hidden md:block">Acelere su crecimiento con el poder de la integración.</h3>
+                            <p class="text-base md:text-lg text-gray-600 leading-relaxed max-w-3xl mb-12 type-container">Ante los desafíos de la globalización, ProcessGo Plus™ es una suite completa de automatización que conecta sus sistemas dispersos, elimina los silos de datos y ofrece una visibilidad de extremo a extremo para convertir los desafíos en oportunidades.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Finanzas y Fiscalidad</h4><p class="text-gray-500 type-container">Automatice los pagos, la facturación electrónica y las operaciones de cumplimiento fiscal.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Nómina y Gastos</h4><p class="text-gray-500 type-container">Simplifique el cálculo de nóminas y el reembolso de gastos de empleados.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Cadena de Suministro</h4><p class="text-gray-500 type-container">Integre el almacenamiento, la logística y los sistemas ERP para una mayor eficiencia.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Plataforma de Integración</h4><p class="text-gray-500 type-container">Conecte sus sistemas para construir un centro digital unificado y en tiempo real.</p></div>
+                            </div>
+                        </main>
+                    </div>
+                    <footer class="bg-gray-50 p-8 md:px-12 md:py-8 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-6 text-center">Con la confianza de líderes mundiales</h4><div class="text-center space-y-3"><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">AEOLUS</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SAILUN</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">CFMOTO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SEGWAY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">NAVIMOW</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">MEDSUP</span></div><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">PHOENIX PAPER</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">WANHUA</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SANY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">DELI</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">COSCO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">LOREX</span></div></div></footer>
+                </div>
+            </div>
+            <!-- Page 5: Português -->
+            <div class="page hidden font-montserrat" data-lang="Português">
+                <div class="bg-white rounded-lg shadow-2xl a4-container">
+                    <div class="p-8 md:p-12 lg:p-16 flex-grow flex flex-col">
+                        <header class="flex justify-between items-start pb-6 mb-8">
+                            <div><h2 class="text-xl sm:text-2xl font-bold tracking-wider text-gray-900">INOSSEM</h2><h1 class="text-2xl sm:text-3xl font-semibold text-blue-600 tracking-wide">ProcessGo Plus™</h1></div>
+                            <div class="bg-[#0057FF] p-3 rounded-lg inline-block"><img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="INOSSEM Logo" class="w-20 h-auto"></div>
+                        </header>
+                        <main class="flex-grow">
+                            <h3 class="text-3xl md:text-5xl font-bold leading-tight mb-6 text-gray-900 type-container">Da complexidade à simplicidade.<br class="hidden md:block">Acelere seu crescimento com o poder da integração.</h3>
+                            <p class="text-base md:text-lg text-gray-600 leading-relaxed max-w-3xl mb-12 type-container">Enfrentando os desafios da globalização, o ProcessGo Plus™ é uma suíte de automação completa que conecta seus sistemas distintos, elimina silos de dados e fornece visibilidade de ponta a ponta para transformar desafios em oportunidades.</p>
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Finanças e Impostos</h4><p class="text-gray-500 type-container">Automatize pagamentos, faturamento eletrônico e conformidade fiscal.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Folha de Pagamento e Despesas</h4><p class="text-gray-500 type-container">Simplifique o cálculo da folha de pagamento e o reembolso de despesas dos funcionários.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Cadeia de Suprimentos</h4><p class="text-gray-500 type-container">Integre armazenagem, logística e sistemas ERP para maior eficiência.</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">Plataforma de Integração</h4><p class="text-gray-500 type-container">Conecte seus sistemas para construir um hub digital unificado e em tempo real.</p></div>
+                            </div>
+                        </main>
+                    </div>
+                    <footer class="bg-gray-50 p-8 md:px-12 md:py-8 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-6 text-center">A confiança de líderes globais</h4><div class="text-center space-y-3"><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">AEOLUS</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SAILUN</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">CFMOTO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SEGWAY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">NAVIMOW</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">MEDSUP</span></div><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">PHOENIX PAPER</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">WANHUA</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SANY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">DELI</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">COSCO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">LOREX</span></div></div></footer>
+                </div>
+            </div>
+            <!-- Page 6: 日本語 -->
+            <div class="page hidden font-jp" data-lang="日本語">
+                <div class="bg-white rounded-lg shadow-2xl a4-container">
+                    <div class="p-8 md:p-12 lg:p-16 flex-grow flex flex-col">
+                        <header class="flex justify-between items-start pb-6 mb-8">
+                             <div><h2 class="font-montserrat text-xl sm:text-2xl font-bold tracking-wider text-gray-900">INOSSEM</h2><h1 class="font-montserrat text-2xl sm:text-3xl font-semibold text-blue-600 tracking-wide">ProcessGo Plus™</h1></div>
+                             <div class="bg-[#0057FF] p-3 rounded-lg inline-block"><img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="INOSSEM Logo" class="w-20 h-auto"></div>
+                        </header>
+                        <main class="flex-grow">
+                            <h3 class="text-3xl md:text-5xl font-bold leading-tight md:leading-snug mb-6 text-gray-900 type-container">複雑からシンプルへ。<br class="hidden md:block">統合の力で、ビジネスの成長を加速させる。</h3>
+                            <p class="text-base md:text-lg text-gray-600 leading-relaxed max-w-3xl mb-12 type-container">グローバル化の課題に直面する中、ProcessGo Plus™は、散在するシステムを接続し、データのサイロ化を解消し、エンドツーエンドの可視性を提供して、課題を機会に変える包括的な自動化スイートです。</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">財務・税務</h4><p class="text-gray-500 type-container">支払、電子請求、税務コンプライアンス業務を自動化します。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">給与計算・経費管理</h4><p class="text-gray-500 type-container">給与計算と従業員の経費精算プロセスを簡素化します。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">サプライチェーン</h4><p class="text-gray-500 type-container">倉庫、物流、ERPシステムを統合して効率を向上させます。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">統合プラットフォーム</h4><p class="text-gray-500 type-container">システムを接続し、リアルタイムの統合デジタルハブを構築します。</p></div>
+                            </div>
+                        </main>
+                    </div>
+                    <footer class="bg-gray-50 p-8 md:px-12 md:py-8 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-6 text-center">世界の業界リーダーからの信頼</h4><div class="text-center space-y-3"><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">AEOLUS</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SAILUN</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">CFMOTO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SEGWAY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">NAVIMOW</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">MEDSUP</span></div><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">PHOENIX PAPER</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">WANHUA</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SANY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">DELI</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">COSCO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">LOREX</span></div></div></footer>
+                </div>
+            </div>
+            <!-- Page 7: 繁體中文 -->
+            <div class="page hidden font-tc" data-lang="繁體中文">
+                <div class="bg-white rounded-lg shadow-2xl a4-container">
+                    <div class="p-8 md:p-12 lg:p-16 flex-grow flex flex-col">
+                        <header class="flex justify-between items-start pb-6 mb-8">
+                            <div><h2 class="font-montserrat text-xl sm:text-2xl font-bold tracking-wider text-gray-900">INOSSEM</h2><h1 class="font-montserrat text-2xl sm:text-3xl font-semibold text-blue-600 tracking-wide">ProcessGo Plus™</h1></div>
+                             <div class="bg-[#0057FF] p-3 rounded-lg inline-block"><img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="INOSSEM Logo" class="w-20 h-auto"></div>
+                        </header>
+                        <main class="flex-grow">
+                            <h3 class="text-3xl md:text-5xl font-bold leading-tight md:leading-snug mb-6 text-gray-900 type-container">化繁為簡，<br class="hidden md:block">以整合之力驅動業務增長。</h3>
+                            <p class="text-base md:text-lg text-gray-600 leading-relaxed max-w-3xl mb-12 type-container">在全球化營運的浪潮中，ProcessGo Plus™ 作為一套全面的企业流程自动化套件，為您連接分散的系統，打破數據壁壘，實現端到端的流程可視化與即時協作，將挑戰轉化為機遇。</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">財務與稅務</h4><p class="text-gray-500 type-container">實現財務收付、電子發票與稅務合規的自動化營運。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">薪酬與費用控制</h4><p class="text-gray-500 type-container">簡化薪酬福利計算與員工報銷支付流程。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">供應鏈</h4><p class="text-gray-500 type-container">打通倉儲、物流與ERP系統，提升供應鏈協同效率。</p></div>
+                                <div><h4 class="font-bold text-lg text-gray-900 type-container">整合平台</h4><p class="text-gray-500 type-container">連接內外部核心系統，構建統一、即時的數位中樞。</p></div>
+                            </div>
+                        </main>
+                    </div>
+                    <footer class="bg-gray-50 p-8 md:px-12 md:py-8 border-t border-gray-200"><h4 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-6 text-center">深受全球行業領導者信賴</h4><div class="text-center space-y-3"><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">AEOLUS</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SAILUN</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">CFMOTO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SEGWAY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">NAVIMOW</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">MEDSUP</span></div><div class="flex flex-wrap justify-center items-center gap-x-5 sm:gap-x-6"><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">PHOENIX PAPER</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">WANHUA</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">SANY</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">DELI</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">COSCO</span><span class="font-montserrat text-gray-600 font-medium text-sm sm:text-base">LOREX</span></div></div></footer>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Navigation -->
+        <div id="navigation-controls" class="mt-8 flex items-center gap-4">
+            <button id="prev-btn" class="bg-white p-3 rounded-full shadow-md hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <div class="text-center">
+                 <span id="page-indicator" class="text-gray-600 text-sm font-medium"></span>
+            </div>
+            <button id="next-btn" class="bg-white p-3 rounded-full shadow-md hover:bg-gray-200 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('magazine-container');
+            const pages = document.querySelectorAll('.page');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const pageIndicator = document.getElementById('page-indicator');
+            
+            let currentPageIndex = 0;
+            let isPaused = true; 
+            let isAnimating = false;
+            let currentSequence; 
+
+            const flipDuration = 1500;
+            const typeInterval = 30;
+
+            // --- Animation Engine ---
+            const typeOut = async (page) => {
+                const elements = page.querySelectorAll('.type-container');
+                for (const el of elements) {
+                    if (isPaused) return;
+                    
+                    const originalHtml = el.dataset.originalHtml;
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = originalHtml;
+                    const nodes = Array.from(tempDiv.childNodes).filter(n => n.nodeType === 3 || n.nodeName === 'BR');
+                    
+                    el.innerHTML = '';
+                    const cursor = document.createElement('span');
+                    cursor.className = 'cursor';
+                    el.appendChild(cursor);
+
+                    for (const node of nodes) {
+                        if(node.nodeType === 3) {
+                             const text = node.textContent;
+                             for (const char of text) {
+                                if (isPaused) return;
+                                await new Promise(resolve => setTimeout(resolve, typeInterval));
+                                el.insertBefore(document.createTextNode(char), cursor);
+                            }
+                        } else if (node.nodeName === 'BR') {
+                             el.insertBefore(document.createElement('br'), cursor);
+                        }
+                    }
+                    cursor.remove();
+                }
+            };
+            
+            const clearPageContent = (page) => {
+                page.querySelectorAll('.type-container').forEach(el => {
+                    el.innerHTML = '';
+                });
+            };
+
+            const storeOriginalsAndClear = () => {
+                pages.forEach(page => {
+                    page.querySelectorAll('.type-container').forEach(el => {
+                        el.dataset.originalHtml = el.innerHTML;
+                        el.innerHTML = '';
+                    });
+                });
+            };
+
+            const updatePageIndicator = () => {
+                const currentPageElement = pages[currentPageIndex];
+                const lang = currentPageElement.dataset.lang;
+                pageIndicator.textContent = `${lang} (${currentPageIndex + 1}/${pages.length})`;
+            };
+
+            // --- Main Animation Controller ---
+            const runPageSequence = async (index) => {
+                if (isAnimating) return;
+                isAnimating = true;
+                isPaused = false;
+
+                currentPageIndex = index;
+                const currentPage = pages[currentPageIndex];
+                updatePageIndicator();
+                
+                pages.forEach(p => {
+                    p.classList.remove('active', 'flipping');
+                    if (p !== currentPage) clearPageContent(p);
+                });
+                currentPage.classList.add('active');
+
+                await typeOut(currentPage);
+                if (isPaused) { isAnimating = false; return; }
+
+                await new Promise(resolve => { currentSequence = setTimeout(resolve, 2000); });
+                if (isPaused) { isAnimating = false; return; }
+
+                const nextPageIndex = (currentPageIndex + 1) % pages.length;
+                const incomingPage = pages[nextPageIndex];
+                
+                incomingPage.classList.add('active');
+                currentPage.classList.add('flipping');
+                
+                setTimeout(() => {
+                    if (!isPaused) typeOut(incomingPage);
+                }, 500);
+
+                setTimeout(() => {
+                    currentPage.classList.remove('active', 'flipping');
+                    isAnimating = false;
+                    
+                    if (!isPaused) {
+                       runPageSequence(nextPageIndex);
+                    }
+                }, flipDuration);
+            };
+
+            const stopAnimation = () => {
+                isPaused = true;
+                clearTimeout(currentSequence);
+                isAnimating = false;
+            };
+
+            // --- Event Listeners ---
+            prevBtn.addEventListener('click', () => {
+                stopAnimation();
+                const prevPageIndex = (currentPageIndex - 1 + pages.length) % pages.length;
+                runPageSequence(prevPageIndex);
+            });
+
+            nextBtn.addEventListener('click', () => {
+                stopAnimation();
+                const nextPageIndex = (currentPageIndex + 1) % pages.length;
+                runPageSequence(nextPageIndex);
+            });
+            
+            container.addEventListener('mouseenter', stopAnimation);
+            container.addEventListener('mouseleave', () => {
+                if(isPaused){
+                    const nextPageIndex = (currentPageIndex + 1) % pages.length;
+                    runPageSequence(nextPageIndex);
+                }
+            });
+
+            // --- Initial Setup ---
+            storeOriginalsAndClear();
+            runPageSequence(0);
+        });
+    </script>
+
+</body>
+</html>
+
