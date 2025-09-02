@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧能源认知引擎 & Alpha-E 交易平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        html, body { 
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling on the body */
+        }
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #0a192f; color: #cbd5e1; }
+        .page {
+            width: 100%;
+            height: 100vh; /* Full viewport height */
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+            position: relative;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .page.active {
+            display: flex; /* Shown when active */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .section-title { font-size: 2.5rem; font-weight: 900; color: #e2e8f0; text-align: center; }
+        .section-subtitle { font-size: 1.125rem; color: #94a3b8; text-align: center; max-width: 800px; margin: 1rem auto; }
+        .nav-link { color: #cbd5e1; }
+        .hero-bg { position: relative; background: radial-gradient(ellipse at bottom, #112240 0%, #0a192f 100%); overflow: hidden; }
+        #particles-js { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; }
+        .pain-card { background-color: #112240; border: 1px solid #1e2F3b; border-radius: 0.5rem; transition: all 0.3s ease; }
+        .pain-card:hover { transform: translateY(-8px); box-shadow: 0 0 25px rgba(100, 255, 218, 0.1); border-color: #64ffda; }
+        .roadmap-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+        .roadmap-table th, .roadmap-table td { padding: 1.25rem; text-align: left; vertical-align: top; }
+        .roadmap-table thead th { background-color: #1e293b; color: #64ffda; font-weight: bold; }
+        .roadmap-table tbody tr:not(:last-child) { border-bottom: 1px solid #1e293b; }
+        .status-quo { color: #f87171; }
+        .target-action { color: #34d399; }
+        .demo-container { background-color: #112240; border: 1px solid #334155; border-radius: 0.5rem; padding: 1.5rem; width: 100%; }
+        .arch-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+        .arch-diagram { background-color: #0a192f; border: 1px solid #334155; padding: 1.5rem; border-radius: 0.5rem; }
+        .arch-title { text-align: center; font-size: 1.25rem; font-weight: bold; color: #64ffda; margin-bottom: 1.5rem; }
+        .arch-layer { border: 1px solid #475569; border-radius: 0.375rem; padding: 1rem; margin-bottom: 1rem; }
+        .layer-title { font-weight: bold; color: #e2e8f0; margin-bottom: 0.5rem; }
+        .layer-content { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .tech-item { background-color: #1e293b; color: #cbd5e1; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.875rem; }
+        .arch-connector { text-align: center; color: #475569; font-size: 1.5rem; line-height: 1; margin: -0.5rem 0; }
+        #avatar-chat-output { min-height: 200px; max-height: 40vh; overflow-y: auto; }
+        .chat-bubble { max-width: 80%; }
+        .chat-bubble.user { background-color: #3b82f6; }
+        .chat-bubble.bot { background-color: #1e293b; }
+        .form-select, .form-input, .form-datepicker, .form-slider { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.375rem; color: #e2e8f0; padding: 0.5rem 1rem; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; }
+        .form-select:focus, .form-input:focus, .form-datepicker:focus, .form-slider:focus { outline: none; border-color: #64ffda; box-shadow: 0 0 0 2px rgba(100, 255, 218, 0.3); }
+        .btn-primary { background-color: #64ffda; color: #0a192f; font-weight: bold; padding: 0.75rem 1.5rem; border-radius: 0.375rem; transition: all 0.3s; width: 100%; }
+        .btn-primary:hover { background-color: #a7f3d0; transform: scale(1.02); }
+        .btn-primary:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; transform: none; }
+        .btn-secondary { background-color: #334155; color: #cbd5e1; font-weight: 500; padding: 0.25rem 0.75rem; border-radius: 0.375rem; transition: background-color 0.3s; }
+        .btn-secondary:hover { background-color: #475569; }
+        .card-alpha { background-color: #112240; border: 1px solid #1e293b; border-radius: 0.5rem; padding: 1.5rem; }
+        .section-title-alpha { font-size: 1.25rem; font-weight: 700; color: #e2e8f0; border-bottom: 2px solid #64ffda; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .loading-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(17, 34, 64, 0.8); z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(4px); border-radius: 0.5rem; }
+        .spinner { width: 48px; height: 48px; border: 4px solid #475569; border-top-color: #64ffda; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .static-asset-container { position: relative; background-color: #0a192f; border: 1px solid #334155; padding: 1rem; border-radius: 0.5rem; overflow: hidden;}
+        .asset-label { position: absolute; background-color: rgba(10, 25, 47, 0.8); color: #64ffda; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; border: 1px solid #64ffda; cursor: pointer; transition: all 0.2s ease; z-index: 10; }
+        .asset-label:hover { background-color: #64ffda; color: #0a192f; transform: scale(1.1); }
+        .workflow-step { background-color: #1e293b; border-left: 3px solid #334155; padding: 1rem; margin-bottom: 1rem; }
+        .workflow-step.active { border-left-color: #64ffda; }
+        .workflow-title { font-bold; color: #e2e8f0; }
+        .workflow-status { font-size: 0.875rem; }
+        .status-pending { color: #facc15; }
+        .status-inprogress { color: #3b82f6; }
+        .status-complete { color: #34d399; }
+        .output-card { background-color: #0a192f; border-radius: 0.375rem; padding: 1rem; min-height: 100px; }
+        .result-metric { text-align: center; }
+        .result-metric-value { font-size: 2.25rem; font-weight: bold; color: #64ffda; line-height: 1; }
+        .result-metric-label { font-size: 0.875rem; color: #94a3b8; }
+        .tech-diagram { background-color: #0a192f; border: 1px solid #334155; border-radius: 0.5rem; padding: 1rem; }
+        .tech-diagram-title { font-size: 1rem; font-weight: 600; color: #94a3b8; text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
+        .data-source-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.5rem; }
+        .source-box { background-color: #1e293b; color: #cbd5e1; padding: 0.5rem; border-radius: 0.25rem; text-align: center; font-size: 0.8rem; border: 1px solid #475569; }
+        .source-connectors { display: flex; flex-direction: column; align-items: center; justify-content: space-around; height: 100%; }
+        .arrow-line { width: 1px; background-color: #475569; position: relative; }
+        .arrow-line::after { content: '▶'; position: absolute; right: -7px; top: 50%; transform: translateY(-50%); color: #64ffda; font-size: 0.8rem; }
+        .central-model-box { background-color: #112240; border: 1px solid #64ffda; color: #e2e8f0; padding: 1rem; border-radius: 0.375rem; text-align: center; font-weight: bold; box-shadow: 0 0 15px rgba(100, 255, 218, 0.2); }
+        .logic-flow { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+        .logic-step { background-color: #1e293b; color: #cbd5e1; padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.8rem; width: 80%; text-align: center; position: relative; }
+        .logic-step:not(:last-child)::after { content: ''; position: absolute; left: 50%; bottom: -0.75rem; transform: translateX(-50%); width: 1px; height: 0.75rem; background-color: #475569; }
+        .logic-step:not(:last-child)::before { content: '▼'; position: absolute; left: 50%; bottom: -1rem; transform: translateX(-50%); color: #475569; font-size: 0.6rem; }
+        .pagination {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 100;
+        }
+        .page-btn {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .page-btn:hover { background-color: #334155; border-color: #64ffda; }
+        .page-btn:disabled { background-color: #112240; color: #475569; cursor: not-allowed; border-color: #334155; }
+        #page-counter { font-size: 1rem; color: #94a3b8; font-weight: 500; }
+
+        @media (max-width: 1024px) { 
+            .arch-container { grid-template-columns: 1fr; } 
+            .page { padding: 1rem; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#0a192f]/80 backdrop-blur-sm fixed top-0 w-full z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-xl font-bold text-white flex items-center"><span class="text-[#64ffda] mr-2">CE</span> 认知引擎</div>
+            <div class="hidden md:flex items-center space-x-6 text-sm">
+                <span class="nav-link">转型思路</span>
+                <span class="nav-link">生存之道</span>
+                <span class="nav-link">价值解构</span>
+                <span class="nav-link">引擎架构</span>
+                <span class="nav-link">战略行动</span>
+                <span class="nav-link">进化路线</span>
+            </div>
+        </nav>
+    </header>
+
+    <main id="presentation-container">
+        <!-- Page 1: Hero -->
+        <section class="page hero-bg" id="hero">
+            <div id="particles-js"></div>
+            <div class="container mx-auto px-6 text-center z-10">
+                <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-4">这不是一次IT升级<br><span class="text-[#64ffda]">而是一场生存进化</span></h1>
+                <p class="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto">我们的核心使命：构建集团“智慧能源认知引擎”，驱动我们从重资产运营商，进化为面向未来的智慧能源价值创造者。</p>
+            </div>
+        </section>
+
+        <!-- Page 2: Transformation Idea -->
+        <section class="page" id="transformation-idea">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">转型的核心思路</h2>
+                <p class="section-subtitle mb-12">我们摒弃复杂的系统划分，回归业务本质。所有数字化功能，都将围绕“记录-分析-执行”这一核心价值闭环进行构建，确保技术始终服务于业务，而非凌驾于业务。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="pain-card p-8 text-center">
+                        <div class="text-5xl mb-4">💾</div>
+                        <h3 class="text-2xl font-bold text-white mb-3">记录 (Record)</h3>
+                        <p class="text-slate-400">构建全域数据的单一可信源。无论是来自传感器的物理信号、API的外部信息，还是人工输入与图像识别，所有数据都将依据管理流程与制度，被合规、自动地记录到相应模块，形成不可篡改的数字底册。</p>
+                    </div>
+                    <div class="pain-card p-8 text-center">
+                        <div class="text-5xl mb-4">📈</div>
+                        <h3 class="text-2xl font-bold text-white mb-3">分析 (Analyze)</h3>
+                        <p class="text-slate-400">将数据转化为洞察。分析功能将满足四大核心诉求：<strong class="text-[#64ffda]">合规报表</strong>的自动生成、<strong class="text-[#64ffda]">例行KPI</strong>的实时监控、<strong class="text-[#64ffda]">专项业务分析</strong>（如绩效、风险）的深度钻取，以及<strong class="text-[#64ffda]">主动预警</strong>，将风险消弭于无形。</p>
+                    </div>
+                    <div class="pain-card p-8 text-center">
+                        <div class="text-5xl mb-4">⚙️</div>
+                        <h3 class="text-2xl font-bold text-white mb-3">执行 (Execute)</h3>
+                        <p class="text-slate-400">让洞察驱动行动。基于经营计划、分析结果与指令，执行功能将各类任务（如交易、运维、采购）精准派发至各个系统与岗位，形成从决策到行动的高效闭环，确保战略意图在每个环节都能精准落地。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 3: Pain Points -->
+        <section class="page bg-[#112240]" id="painpoints">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">燃烧的甲板：我们为何必须进化？</h2>
+                <p class="section-subtitle mb-12">过去的成功模式正在失效。四大行业痛点如冰冷巨浪，冲击着我们的根基。数字化转型不是锦上添花，而是我们应对生存危机的唯一出路。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="pain-card p-6"><div class="text-5xl mb-4 text-[#64ffda]">⬛</div><h3 class="text-xl font-bold text-white mb-2">价值的“黑箱化”</h3><p class="text-slate-400">一度电的真实成本、一项技改的精准收益、一条曲线的衰减趋势... 我们依赖估算，缺乏穿透，经营风险巨大。</p></div>
+                    <div class="pain-card p-6"><div class="text-5xl mb-4 text-[#64ffda]">⏳</div><h3 class="text-xl font-bold text-white mb-2">决策的“滞后性”</h3><p class="text-slate-400">市场窗口以分钟计，决策链条却以天周计。当机会来临时，我们还在审批；当风险显现时，我们早已错过窗口。</p></div>
+                    <div class="pain-card p-6"><div class="text-5xl mb-4 text-[#64ffda]">🏝️</div><h3 class="text-xl font-bold text-white mb-2">知识的“孤岛化”</h3><p class="text-slate-400">顶尖专家的经验无法规模化复制，一个场站的成功难以赋能全局。我们最大的无形资产正在持续流失。</p></div>
+                    <div class="pain-card p-6"><div class="text-5xl mb-4 text-[#64ffda]">🗺️</div><h3 class="text-xl font-bold text-white mb-2">创新的“贫瘠化”</h3><p class="text-slate-400">思维停留在“发好电、卖好电”。对虚拟电厂、绿电交易、储能套利等新航道，我们缺乏技术抓手和敏锐嗅觉。</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 4: LCOE Simulator -->
+        <section class="page" id="lcoe-simulator-page">
+            <div class="container mx-auto px-6">
+                <div class="pain-card p-8 relative">
+                    <div id="lcoe-loader" class="loading-overlay hidden"><div class="spinner"></div><p class="text-white mt-4">PGo+ 正在进行成本穿透分析...</p></div>
+                    <h3 class="text-2xl font-bold text-white mb-6 border-l-4 border-[#64ffda] pl-4">度电成本模拟器：解构一度电的诞生</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="tech-diagram">
+                                <h4 class="tech-diagram-title">数据来源示意图</h4>
+                                <div class="data-source-grid" style="height: 120px;">
+                                    <div class="flex flex-col gap-2 justify-center h-full">
+                                        <div class="source-box">ERP 财务/物料成本</div>
+                                        <div class="source-box">SCADA/IoT 发电量</div>
+                                        <div class="source-box">人工输入/合同</div>
+                                    </div>
+                                    <div class="source-connectors"><div class="arrow-line" style="height: 100%;"></div></div>
+                                    <div class="central-model-box flex items-center justify-center">PGo+<br>成本分析引擎</div>
+                                </div>
+                            </div>
+                            <div class="tech-diagram">
+                                <h4 class="tech-diagram-title">PGo+ 计算逻辑</h4>
+                                <div class="logic-flow py-3">
+                                    <div class="logic-step">真实数据注入</div>
+                                    <div class="logic-step">成本要素智能归集</div>
+                                    <div class="logic-step">LCOE 模型计算</div>
+                                    <div class="logic-step">敏感性分析 & 优化建议</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-3">
+                            <h4 class="font-semibold text-white mb-4">模拟参数输入</h4>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div><label class="text-sm">选择风场</label><select id="lcoe-farm" class="form-select text-sm p-2 mt-1"><option>张北风电场</option><option>酒泉风电场</option></select></div>
+                                <div><label class="text-sm">资本支出 (万元)</label><input id="lcoe-capex" type="number" value="45000" class="form-input text-sm p-2 mt-1"></div>
+                                <div><label class="text-sm">年运维成本 (万元)</label><input id="lcoe-opex" type="number" value="800" class="form-input text-sm p-2 mt-1"></div>
+                                <div><label class="text-sm">年发电量 (万kWh)</label><input id="lcoe-aep" type="number" value="25000" class="form-input text-sm p-2 mt-1"></div>
+                            </div>
+                            <button id="lcoe-run" class="btn-primary text-sm py-2">启动成本穿透分析</button>
+                            <div class="mt-6">
+                                <h4 class="font-semibold text-white mb-2">分析结果</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="output-card flex flex-col justify-center items-center"><div class="result-metric"><div id="lcoe-result-value" class="result-metric-value">--</div><div class="result-metric-label">元/kWh</div></div><p class="text-sm text-slate-400 mt-1">平准化度电成本 (LCOE)</p></div>
+                                    <div class="output-card h-32"><canvas id="lcoe-chart"></canvas></div>
+                                </div>
+                                 <div class="output-card mt-4"><h5 class="text-base font-bold text-white mb-2">PGo+ 智能洞察</h5><p id="lcoe-analysis" class="text-sm text-slate-300">请先运行分析...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 5: ROI Simulator -->
+        <section class="page" id="roi-simulator-page">
+            <div class="container mx-auto px-6">
+                <div class="pain-card p-8 relative">
+                    <div id="roi-loader" class="loading-overlay hidden"><div class="spinner"></div><p class="text-white mt-4">PGo+ 正在模拟技改收益...</p></div>
+                    <h3 class="text-2xl font-bold text-white mb-6 border-l-4 border-[#64ffda] pl-4">技改项目ROI模拟器：洞察每一次投资的价值</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                         <div class="lg:col-span-2 space-y-6">
+                            <div class="tech-diagram">
+                                <h4 class="tech-diagram-title">数据来源示意图</h4>
+                                <div class="data-source-grid" style="height: 120px;">
+                                    <div class="flex flex-col gap-2 justify-center h-full">
+                                        <div class="source-box">SCADA 技改前基线数据</div>
+                                        <div class="source-box">ERP 项目投资/采购成本</div>
+                                        <div class="source-box">供应商 技改方案参数</div>
+                                    </div>
+                                    <div class="source-connectors"><div class="arrow-line" style="height: 100%;"></div></div>
+                                    <div class="central-model-box flex items-center justify-center">PGo+<br>收益模拟引擎</div>
+                                </div>
+                            </div>
+                            <div class="tech-diagram">
+                                <h4 class="tech-diagram-title">PGo+ 测算逻辑</h4>
+                                <div class="logic-flow py-3">
+                                    <div class="logic-step">基线数据与方案建模</div>
+                                    <div class="logic-step">发电增益(AEP)预测</div>
+                                    <div class="logic-step">运维成本(OPEX)节约预测</div>
+                                    <div class="logic-step">ROI & 投资回收期计算</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-3">
+                             <h4 class="font-semibold text-white mb-4">模拟参数输入</h4>
+                             <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div><label class="text-sm">选择技改方案</label><select id="roi-project" class="form-select text-sm p-2 mt-1"><option>更换高效叶片</option><option>加装激光雷达</option><option>软件升级优化偏航</option></select></div>
+                                <div><label class="text-sm">技改投入成本 (万元)</label><input id="roi-cost" type="number" value="1500" class="form-input text-sm p-2 mt-1"></div>
+                            </div>
+                            <button id="roi-run" class="btn-primary text-sm py-2">启动ROI模拟分析</button>
+                            <div class="mt-6">
+                                 <h4 class="font-semibold text-white mb-2">分析结果</h4>
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <div class="output-card flex justify-around items-center"><div class="result-metric"><div id="roi-result-value" class="result-metric-value">--</div><div class="result-metric-label">投资回报率 (ROI)</div></div><div class="result-metric"><div id="roi-payback-value" class="result-metric-value">--</div><div class="result-metric-label">投资回收期 (年)</div></div></div>
+                                     <div class="output-card h-32"><canvas id="roi-chart"></canvas></div>
+                                 </div>
+                                 <div class="output-card mt-4"><h5 class="text-base font-bold text-white mb-2">PGo+ 可行性分析</h5><p id="roi-analysis" class="text-sm text-slate-300">请先运行分析...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 6: Engine Architecture -->
+        <section class="page bg-[#112240]" id="engine">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">引擎架构：重塑行业数字标准</h2>
+                <p class="section-subtitle mb-12">“智慧能源认知引擎”是一个分层解耦、能力复用的数字生命体。我们在此详细定义其逻辑架构与技术架构，为行业树立新的数字化标杆。</p>
+                <div class="arch-container">
+                    <div class="arch-diagram">
+                        <h3 class="arch-title">逻辑架构 (Logical Architecture)</h3>
+                        <div class="arch-layer">
+                            <div class="layer-title">应用与服务</div>
+                            <div class="layer-content">
+                                <span class="tech-item">整合的ERP</span><span class="tech-item">气象水文与地质</span><span class="tech-item">风场集控</span><span class="tech-item">光伏基地管理</span><span class="tech-item">电力市场</span><span class="tech-item">合作伙伴协同门户</span><span class="tech-item">数据与分析超市</span>
+                            </div>
+                        </div>
+                        <div class="arch-connector">▲</div>
+                        <div class="arch-layer border-[#64ffda]">
+                            <div class="layer-title">平台</div>
+                            <div class="layer-content">
+                                <span class="tech-item">数据模块</span><span class="tech-item">AI接入(PGo+)</span><span class="tech-item">IoT</span><span class="tech-item">云原生</span><span class="tech-item">身份认证等</span>
+                            </div>
+                        </div>
+                        <div class="arch-connector">▲</div>
+                        <div class="arch-layer">
+                            <div class="layer-title">基础设施 (IaaS)</div>
+                            <div class="layer-content">
+                                <span class="tech-item">混合云架构</span><span class="tech-item">边缘计算</span><span class="tech-item">5G/TSN网络</span><span class="tech-item">时序数据库</span><span class="tech-item">数据湖仓一体</span><span class="tech-item">统一安全体系</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="arch-diagram">
+                        <h3 class="arch-title">技术架构 (Technical Architecture)</h3>
+                        <div class="arch-layer">
+                            <div class="layer-title">应用与服务 (Application & Services)</div>
+                            <div class="layer-content">
+                                <span class="tech-item">微服务应用</span><span class="tech-item">低代码平台</span><span class="tech-item">BI & 可视化</span><span class="tech-item">AR/VR</span><span class="tech-item">API网关</span>
+                            </div>
+                        </div>
+                        <div class="arch-connector">▲</div>
+                        <div class="arch-layer border-[#64ffda]">
+                            <div class="layer-title">平台与中台 (PaaS & Middle Platform)</div>
+                            <div class="layer-content">
+                                <span class="tech-item">数据中台</span><span class="tech-item">AI中台(PGo+/TensorFlow)</span><span class="tech-item">物联网(IoT)平台</span><span class="tech-item">云原生(K8s/Docker)</span><span class="tech-item">统一身份认证</span>
+                            </div>
+                        </div>
+                        <div class="arch-connector">▲</div>
+                        <div class="arch-layer">
+                            <div class="layer-title">基础设施 (IaaS)</div>
+                            <div class="layer-content">
+                                <span class="tech-item">混合云架构</span><span class="tech-item">边缘计算</span><span class="tech-item">5G/TSN网络</span><span class="tech-item">时序数据库</span><span class="tech-item">数据湖仓一体</span><span class="tech-item">统一安全体系</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 7: Alpha-E Plan -->
+        <section class="page" id="alpha-e-page">
+            <div class="container mx-auto px-6 w-full">
+                 <h3 class="text-3xl font-bold text-white mb-4 border-l-4 border-[#64ffda] pl-4 text-center">“阿尔法能源”计划：AI量化交易平台 (Alpha-E)</h3>
+                <div class="demo-container mt-8"><div class="grid grid-cols-12 gap-6"><aside class="col-span-12 lg:col-span-3"><div class="card-alpha space-y-6"><h2 class="section-title-alpha">交易参数设置</h2><div><label for="region" class="block text-sm font-medium mb-1">选择市场区域</label><select id="region" class="form-select"><option value="shandong">山东</option><option value="shanxi">山西</option><option value="gansu">甘肃</option><option value="guangdong">广东</option><option value="zhejiang">浙江</option></select></div><div><label for="bidding-date" class="block text-sm font-medium mb-1">报价日期</label><input type="date" id="bidding-date" class="form-datepicker"></div><div><label for="entity-type" class="block text-sm font-medium mb-1">主体类型</label><select id="entity-type" class="form-select"><option value="新能源场站">新能源场站</option><option value="火电厂">火电厂</option><option value="负荷聚合商">负荷聚合商</option></select></div><div class="pt-4 border-t border-slate-700"><div class="flex justify-between items-center mb-2"><h3 class="text-base font-medium">申报曲线（日前）</h3><button id="add-segment" class="btn-secondary text-sm">+</button></div><div id="bidding-segments" class="space-y-2 max-h-40 overflow-y-auto"></div></div><button id="generate-strategy" class="btn-primary">生成报价策略</button></div></aside><div class="col-span-12 lg:col-span-9 space-y-6"><div class="card-alpha relative"><div id="main-chart-loader" class="loading-overlay hidden"><div class="spinner"></div><p class="text-white mt-4">PGo+ 正在分析与预测...</p></div><h2 class="section-title-alpha">市场价格预测与报价策略</h2><div class="h-80"><canvas id="mainChart"></canvas></div></div><div class="grid grid-cols-1 xl:grid-cols-2 gap-6"><div class="card-alpha relative"><div id="analysis-loader" class="loading-overlay hidden"><div class="spinner"></div></div><h2 class="section-title-alpha">PGo+ 市场洞察</h2><div id="market-analysis-output" class="text-slate-300 text-sm space-y-2 h-60 overflow-y-auto"><p class="text-slate-500">请先设置参数并点击“生成报价策略”按钮，AI将在此处提供对市场的宏观分析。</p></div></div><div class="card-alpha relative"><div id="strategy-loader" class="loading-overlay hidden"><div class="spinner"></div></div><h2 class="section-title-alpha">PGo+ 报价策略建议</h2><div id="strategy-output" class="text-slate-300 text-sm space-y-2 h-60 overflow-y-auto"><p class="text-slate-500">AI将根据您的申报曲线和市场预测，在此处提供优化后的报价策略及理由。</p></div></div></div></div></div></div>
+            </div>
+        </section>
+
+        <!-- Page 8: Prometheus Plan -->
+        <section class="page" id="prometheus-page">
+            <div class="container mx-auto px-6 w-full">
+                <h3 class="text-3xl font-bold text-white mb-4 border-l-4 border-[#64ffda] pl-4 text-center">“普罗米修斯”计划：资产数字孪生</h3>
+                <div class="demo-container mt-8">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xl font-semibold text-white mb-4 text-center">数字孪生资产全景</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="static-asset-container aspect-video"><div style="position: relative; width: 100%; height: 100%;"><div style="position: absolute; bottom: 5%; left: 45%; width: 10%; height: 60%; background: #9ca3af; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);"></div><div style="position: absolute; bottom: 65%; left: 38%; width: 24%; height: 10%; background: #e5e7eb; border-radius: 2px 5px 2px 2px;"></div><div style="position: absolute; bottom: 68%; left: 30%; width: 8%; height: 8%; background: #9ca3af; border-radius: 50%;"></div><div class="asset-label" style="top: 28%; left: 15%;" data-component="叶片">叶片</div><div class="asset-label" style="top: 22%; left: 65%;" data-component="机舱">机舱</div><div class="asset-label" style="bottom: 40%; left: 20%;" data-component="塔筒">塔筒</div></div><p class="text-center text-sm mt-2 font-bold">智慧风场</p></div>
+                                <div class="static-asset-container aspect-video"><div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; transform: perspective(100px) rotateX(20deg);"><script>for(let i=0; i<24; i++) document.write('<div style="background: #1e3a8a; aspect-ratio: 1.5/1;"></div>');</script></div><div class="asset-label" style="top: 40%; left: 30%;" data-component="光伏阵列">光伏阵列</div><div class="asset-label" style="bottom: 15%; right: 15%;" data-component="逆变器">逆变器</div><p class="text-center text-sm mt-2 font-bold">光伏基地</p></div>
+                            </div>
+                        </div>
+                        <div class="mt-8 md:mt-0">
+                            <h4 class="text-xl font-semibold text-white mb-4 text-center">智能运维仿真流程</h4>
+                            <div id="workflow-container" class="space-y-2">
+                                <p class="text-center text-slate-500 py-8">请点击左侧资产图中的部件标签以启动仿真流程...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 9: Digital Avatar Plan -->
+        <section class="page" id="avatar-page">
+            <div class="container mx-auto px-6 w-full max-w-4xl">
+                <h3 class="text-3xl font-bold text-white mb-4 border-l-4 border-[#64ffda] pl-4 text-center">“数字元”计划：AI专家系统</h3>
+                <div class="demo-container mt-8">
+                     <h4 class="text-xl font-semibold text-white mb-4 text-center">AI专家问答助手</h4>
+                     <div id="avatar-chat-output" class="bg-[#0a192f] p-4 rounded mb-4 space-y-3"><div class="chat-bubble bot self-start rounded-lg p-3"><p>您好，我是数字元专家助手。您可以向我咨询关于设备故障、运维规程、电力市场等任何问题。</p></div></div>
+                     <div class="flex gap-2"><input type="text" id="avatar-chat-input" placeholder="输入您的问题..." class="flex-grow bg-[#1e293b] text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[#64ffda]"><button id="avatar-chat-send" class="bg-[#64ffda] text-[#0a192f] font-bold px-4 py-2 rounded">发送</button></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page 10: Roadmap -->
+        <section class="page bg-[#112240]" id="roadmap">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">脚踏实地：基于现状的进化路线图</h2>
+                <p class="section-subtitle mb-12">我们的进化并非凭空而来，而是紧密结合国华投资与华能集团的现有基础。每一步都旨在解决当前最迫切的痛点，并为下一阶段的跃迁构筑坚实的基础。</p>
+                <div class="overflow-x-auto"><table class="roadmap-table rounded-lg overflow-hidden"><thead><tr><th class="w-1/4">阶段目标</th><th class="w-2/5">关键任务 (从现状到目标)</th><th class="w-1/5">标志性成果</th><th class="w-1/5">组织保障</th></tr></thead><tbody><tr><td><strong class="text-xl text-white">第一阶段 (1-2年)<br>数据孤岛破冰与平台基座构筑</strong></td><td><p><strong class="status-quo">现状：</strong>多套系统并存(“不可用、不好用”)，数据标准不一，集团与各区域公司数据链路不畅。</p><p class="mt-2"><strong class="target-action">举措：</strong>完成公主坟-北七家数据架构的整合与优化；统一集团级核心主数据标准（设备KKS编码、物料编码）；建设集团统一数据湖，完成至少80%存量场站生产数据入湖。</p></td><td><ul class="list-disc list-inside text-sm"><li>“指挥官驾驶舱” V1.0 上线</li><li>数据治理委员会成立并发布首版数据标准</li><li>“阿尔法能源”计划完成模型回测</li></ul></td><td>设立首席AI官，组建数据治理委员会，启动“数字星火”人才引进。</td></tr><tr><td><strong class="text-xl text-white">第二阶段 (3-4年)<br>业务应用深化与AI能力孵化</strong></td><td><p><strong class="status-quo">现状：</strong>应用以基础监控和报表为主，缺乏高级分析和预测能力，一线应用（如移动两票）体验有待提升。</p><p class="mt-2"><strong class="target-action">举措：</strong>推广“普罗米修斯”数字孪生标准至所有新建项目；在至少50%的风电场站部署预测性维护模型；上线“数字元”专家问答系统，覆盖风机、光伏逆变器常见故障诊断；全面升级移动应用，提升一线体验。</p></td><td><ul class="list-disc list-inside text-sm"><li>设备故障率同比下降10%</li><li>集团度电成本进入行业第一梯队</li><li>“数字元”系统日均调用超百次</li></ul></td><td>推行敏捷部落工作模式，建立内部“数字学院”，完善数字化绩效考核。</td></tr><tr><td><strong class="text-xl text-white">第三阶段 (5年+)<br>认知引擎进化与新价值创造</strong></td><td><p><strong class="status-quo">现状：</strong>商业模式单一，局限于发电售电，对数据资产价值认知不足，缺乏创新孵化机制。</p><p class="mt-2"><strong class="target-action">举措：</strong>推动“阿尔法能源”计划进入部分自动化实盘交易；探索将成熟的资源评估、功率预测能力产品化，对外提供SaaS服务；与金融机构合作，探索基于设备健康数据的供应链金融、保险等新业务。</p></td><td><ul class="list-disc list-inside text-sm"><li>首个数据驱动的创新业务板块实现盈利</li><li>发布行业级新能源数字化白皮书</li><li>成为国家级工业互联网平台试点</li></ul></td><td>设立“内部创新特区”，成立数字化转型专项基金，构建开放的产业生态联盟。</td></tr></tbody></table></div>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="pagination">
+        <button id="prev-page" class="page-btn">‹</button>
+        <span id="page-counter">1 / 10</span>
+        <button id="next-page" class="page-btn">›</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Pagination Logic ---
+            let currentPageIndex = 0;
+            const pages = document.querySelectorAll('.page');
+            const pageCounter = document.getElementById('page-counter');
+            const prevButton = document.getElementById('prev-page');
+            const nextButton = document.getElementById('next-page');
+
+            function showPage(index) {
+                if (index < 0 || index >= pages.length) return;
+                pages.forEach((page, i) => {
+                    page.classList.toggle('active', i === index);
+                });
+                pageCounter.textContent = `${index + 1} / ${pages.length}`;
+                prevButton.disabled = index === 0;
+                nextButton.disabled = index === pages.length - 1;
+                currentPageIndex = index;
+            }
+
+            prevButton.addEventListener('click', () => showPage(currentPageIndex - 1));
+            nextButton.addEventListener('click', () => showPage(currentPageIndex + 1));
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft') {
+                    prevButton.click();
+                }
+            });
+            
+            showPage(0); // Show the first page initially
+
+            // --- API and other logic ---
+            const PGO_API_KEY = 'AIzaSyBo0XRabcNGE54rl189y_QyiLYg3N7iDxs';
+            const PGO_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${PGO_API_KEY}`;
+
+            if (document.getElementById('particles-js')) { particlesJS('particles-js', {"particles":{"number":{"value":60,"density":{"enable":true,"value_area":800}},"color":{"value":"#64ffda"},"shape":{"type":"circle"},"opacity":{"value":0.3,"random":true},"size":{"value":2,"random":true},"line_linked":{"enable":true,"distance":150,"color":"#334155","opacity":0.4,"width":1},"move":{"enable":true,"speed":1,"direction":"none","random":false,"straight":false,"out_mode":"out","bounce":false}},"interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"grab"},"onclick":{"enable":false},"resize":true},"modes":{"grab":{"distance":140,"line_linked":{"opacity":1}}}},"retina_detect":true}); }
+            
+             // --- Generic Helper Functions ---
+            async function callPgoApi(payload, isJson = false, context = '') {
+                try {
+                    const response = await fetch(PGO_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                    const data = await response.json();
+                    if (!data.candidates || !data.candidates[0].content) { throw new Error("Invalid API response structure"); }
+                    const text = data.candidates[0].content.parts[0].text;
+                    if (isJson) {
+                       try {
+                           const jsonString = text.match(/```json\n([\s\S]*?)\n```/s)[1];
+                           return JSON.parse(jsonString);
+                       } catch (e) { return JSON.parse(text); }
+                    }
+                    return text;
+                } catch (error) { console.error(`PGo+ API call failed for ${context}:`, error); return { error: error.message }; }
+            }
+
+            // --- LCOE Demo Logic ---
+            const lcoeRunBtn = document.getElementById('lcoe-run');
+            const lcoeLoader = document.getElementById('lcoe-loader');
+            const lcoeResultValue = document.getElementById('lcoe-result-value');
+            const lcoeAnalysis = document.getElementById('lcoe-analysis');
+            let lcoeChart;
+
+            function initializeLcoeChart() {
+                const ctx = document.getElementById('lcoe-chart').getContext('2d');
+                if (lcoeChart) lcoeChart.destroy();
+                lcoeChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels: ['资本成本', '运维成本'], datasets: [{ data: [70, 30], backgroundColor: ['#1d4ed8', '#0ea5e9'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            }
+            
+            lcoeRunBtn.addEventListener('click', async () => {
+                lcoeLoader.classList.remove('hidden');
+                const farmName = document.getElementById('lcoe-farm').value;
+                const capex = document.getElementById('lcoe-capex').value;
+                const opex = document.getElementById('lcoe-opex').value;
+                const aep = document.getElementById('lcoe-aep').value;
+
+                if (!capex || !opex || !aep) {
+                    alert('请输入所有成本参数。');
+                    lcoeLoader.classList.add('hidden');
+                    return;
+                }
+
+                const systemPrompt = `You are an expert financial analyst for the renewable energy sector, specializing in calculating and interpreting the Levelized Cost of Energy (LCOE) for wind farms in China. You must return a valid JSON object.`;
+                const userPrompt = `为位于中国的'${farmName}'进行度电成本分析。参数如下:
+- 总资本支出 (CAPEX): ${capex} 万元
+- 年均运维成本 (OPEX): ${opex} 万元
+- 年均发电量 (AEP): ${aep} 万kWh
+- 项目生命周期: 20 年
+- 折现率: 8%
+
+请完成以下任务:
+1.  基于以上参数，使用公式 LCOE = (总投资的年金化值 + 年运维成本) / 年发电量，计算平准化度电成本 (LCOE)，单位为 元/kWh。
+2.  估算一个典型的运维成本(OPEX)构成百分比，分为'备件成本', '人工成本', '保险及其他'。
+3.  提供一段专业的、不超过150字的智能洞察分析，指出主要的成本驱动因素并提出优化建议。`;
+                const schema = {type: "OBJECT", properties: { lcoe: {type: "NUMBER"}, opexBreakdown: {type: "ARRAY", items: { type: "OBJECT", properties: { category: {type: "STRING"}, percentage: {type: "NUMBER"} }}}, analysis: {type: "STRING"}}, required: ["lcoe", "opexBreakdown", "analysis"]};
+
+                try {
+                    const result = await callPgoApi({ contents: [{ parts: [{ text: userPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json", responseSchema: schema } }, true, 'lcoe');
+                    if(result.error) throw new Error(result.error);
+                    
+                    lcoeResultValue.textContent = result.lcoe.toFixed(3);
+                    lcoeAnalysis.innerHTML = result.analysis;
+                    lcoeChart.data.labels = result.opexBreakdown.map(item => item.category);
+                    lcoeChart.data.datasets[0].data = result.opexBreakdown.map(item => item.percentage);
+                    lcoeChart.data.datasets[0].backgroundColor = ['#1d4ed8', '#0ea5e9', '#3b82f6'];
+                    lcoeChart.options.plugins.legend.display = true;
+                    lcoeChart.options.plugins.legend.position = 'right';
+                    lcoeChart.options.plugins.legend.labels= {color: '#cbd5e1', boxWidth: 10, padding: 10};
+
+                    lcoeChart.update();
+
+                } catch (error) {
+                    lcoeAnalysis.textContent = `分析失败: ${error.message}`;
+                } finally {
+                    lcoeLoader.classList.add('hidden');
+                }
+            });
+            initializeLcoeChart();
+
+            // --- ROI Demo Logic ---
+            const roiRunBtn = document.getElementById('roi-run');
+            const roiLoader = document.getElementById('roi-loader');
+            const roiResultValue = document.getElementById('roi-result-value');
+            const roiPaybackValue = document.getElementById('roi-payback-value');
+            const roiAnalysis = document.getElementById('roi-analysis');
+            let roiChart;
+
+            function initializeRoiChart() {
+                const ctx = document.getElementById('roi-chart').getContext('2d');
+                if(roiChart) roiChart.destroy();
+                roiChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: ['技改前', '技改后'], datasets: [{ label: '年发电收益 (万元)', data: [10000, 10500], backgroundColor: '#059669' }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } } }, plugins: { legend: { display: false } } }
+                });
+            }
+
+            roiRunBtn.addEventListener('click', async () => {
+                roiLoader.classList.remove('hidden');
+                const project = document.getElementById('roi-project').value;
+                const cost = document.getElementById('roi-cost').value;
+
+                if (!cost) {
+                    alert('请输入技改投入成本。');
+                    roiLoader.classList.add('hidden');
+                    return;
+                }
+                const systemPrompt = `You are a top-tier asset management expert for wind farms, specializing in evaluating the ROI of technical upgrade projects. You must return a valid JSON object.`;
+                const userPrompt = `为一项风电技改项目进行ROI模拟分析。
+- 技改方案: '${project}'
+- 技改总投入: ${cost} 万元
+- 基线数据(某单个风场): 年发电量(AEP) 25000 万kWh, 年运维成本 800 万元, 上网电价 0.4 元/kWh.
+
+请完成以下任务:
+1.  基于你的行业知识，估算该技改方案能带来的 AEP 提升百分比 和 运维成本(OPEX)节约百分比。
+2.  计算因此产生的年均收益增加值(万元)和年均成本节约值(万元)。
+3.  计算项目的静态投资回报率(ROI)和投资回收期(年)。ROI = (年收益增加 + 年成本节约) / 总投入 * 100%。回收期 = 总投入 / (年收益增加 + 年成本节约)。
+4.  提供一段专业的、不超过150字的可行性分析，包括项目优点、潜在风险和建议。`;
+                const schema = {type:"OBJECT", properties: { aepIncreasePercent: {type:"NUMBER"}, opexDecreasePercent: {type:"NUMBER"}, roi: {type:"NUMBER"}, paybackPeriodYears: {type:"NUMBER"}, feasibilityAnalysis: {type:"STRING"}}, required: ["aepIncreasePercent","opexDecreasePercent","roi","paybackPeriodYears","feasibilityAnalysis"]};
+                 try {
+                    const result = await callPgoApi({ contents: [{ parts: [{ text: userPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json", responseSchema: schema } }, true, 'roi');
+                    if(result.error) throw new Error(result.error);
+                    
+                    roiResultValue.textContent = `${result.roi.toFixed(1)}%`;
+                    roiPaybackValue.textContent = result.paybackPeriodYears.toFixed(1);
+                    roiAnalysis.innerHTML = result.feasibilityAnalysis;
+
+                    const baselineRevenue = 25000 * 0.4;
+                    const newRevenue = baselineRevenue * (1 + result.aepIncreasePercent / 100);
+                    
+                    roiChart.data.datasets[0].data = [baselineRevenue, newRevenue];
+                    roiChart.update();
+                } catch (error) {
+                    roiAnalysis.textContent = `分析失败: ${error.message}`;
+                } finally {
+                    roiLoader.classList.add('hidden');
+                }
+            });
+
+            initializeRoiChart();
+
+            // --- Alpha-E Trading Platform Logic ---
+            const regionSelect = document.getElementById('region');
+            const dateInput = document.getElementById('bidding-date');
+            const entityTypeSelect = document.getElementById('entity-type');
+            const addSegmentBtn = document.getElementById('add-segment');
+            const biddingSegmentsContainer = document.getElementById('bidding-segments');
+            const generateBtn = document.getElementById('generate-strategy');
+            const mainChartLoader = document.getElementById('main-chart-loader');
+            const analysisLoader = document.getElementById('analysis-loader');
+            const strategyLoader = document.getElementById('strategy-loader');
+            const marketAnalysisOutput = document.getElementById('market-analysis-output');
+            const strategyOutput = document.getElementById('strategy-output');
+            let mainChart;
+            const chartCanvas = document.getElementById('mainChart').getContext('2d');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.value = tomorrow.toISOString().split('T')[0];
+
+            function initializeChart() { if (mainChart) mainChart.destroy(); mainChart = new Chart(chartCanvas, { type: 'line', data: { labels: Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`), datasets: [] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { title: { display: true, text: '价格 (元/MWh)', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, x: { title: { display: true, text: '小时', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } } }, plugins: { legend: { position: 'top', labels: { color: '#e2e8f0' } }, tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += `${context.parsed.y.toFixed(2)} 元/MWh`; } return label; } } } } } });}
+            let segmentCount = 0;
+            function addSegment(price = '', quantity = '') { segmentCount++; const segmentHtml = `<div class="flex items-center gap-2" id="segment-${segmentCount}"><input type="number" placeholder="价格" class="form-input text-sm p-1 w-1/2 segment-price" value="${price}"><input type="number" placeholder="容量(MW)" class="form-input text-sm p-1 w-1/2 segment-quantity" value="${quantity}"><button class="btn-secondary text-xs remove-segment" data-id="${segmentCount}">-</button></div>`; biddingSegmentsContainer.insertAdjacentHTML('beforeend', segmentHtml); }
+            biddingSegmentsContainer.addEventListener('click', (e) => { if (e.target.classList.contains('remove-segment')) { document.getElementById(`segment-${e.target.dataset.id}`).remove(); } });
+            addSegmentBtn.addEventListener('click', () => addSegment()); addSegment(350, 100); addSegment(450, 150); addSegment(600, 200);
+
+            generateBtn.addEventListener('click', async () => {
+                const region = regionSelect.options[regionSelect.selectedIndex].text; const date = dateInput.value; const entityType = entityTypeSelect.value;
+                const segments = Array.from(document.querySelectorAll('#bidding-segments > div')).map(div => ({ price: div.querySelector('.segment-price').value, quantity: div.querySelector('.segment-quantity').value })).filter(s => s.price && s.quantity);
+                if (!date || segments.length === 0) { alert("请填写完整的报价日期和至少一段报价曲线。"); return; }
+                showLoaders(true, ['main-chart-loader', 'analysis-loader', 'strategy-loader']);
+                const systemPrompt = `You are a world-class power market trading strategist, with deep expertise in both international best practices and the specific rules of Chinese provincial electricity spot markets. Your analysis must be quantitative, data-driven, and provide actionable, compliant bidding advice. You must return a valid JSON object matching the provided schema, with no extra text or markdown formatting. The price forecast must contain exactly 24 numerical data points.`;
+                const userPrompt = `市场背景: - 区域: ${region}, 中国 - 报价日期: ${date} - 市场主体类型: ${entityType} - 历史数据参考: 采用该区域 typical historical data for a similar season. 我的初步申报 (日前市场): ${segments.map(s => `- ${s.quantity} MW @ ${s.price} 元/MWh`).join('\n')} 任务: 请基于以上信息，结合中国电力市场规则和国际最佳实践，为我提供一份完整的交易决策支持报告。`;
+                const schema = { type: "OBJECT", properties: { marketAnalysis: { type: "STRING" }, priceForecast_24h: { type: "ARRAY", items: { type: "NUMBER" } }, recommendedBiddingStrategy: { type: "STRING" }, riskAssessment: { type: "STRING" } }, required: ["marketAnalysis", "priceForecast_24h", "recommendedBiddingStrategy", "riskAssessment"] };
+                try {
+                    const result = await callPgoApi({ contents: [{ parts: [{ text: userPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] }, generationConfig: { responseMimeType: "application/json", responseSchema: schema } }, true, 'alpha-e');
+                    if(result.error) throw new Error(result.error);
+                    updateAlphaEUI(result);
+                } catch (error) { console.error('Error in Alpha-E:', error); marketAnalysisOutput.innerHTML = `<p class="text-red-400">错误: ${error.message}</p>`; } finally { showLoaders(false, ['main-chart-loader', 'analysis-loader', 'strategy-loader']); }
+            });
+            function showLoaders(isLoading, loaderIds) { loaderIds.forEach(id => document.getElementById(id).classList.toggle('hidden', !isLoading)); }
+            
+            function updateAlphaEUI(data) {
+                const forecastDataset = { label: 'PGo+ 价格预测', data: data.priceForecast_24h, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.1)', fill: true, tension: 0.4 };
+                const existingIndex = mainChart.data.datasets.findIndex(ds => ds.label === 'PGo+ 价格预测');
+                if (existingIndex > -1) mainChart.data.datasets[existingIndex] = forecastDataset;
+                else mainChart.data.datasets.unshift(forecastDataset);
+                mainChart.update();
+                marketAnalysisOutput.innerHTML = data.marketAnalysis.replace(/\n/g, '<br/>');
+                strategyOutput.innerHTML = `<h3 class="font-bold mb-2 text-white">策略建议</h3><p>${data.recommendedBiddingStrategy.replace(/\n/g, '<br/>')}</p><h3 class="font-bold mt-4 mb-2 text-white">风险评估</h3><p>${data.riskAssessment.replace(/\n/g, '<br/>')}</p>`;
+            }
+            initializeChart();
+
+            // --- Prometheus Plan Logic ---
+            const assetLabels = document.querySelectorAll('.asset-label');
+            const workflowContainer = document.getElementById('workflow-container');
+            assetLabels.forEach(label => { label.addEventListener('click', (e) => { runWorkflowSimulation(e.target.dataset.component); }); });
+
+            async function runWorkflowSimulation(component) {
+                workflowContainer.innerHTML = '';
+                const steps = [
+                    { title: '故障感知', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">检测到 <strong class="text-white">${component}</strong> 振动频率异常，疑似早期故障...</p>`; } },
+                    { title: '创建故障通知单', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">通知单 <strong class="text-white">FN-${Date.now()}</strong> 已创建，等待PGo+算法筛选...</p>`; } },
+                    { title: 'PGo+ 智能诊断与工单生成', action: async (el) => {
+                        el.querySelector('.status-text').innerHTML = `<div class="spinner h-4 w-4 inline-block"></div> PGo+ 分析中...`;
+                        const prompt = `模拟一个针对'${component}'的故障工单。返回JSON，包含workOrderId(string), faultDescription(string), requiredParts(array of {name:string, partNumber:string}), recommendedContractor({name:string, contact:string})。`;
+                        const result = await callPgoApi({ contents: [{ parts: [{ text: prompt }] }] }, true, 'prometheus');
+                        if (result.error || !result.workOrderId) { el.innerHTML += `<p class="text-red-400 mt-2">PGo+ 分析失败: ${result.error || 'Invalid JSON response'}</p>`; return; }
+                        el.innerHTML += `<div class="text-xs text-slate-400 mt-2 bg-black/20 p-2 rounded"><strong>工单号:</strong> ${result.workOrderId}<br><strong>故障描述:</strong> ${result.faultDescription}<br><strong>所需备件:</strong> ${result.requiredParts.map(p=>`${p.name} (${p.partNumber})`).join(', ')}<br><strong>推荐服务商:</strong> ${result.recommendedContractor.name} (${result.recommendedContractor.contact})</div>`;
+                    }},
+                    { title: '资源匹配与采购', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">备件领料计划 <strong class="text-white">REQ-001</strong> 已生成。<br>外委服务采购订单 <strong class="text-white">PO-001</strong> 已发送至服务商。</p>`; } },
+                    { title: '现场维修与结算', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">工单完成，确认工时: 8小时。<br>结算单 <strong class="text-white">SET-001</strong> 已生成，总价: ￥8,000。</p>`; } },
+                    { title: '财务自动化处理', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">电子发票已接收并自动入账 (借:维修费, 贷:应付账款)。<br>付款指令已发送至银行。</p>`; } }
+                ];
+                for (let i = 0; i < steps.length; i++) {
+                    const stepEl = document.createElement('div'); stepEl.className = 'workflow-step';
+                    stepEl.innerHTML = `<div class="flex justify-between items-center"><span class="workflow-title">${i + 1}. ${steps[i].title}</span><span class="workflow-status status-pending status-text">等待中</span></div>`;
+                    workflowContainer.appendChild(stepEl);
+                    await new Promise(r => setTimeout(r, 300));
+                    stepEl.classList.add('active'); stepEl.querySelector('.status-text').className = 'workflow-status status-inprogress status-text'; stepEl.querySelector('.status-text').textContent = '进行中...';
+                    await steps[i].action(stepEl);
+                    await new Promise(r => setTimeout(r, 1500));
+                    stepEl.querySelector('.status-text').className = 'workflow-status status-complete status-text'; stepEl.querySelector('.status-text').textContent = '完成';
+                }
+            }
+            
+            // --- Avatar Demo Logic ---
+            const chatOutput = document.getElementById('avatar-chat-output');
+            const chatInput = document.getElementById('avatar-chat-input');
+            const chatSendBtn = document.getElementById('avatar-chat-send');
+            const systemInstruction = { parts: [{ text: "你是一个世界顶级的风电运维专家，名为“数字元”。你的知识库涵盖了风力发电机的设计、制造、运维、故障诊断和电力市场交易等所有方面。请用专业、精准、简洁的语言回答用户提出的问题。如果问题超出你的知识范围，请礼貌地说明。" }] };
+            let conversationHistory = [];
+            const handleSend = async () => {
+                const userQuery = chatInput.value.trim();
+                if (!userQuery) return;
+                appendMessage(userQuery, 'user'); chatInput.value = ''; chatInput.disabled = true; chatSendBtn.disabled = true;
+                const botThinkingMsg = appendMessage('正在思考中...', 'bot', true);
+                conversationHistory.push({ role: "user", parts: [{ text: userQuery }] });
+                try {
+                    const payload = { contents: conversationHistory, systemInstruction: systemInstruction };
+                    const response = await fetch(PGO_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+                    const data = await response.json();
+                    const botResponse = data.candidates[0].content.parts[0].text;
+                    botThinkingMsg.querySelector('p').innerHTML = botResponse.replace(/\n/g, '<br/>');
+                    botThinkingMsg.querySelector('p').classList.remove('animate-pulse');
+                    conversationHistory.push({ role: "model", parts: [{ text: botResponse }] });
+                } catch (error) { botThinkingMsg.querySelector('p').textContent = '抱歉，我现在遇到了一些技术问题，请稍后再试。'; console.error('Error in Avatar Demo:', error); } 
+                finally { chatInput.disabled = false; chatSendBtn.disabled = false; chatInput.focus(); }
+            };
+            chatSendBtn.addEventListener('click', handleSend);
+            chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
+            function appendMessage(text, sender, isThinking = false) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `chat-bubble rounded-lg p-3 w-fit ${sender === 'user' ? 'bg-blue-600 self-end' : 'bg-slate-700 self-start'}`;
+                const p = document.createElement('p'); p.innerHTML = text;
+                if(isThinking) { p.classList.add('animate-pulse'); }
+                msgDiv.appendChild(p); chatOutput.appendChild(msgDiv); chatOutput.scrollTop = chatOutput.scrollHeight; return msgDiv;
+            }
+        });
+    </script>
+</body>
+</html>
+
