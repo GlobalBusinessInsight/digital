@@ -37,7 +37,8 @@
         }
         .section-title { font-size: 2.5rem; font-weight: 900; color: #e2e8f0; text-align: center; }
         .section-subtitle { font-size: 1.125rem; color: #94a3b8; text-align: center; max-width: 800px; margin: 1rem auto; }
-        .nav-link { color: #cbd5e1; }
+        .nav-link { color: #cbd5e1; transition: color 0.2s; }
+        .nav-link:hover { color: #64ffda; }
         .hero-bg { position: relative; background: radial-gradient(ellipse at bottom, #112240 0%, #0a192f 100%); overflow: hidden; }
         #particles-js { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; }
         .pain-card { background-color: #112240; border: 1px solid #1e2F3b; border-radius: 0.5rem; transition: all 0.3s ease; }
@@ -139,9 +140,11 @@
 <body class="antialiased">
 
     <header class="bg-[#0a192f]/80 backdrop-blur-sm fixed top-0 w-full z-50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-xl font-bold text-white flex items-center"><span class="text-[#64ffda] mr-2">CE</span> 认知引擎</div>
-            <div class="hidden md:flex items-center space-x-6 text-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center relative">
+            <div class="text-xl font-bold text-white flex items-center">
+                <span class="text-[#64ffda] mr-2">CE</span> 认知引擎
+            </div>
+            <div class="hidden md:flex items-center space-x-8 text-sm absolute left-1/2 -translate-x-1/2">
                 <span class="nav-link">转型思路</span>
                 <span class="nav-link">生存之道</span>
                 <span class="nav-link">价值解构</span>
@@ -149,6 +152,7 @@
                 <span class="nav-link">战略行动</span>
                 <span class="nav-link">进化路线</span>
             </div>
+            <img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="Inossem Logo" class="w-32">
         </nav>
     </header>
 
@@ -458,7 +462,9 @@
             showPage(0); // Show the first page initially
 
             // --- API and other logic ---
-            const PGO_API_KEY = 'AIzaSyBo0XRabcNGE54rl189y_QyiLYg3N7iDxs';
+            // The API key is encoded in Base64 to prevent simple plaintext scraping.
+            const encodedApiKey = 'QUl6YVN5Qm8wWFJhYmNOR0U1NHJsMTg5eV9ReWlMWWczTjdpRHhz';
+            const PGO_API_KEY = atob(encodedApiKey);
             const PGO_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${PGO_API_KEY}`;
 
             if (document.getElementById('particles-js')) { particlesJS('particles-js', {"particles":{"number":{"value":60,"density":{"enable":true,"value_area":800}},"color":{"value":"#64ffda"},"shape":{"type":"circle"},"opacity":{"value":0.3,"random":true},"size":{"value":2,"random":true},"line_linked":{"enable":true,"distance":150,"color":"#334155","opacity":0.4,"width":1},"move":{"enable":true,"speed":1,"direction":"none","random":false,"straight":false,"out_mode":"out","bounce":false}},"interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"grab"},"onclick":{"enable":false},"resize":true},"modes":{"grab":{"distance":140,"line_linked":{"opacity":1}}}},"retina_detect":true}); }
@@ -664,19 +670,29 @@
             // --- Prometheus Plan Logic ---
             const assetLabels = document.querySelectorAll('.asset-label');
             const workflowContainer = document.getElementById('workflow-container');
+            const faultMap = {
+                '叶片': '叶片根部应力超限',
+                '机舱': '齿轮箱油温过高',
+                '塔筒': '连接螺栓扭矩异常',
+                '光伏阵列': '光伏板出现热斑效应',
+                '逆变器': '直流侧电压异常'
+            };
+
             assetLabels.forEach(label => { label.addEventListener('click', (e) => { runWorkflowSimulation(e.target.dataset.component); }); });
 
             async function runWorkflowSimulation(component) {
                 workflowContainer.innerHTML = '';
+                const faultDescription = faultMap[component] || '振动频率异常';
+
                 const steps = [
-                    { title: '故障感知', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">检测到 <strong class="text-white">${component}</strong> 振动频率异常，疑似早期故障...</p>`; } },
+                    { title: '故障感知', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">检测到 <strong class="text-white">${component}</strong> <strong class="text-yellow-400">${faultDescription}</strong>，疑似早期故障...</p>`; } },
                     { title: '创建故障通知单', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">通知单 <strong class="text-white">FN-${Date.now()}</strong> 已创建，等待PGo+算法筛选...</p>`; } },
                     { title: 'PGo+ 智能诊断与工单生成', action: async (el) => {
                         el.querySelector('.status-text').innerHTML = `<div class="spinner h-4 w-4 inline-block"></div> PGo+ 分析中...`;
-                        const prompt = `模拟一个针对'${component}'的故障工单。返回JSON，包含workOrderId(string), faultDescription(string), requiredParts(array of {name:string, partNumber:string}), recommendedContractor({name:string, contact:string})。`;
+                        const prompt = `模拟一个针对风电场或光伏电站的"${component}"部件发生的"${faultDescription}"故障，生成一份维修工单。返回一个JSON对象，包含: "workOrderId"(string, e.g., "WO-xxxxx"), "faultDescription"(string, 详细描述故障), "requiredParts"(array of objects, each with "name":string and "partNumber":string), "recommendedContractor"(object with "name":string and "contact":string)。`;
                         const result = await callPgoApi({ contents: [{ parts: [{ text: prompt }] }] }, true, 'prometheus');
                         if (result.error || !result.workOrderId) { el.innerHTML += `<p class="text-red-400 mt-2">PGo+ 分析失败: ${result.error || 'Invalid JSON response'}</p>`; return; }
-                        el.innerHTML += `<div class="text-xs text-slate-400 mt-2 bg-black/20 p-2 rounded"><strong>工单号:</strong> ${result.workOrderId}<br><strong>故障描述:</strong> ${result.faultDescription}<br><strong>所需备件:</strong> ${result.requiredParts.map(p=>`${p.name} (${p.partNumber})`).join(', ')}<br><strong>推荐服务商:</strong> ${result.recommendedContractor.name} (${result.recommendedContractor.contact})</div>`;
+                        el.innerHTML += `<div class="text-xs text-slate-400 mt-2 bg-black/20 p-2 rounded"><strong>工单号:</strong> ${result.workOrderId}<br><strong>故障描述:</strong> ${result.faultDescription}<br><strong>所需备件:</strong> ${result.requiredParts.map(p=>`${p.name} (${p.partNumber})`).join(', ') || '无'}<br><strong>推荐服务商:</strong> ${result.recommendedContractor.name} (${result.recommendedContractor.contact})</div>`;
                     }},
                     { title: '资源匹配与采购', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">备件领料计划 <strong class="text-white">REQ-001</strong> 已生成。<br>外委服务采购订单 <strong class="text-white">PO-001</strong> 已发送至服务商。</p>`; } },
                     { title: '现场维修与结算', action: async (el) => { el.innerHTML += `<p class="text-slate-400 mt-2">工单完成，确认工时: 8小时。<br>结算单 <strong class="text-white">SET-001</strong> 已生成，总价: ￥8,000。</p>`; } },
@@ -698,7 +714,7 @@
             const chatOutput = document.getElementById('avatar-chat-output');
             const chatInput = document.getElementById('avatar-chat-input');
             const chatSendBtn = document.getElementById('avatar-chat-send');
-            const systemInstruction = { parts: [{ text: "你是一个世界顶级的风电运维专家，名为“数字元”。你的知识库涵盖了风力发电机的设计、制造、运维、故障诊断和电力市场交易等所有方面。请用专业、精准、简洁的语言回答用户提出的问题。如果问题超出你的知识范围，请礼貌地说明。" }] };
+            const systemInstruction = { parts: [{ text: "你是一个世界顶级的风电运维专家，名为“PGo+数字元”。你的知识库涵盖了风力发电机的设计、制造、运维、故障诊断和电力市场交易等所有方面。请用专业、精准、简洁的语言回答用户提出的问题。如果问题超出你的知识范围，请礼貌地说明。" }] };
             let conversationHistory = [];
             const handleSend = async () => {
                 const userQuery = chatInput.value.trim();
