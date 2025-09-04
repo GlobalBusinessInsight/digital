@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业数字化转型成熟度评估</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Stone) with Cyan accent -->
+    <!-- Application Structure Plan: 采用仪表板布局。初始视图是一个多公司对比的条形图，用于宏观比较。用户选择特定公司后，界面会切换到该公司专属的详细视图，其中包含一个雷达图用于展示五个核心维度的总体概况，以及可点击的标签页。点击标签页可以展示该维度下各二级指标得分的条形图，实现逐层深入的分析。新增可折叠的详细报告文本区域，将原始报告内容按维度整合，方便用户查阅原始依据。这种结构设计能引导用户从宏观对比平滑地过渡到微观细节探究，并能随时回溯原始文本，符合数据分析的直观流程。 -->
+    <!-- Visualization & Content Choices: 1. 总体对比 -> 目标: 比较 -> 分组条形图 -> 理由: 清晰地展示多个实体在不同类别下的表现，便于横向比较。 2. 公司概览 -> 目标: 告知 -> 雷达图 -> 理由: 直观展示单个实体在多个维度上的表现分布和均衡性。 3. 分类钻取 -> 目标: 告知/比较 -> 水平条形图 -> 理由: 对于比较同一类别下的子项得分，具有很高的可读性。 4. 原始报告 -> 目标: 告知/回溯 -> 可折叠文本块(details/summary) -> 理由: 在不影响主视图简洁性的前提下，容纳大量原始文本信息。所有图表均使用Chart.js（Canvas）实现。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 50vh;
+            }
+        }
+        .nav-item {
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+            color: #475569; /* slate-600 */
+        }
+        .nav-item:hover {
+            background-color: #e2e8f0; /* slate-200 */
+        }
+        .nav-item.active {
+            background-color: #0891b2; /* cyan-600 */
+            color: white;
+        }
+        .tab-item {
+            cursor: pointer;
+            padding: 0.5rem 1.5rem;
+            border-bottom: 3px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+             color: #475569; /* slate-600 */
+        }
+        .tab-item:hover {
+            color: #0e7490; /* cyan-700 */
+        }
+        .tab-item.active {
+            color: #0891b2; /* cyan-600 */
+            border-color: #0891b2; /* cyan-600 */
+            font-weight: 600;
+        }
+        .summary-content {
+            background-color: #f1f5f9; /* slate-100 */
+            border-left: 4px solid #0891b2; /* cyan-600 */
+            padding: 1.25rem;
+            border-radius: 0.25rem;
+            line-height: 1.75;
+        }
+        .summary-content h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b; /* slate-800 */
+        }
+         .summary-content p, .summary-content ul {
+            margin-top: 0.75rem;
+        }
+        .summary-content li {
+            margin-left: 1.5rem;
+            list-style-type: disc;
+        }
+        details {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        summary {
+            font-weight: 600;
+            padding: 1rem;
+            cursor: pointer;
+            background-color: #f8fafc;
+            border-radius: 0.5rem 0.5rem 0 0;
+            outline: none;
+        }
+        details[open] summary {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .details-content {
+            padding: 1rem;
+            line-height: 1.75;
+            white-space: pre-wrap;
+            background-color: white;
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+    <div id="app" class="max-w-screen-2xl mx-auto p-4 md:p-8">
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <img src="https://globalbusinessinsight.github.io/picture/ccpitlogo.jpeg" alt="CCPIT Logo" class="w-40" onerror="this.style.display='none'">
+            </div>
+            <div class="text-center px-4">
+                <h1 class="text-3xl md:text-4xl font-bold text-slate-800">企业数字化转型成熟度评估</h1>
+                <p class="mt-2 text-lg text-slate-500">交互式仪表板</p>
+            </div>
+            <div class="bg-blue-800 p-2 rounded-md">
+                 <img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="Inossem Logo" class="w-40" onerror="this.style.display='none'">
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <nav class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg h-fit">
+                <h2 class="text-xl font-semibold mb-4 text-slate-800 border-b pb-2">企业列表</h2>
+                <ul id="company-list" class="space-y-2">
+                    <!-- Company list will be populated by JS -->
+                </ul>
+            </nav>
+
+            <div id="content-area" class="lg:col-span-9 space-y-8">
+                <div id="overview-section" class="bg-white p-6 rounded-xl shadow-lg space-y-6">
+                    <div>
+                      <h2 class="text-2xl font-bold text-slate-800">总体得分概览</h2>
+                      <p class="mt-2 text-slate-500">此图表展示了所有参与评估企业在五个核心维度上的得分情况，您可以点击图例中的企业名称以在图表中显示或隐藏该企业的数据，从而进行灵活的对比分析。</p>
+                    </div>
+                    <div id="overview-summary" class="summary-content">
+                        <!-- Overall summary content will be populated by JS -->
+                    </div>
+                    <div class="chart-container mt-4">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
+                </div>
+
+                <div id="detail-section" class="hidden space-y-8">
+                    <div class="bg-white p-6 rounded-xl shadow-lg space-y-6">
+                         <div>
+                            <h2 id="company-name-title" class="text-2xl font-bold text-slate-800"></h2>
+                            <p class="mt-2 text-slate-500">雷达图直观地展示了该企业在五个核心维度的成熟度概况。下方的标签页提供了各维度内部二级指标的详细得分情况。您还可以展开页面底部的“详细评估报告”部分，查阅完整的分析文本。</p>
+                        </div>
+                        <div id="company-summary" class="summary-content">
+                             <!-- Company-specific summary content will be populated by JS -->
+                        </div>
+                        <div class="chart-container mt-4">
+                            <canvas id="companyRadarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4">各维度详情</h3>
+                        <div id="tabs-container" class="border-b border-slate-200">
+                            <!-- Tabs will be populated by JS -->
+                        </div>
+                        <div class="chart-container mt-4 !h-[50vh] max-h-[600px]">
+                            <canvas id="categoryBarChart"></canvas>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4">详细评估报告</h3>
+                        <div id="detailed-analysis-section">
+                            <!-- Detailed analysis will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+const allData = {
+    "株冶": {
+        "score": 57.75,
+        "发展战略": { "score": 68.35, "subCategories": { "战略规划": 74.25, "价值模式": 60.1 } },
+        "治理体系": { "score": 68.93, "subCategories": { "数字化领导力": 73.43, "战略决策体系": 75.0, "业务运行管控体系": 60.0, "组织架构": 75.0, "数字化文化": 61.25 } },
+        "新型能力": { "score": 59.55, "subCategories": { "新型能力模型可处理的数据": 58.2, "新型能力模型的算法与技术": 60.0, "新型能力模型的迭代优化": 61.5 } },
+        "业务创新转型": { "score": 35.38, "subCategories": { "业务数字化": 48.36, "数字业务发展": 15.0 } },
+        "系统性解决方案": { "score": 66.53, "subCategories": { "数据": 64.76, "技术": 75.0, "流程": 60.0, "组织": 65.0 } },
+        "detailedAnalysis": {
+            "发展战略": `优势：企业在数字化转型战略规划方面表现出色，已制定较为完善的战略规划，明确了转型目标、路径和重点任务，并与企业发展战略深度融合。企业高层对数字化转型的重要性有清晰认识，并积极推动战略的落地实施。\n不足：价值创造与分享模式策划方面相对薄弱，尚未形成成熟的、基于数字技术的价值创造和分享模式，对数据资产的价值挖掘和变现能力有待提升。`,
+            "治理体系": `优势：企业已建立较为完善的数字化转型治理体系。在数字化领导力方面，建立了领导力提升机制；在战略决策方面，成立了跨部门的数字化转型委员会；在组织架构方面，进行了系统性调整以适应数字化转型需求。\n不足：业务运行管控体系与数字化转型战略的匹配度有待提升，部分业务流程尚未实现完全的数字化和智能化。数字化文化建设仍处于引导和激励阶段，尚未完全内化为全员的自觉行动。`,
+            "新型能力": `优势：企业在新型能力建设方面已取得一定进展，尤其在算法/模型丰富度和技术先进性方面表现尚可，能够根据业务需求引入和应用新技术。\n不足：数据处理能力方面存在短板，尤其是在处理多源异构数据和非结构化数据方面能力不足。模型迭代优化效率和用户反馈收集水平有待提高，尚未形成快速响应、持续优化的闭环机制。`,
+            "业务创新转型": `优势：企业在核心业务的数字化方面取得了一定成效，如生产制造、供应链管理等环节的数字化水平均有提升。\n不足：业务创新转型是企业的最大短板。数字业务发展严重滞后，尚未开展个性化定制、服务化延伸等新业务模式。这表明企业的数字化转型仍停留在对内提质增效的层面，尚未转化为对外创造新价值、开拓新市场的动力。`,
+            "系统性解决方案": `优势：企业在系统性解决方案方面基础较好，尤其是在技术应用方面，已应用云计算、大数据等新兴技术，技术架构较为完善。数据治理工作已启动，并建立了初步的数据标准。\n不足：数据采集的自动化和实时性有待加强，部分数据仍依赖人工采集。流程数字化管理水平不高，尚未实现流程的智能化管理和持续优化。组织和人员的调整与流程优化的匹配度需进一步提升。`
+        }
+    },
+     "水口山": {
+        "score": 53.53,
+        "发展战略": { "score": 69.95, "subCategories": { "战略规划": 65.25, "价值模式": 77.0 } },
+        "治理体系": { "score": 59.18, "subCategories": { "数字化领导力": 56.1, "战略决策体系": 60.0, "业务运行管控体系": 60.0, "组织架构": 60.0, "数字化文化": 60.0 } },
+        "新型能力": { "score": 54.99, "subCategories": { "新型能力模型可处理的数据": 58.2, "新型能力模型的算法与技术": 45.0, "新型能力模型的迭代优化": 60.0 } },
+        "业务创新转型": { "score": 32.07, "subCategories": { "业务数字化": 40.98, "数字业务发展": 19.5 } },
+        "系统性解决方案": { "score": 51.45, "subCategories": { "数据": 51.96, "技术": 45.0, "流程": 60.0, "组织": 50.0 } },
+        "detailedAnalysis": {
+            "发展战略": `优势：企业在“发展战略”维度表现非常突出，尤其是在“价值模式”策划上得分高达77分，位居所有企业之首。这表明公司高层对于如何通过数字化来重塑价值链、创造新价值有深刻的理解和系统性的规划，为转型指明了清晰的商业方向。\n不足：尽管战略清晰，但在具体的战略规划执行层面，如竞争合作优势的构建上，仍有提升空间，需要将先进的价值理念转化为更具竞争力的市场策略。`,
+            "治理体系": `优势：治理体系建设相对均衡，在决策、管控、组织和文化四个方面均达到了60分的水平，说明企业已经建立了全面的、系统性的数字化转型管理框架，为战略执行提供了有力的组织保障。\n不足：数字化领导力的培养（56.1分）相对其他治理要素稍显滞后，未来需要进一步加强对各级管理者的数字化意识和能力的系统性培养，确保战略意图能够层层穿透。`,
+            "新型能力": `优势：新型能力建设较为均衡，在数据处理、迭代优化等方面均有不错的表现。特别是在模型的迭代优化方面（60分），说明企业已经建立了反馈和优化的初步机制，具备了持续提升数字化能力的潜力。\n不足：算法与技术能力（45分）是新型能力中的相对短板。企业需要加大在核心算法自主研发和前沿技术探索方面的投入，以构建差异化的技术竞争力。`,
+            "业务创新转型": `优势：在核心业务的数字化方面（40.98分）有一定基础，尤其是在研发规划、生产制造等环节，已经开始应用数字化工具进行优化，为提质增效打下了基础。\n不足：与所有企业类似，“业务创新转型”是水口山最薄弱的环节，得分仅为32.07分。尤其在“数字业务发展”方面（19.5分），利用数字化能力开创服务化延伸等新业务模式的尝试非常有限，能力向价值的转化存在明显断层。`,
+            "系统性解决方案": `优势：系统性解决方案相对完善，尤其是在流程的数字化管理方面（60分）表现较好，表明企业重视流程的梳理和固化。数据、技术和组织方面也具备了较好的基础。\n不足：技术应用（45分）和组织配套（50分）方面仍有提升空间。需要引进更先进的数字化技术，并确保持续的组织变革能够跟上技术和流程优化的步伐。`
+        }
+    },
+    "锡矿山": {
+        "score": 33.4,
+        "发展战略": { "score": 45.33, "subCategories": { "战略规划": 49.94, "价值模式": 38.5 } },
+        "治理体系": { "score": 32.63, "subCategories": { "数字化领导力": 49.33, "战略决策体系": 25.0, "业务运行管控体系": 25.0, "组织架构": 25.0, "数字化文化": 35.0 } },
+        "新型能力": { "score": 36.18, "subCategories": { "新型能力模型可处理的数据": 47.7, "新型能力模型的算法与技术": 25.0, "新型能力模型的迭代优化": 31.5 } },
+        "业务创新转型": { "score": 20.63, "subCategories": { "业务数字化": 24.69, "数字业务发展": 14.5 } },
+        "系统性解决方案": { "score": 32.58, "subCategories": { "数据": 26.92, "技术": 25.0, "流程": 45.0, "组织": 35.0 } },
+        "detailedAnalysis": {
+            "发展战略": "优势：企业对数字化转型有初步的战略认知和方向性思考，特别是在主营业务运营的竞争合作方面，已开始关注并建立初步的合作网络。\n不足：战略规划缺乏系统性和深度，尚未与企业发展战略深度融合。价值创造与分享模式策划方面尤为薄弱，未能形成基于数字技术的清晰价值实现路径，对数据资产的价值挖掘和商业模式创新思考不足。",
+            "治理体系": "优势：数字化领导力建设是治理体系中相对较好的环节，表明管理层对数字化转型的重要性有一定认知，并建立了初步的领导力提升机制。\n不足：治理体系存在严重短板。战略决策、业务管控、组织架构均处于最低水平，缺乏有效的数字化转型决策机制和与之匹配的组织保障，无法为战略的落地提供有力支撑。数字化文化建设也处于初级阶段。",
+            "新型能力": "优势：在数据处理方面具备一定基础，尤其是在数据采集和存储方面，能够处理一定规模的结构化数据，为后续的数据分析应用奠定了基础。\n不足：新型能力建设不均衡，算法/模型和技术先进性方面是明显短板，缺乏自主研发和创新能力。模型迭代优化效率和用户反馈收集水平有待提高，尚未形成数据驱动的持续改进闭环。",
+            "业务创新转型": "优势：在部分核心业务环节（如生产制造）的数字化方面取得了一定进展，应用了信息系统进行流程管控。\n不足：业务创新转型是企业最大的短板，得分在所有维度中最低。数字业务发展几乎为空白，个性化定制、服务化延伸等新模式尚未探索。数字化转型仍停留在内部效率提升的浅层，远未成为驱动业务创新和增长的核心引擎。",
+            "系统性解决方案": "优势：流程的数字化管理具备一定基础，对部分关键流程进行了梳理和优化。\n不足：系统性解决方案的整体水平不高。数据采集的自动化和实时性不足；技术应用相对保守，对新技术的引入和应用不足；组织和人员的调整未能与流程优化和技术应用有效匹配，存在脱节现象。"
+        }
+    },
+    "五矿铜业": {
+        "score": 42.6,
+        "发展战略": { "score": 49.9, "subCategories": { "战略规划": 42.88, "价值模式": 61.25 } },
+        "治理体系": { "score": 47.24, "subCategories": { "数字化领导力": 59.75, "战略决策体系": 45.0, "业务运行管控体系": 45.0, "组织架构": 45.0, "数字化文化": 42.5 } },
+        "新型能力": { "score": 44.68, "subCategories": { "新型能力模型可处理的数据": 47.7, "新型能力模型的算法与技术": 45.0, "新型能力模型的迭代优化": 42.0 } },
+        "业务创新转型": { "score": 27.43, "subCategories": { "业务数字化": 45.89, "数字业务发展": 0.0 } },
+        "系统性解决方案": { "score": 43.72, "subCategories": { "数据": 59.54, "技术": 25.0, "流程": 45.0, "组织": 42.5 } },
+        "detailedAnalysis": {
+            "发展战略": `优势：公司在价值模式策划（61.25分）方面有较好的思考，显示出对数字化转型商业价值的认知。高层的数字化领导力意识也相对较强。\n不足：战略规划的系统性不足（42.88分），未能将价值模式的思考有效转化为具体的、可执行的战略部署和竞争策略。`,
+            "治理体系": `优势：数字化领导力（59.75分）是治理体系中的亮点，表明管理层对数字化转型持积极态度，这是推动变革的重要前提。\n不足：决策、管控和组织架构（均为45分）等机制性建设较为薄弱，尚未形成能够高效支撑数字化转型的敏捷组织和决策流程。`,
+            "新型能力": `优势：新型能力建设相对均衡，数据处理、算法技术和迭代优化三个方面均在40分档，表明已初步搭建了数字化能力框架。\n不足：各项新型能力均处于“知其然”但尚未“知其所以然”的阶段，深度和广度都不足，难以有效支撑复杂的业务场景。`,
+            "业务创新转型": `优势：在业务数字化方面（45.89分）表现尚可，说明企业在存量业务的线上化、数字化方面投入了资源并取得了一定进展。\n不足：最大的短板在于数字业务发展，得分为0。这意味着公司完全没有利用数字化手段开展任何新业务、新模式的探索，数字化转型完全停留在内部运营优化的初级阶段，价值创造能力极为有限。`,
+            "系统性解决方案": `优势：数据层面（59.54分）基础较好，尤其在数据采集和治理方面有一定积累，这是未来发展的重要资产。\n不足：技术应用（25分）是系统性解决方案中的致命短板，技术架构陈旧，缺乏对新技术的应用，这严重制约了数据价值的发挥和其他各项能力的发展。`
+        }
+    },
+    "五矿铍业": {
+        "score": 30.8,
+        "发展战略": { "score": 49.9, "subCategories": { "战略规划": 62.63, "价值模式": 38.5 } },
+        "治理体系": { "score": 24.24, "subCategories": { "数字化领导力": 32.03, "战略决策体系": 25.0, "业务运行管控体系": 25.0, "组织架构": 25.0, "数字化文化": 15.0 } },
+        "新型能力": { "score": 34.34, "subCategories": { "新型能力模型可处理的数据": 44.1, "新型能力模型的算法与技术": 25.0, "新型能力模型的迭代优化": 31.5 } },
+        "业务创新转型": { "score": 13.19, "subCategories": { "业务数字化": 18.06, "数字业务发展": 5.0 } },
+        "系统性解决方案": { "score": 22.00, "subCategories": { "数据": 29.57, "技术": 25.0, "流程": 25.0, "组织": 5.0 } },
+        "detailedAnalysis": {
+            "发展战略": `优势：发展战略是唯一接近及格线的维度，尤其在战略规划（62.63分）方面表现尚可，表明公司高层对数字化转型有初步的思考和规划意图。\n不足：价值模式策划（38.5分）得分较低，战略规划未能有效转化为清晰的价值创造路径，缺乏商业模式创新的思考。`,
+            "治理体系": `优势：无明显优势。各分项得分均很低。\n不足：治理体系（24.24分）是最大的短板之一，全面缺失。决策、管控、组织架构均为25分，数字化文化更是只有15分，说明公司完全没有为数字化转型建立起码的组织保障、管理机制和文化氛围。`,
+            "新型能力": `优势：数据处理能力（44.1分）相对其他能力稍好，说明在数据采集和存储方面有一定基础。\n不足：算法技术（25分）和迭代优化（31.5分）能力薄弱，无法对数据进行有效利用和价值挖掘。`,
+            "业务创新转型": `优势：无明显优势。\n不足：业务创新转型（13.19分）基本处于停滞状态。无论是对现有业务的数字化改造，还是新业务的开拓，都处于非常初级的阶段。`,
+            "系统性解决方案": `优势：无明显优势。\n不足：系统性解决方案（22.00分）全面薄弱。尤其在组织层面得分仅为5分，这意味着流程优化后的人员和职责调整基本没有进行，这是数字化转型失败的典型原因之一。数据、技术、流程基础均亟待建设。`
+        }
+    },
+    "黄沙坪": {
+        "score": 29.04,
+        "发展战略": { "score": 40.68, "subCategories": { "战略规划": 36.63, "价值模式": 47.0 } },
+        "治理体系": { "score": 27.46, "subCategories": { "数字化领导力": 27.85, "战略决策体系": 25.0, "业务运行管控体系": 25.0, "组织架构": 25.0, "数字化文化": 33.75 } },
+        "新型能力": { "score": 35.43, "subCategories": { "新型能力模型可处理的数据": 47.7, "新型能力模型的算法与技术": 25.0, "新型能力模型的迭代优化": 31.5 } },
+        "业务创新转型": { "score": 13.03, "subCategories": { "业务数字化": 22.01, "数字业务发展": 0.0 } },
+        "系统性解决方案": { "score": 18.59, "subCategories": { "数据": 25.65, "技术": 25.0, "流程": 25.0, "组织": 0.0 } },
+         "detailedAnalysis": {
+            "发展战略": `优势：在所有维度中，发展战略（40.68分）相对得分最高，表明企业对数字化转型有基本的战略意图和方向性思考。\n不足：战略规划的系统性和深度不足（36.63分），缺乏将战略意图转化为具体、可落地行动计划的能力。`,
+            "治理体系": `优势：无明显优势。\n不足：治理体系建设严重缺失（27.46分）。除数字化文化外，领导力、决策、管控、组织架构等关键机制均处于最低水平，无法为转型提供有效的组织保障和推动力。`,
+            "新型能力": `优势：数据处理能力（47.7分）是所有能力项中唯一接近50分的，说明在矿山生产过程中积累了一定的数据采集基础。\n不足：算法技术（25分）和迭代优化能力（31.5分）的缺失，使得已采集的数据无法被有效分析和利用，数据仍是“沉睡的资产”。`,
+            "业务创新转型": `优势：无明显优势。\n不足：业务创新转型基本停滞。数字业务发展得分为0，意味着完全没有新模式的探索。现有业务的数字化改造（22.01分）也处于非常初级的水平。`,
+            "系统性解决方案": `优势：无明显优势。\n不足：系统性解决方案（18.59分）是所有企业中得分最低的，这是一个巨大的警示。尤其在“组织”层面得分为0，说明在流程梳理和系统实施后，完全没有进行相应的组织职责和人员能力匹配调整，这使得任何技术和流程的投入都难以产生实际效果。`
+        }
+    },
+    "云天化氟化学": {
+        "score": 30.01,
+        "发展战略": { "score": 36.63, "subCategories": { "战略规划": 54.06, "价值模式": 12.0 } },
+        "治理体系": { "score": 30.02, "subCategories": { "数字化领导力": 28.63, "战略决策体系": 25.0, "业务运行管控体系": 25.0, "组织架构": 25.0, "数字化文化": 45.0 } },
+        "新型能力": { "score": 37.43, "subCategories": { "新型能力模型可处理的数据": 39.7, "新型能力模型的算法与技术": 25.0, "新型能力模型的迭代优化": 46.5 } },
+        "业务创新转型": { "score": 17.52, "subCategories": { "业务数字化": 22.14, "数字业务发展": 12.0 } },
+        "系统性解决方案": { "score": 28.06, "subCategories": { "数据": 29.24, "技术": 25.0, "流程": 25.0, "组织": 32.5 } },
+        "detailedAnalysis": {
+            "发展战略": `优势：公司的战略规划（54.06分）相对完善，显示出公司层面制定了较为清晰的数字化转型蓝图和实施路径。\n不足：存在严重的“战略与价值脱节”问题。价值模式得分仅为12分，是所有企业中最低的。这表明公司的战略规划未能有效回答“如何通过数字化创造和获取价值”这一核心问题，可能导致转型缺乏商业驱动力，陷入为了转型而转型的困境。`,
+            "治理体系": `优势：数字化文化建设（45分）相对较好，说明在员工层面有一定的数字化氛围和认知基础。\n不足：除文化外，其余治理要素均处于最低水平（25分档），领导力、决策、管控、组织架构等“硬约束”机制严重缺失，无法保障战略的有效执行。`,
+            "新型能力": `优势：模型的迭代优化能力（46.5分）相对突出，表明企业可能在某些单点应用上建立了反馈和改进的机制。\n不足：数据处理能力（39.7分）和算法技术能力（25分）薄弱，缺乏系统性的数据资产管理和核心技术能力，难以支撑规模化的数字化应用。`,
+            "业务创新转型": `优势：无明显优势。\n不足：业务创新转型水平极低（17.52分），无论是存量业务改造还是增量业务开拓都非常滞后，战略规划的价值完全没有在业务层面体现出来。`,
+            "系统性解决方案": `优势：无明显优势。\n不足：系统性解决方案全面薄弱，数据、技术、流程、组织四个基础支撑均处于25分左右的初始水平，无法承载任何有深度的数字化转型需求。`
+        }
+    },
+    "北京金色锑业": {
+        "score": 27.0,
+        "发展战略": { "score": 38.28, "subCategories": { "战略规划": 36.19, "价值模式": 41.5 } },
+        "治理体系": { "score": 27.60, "subCategories": { "数字化领导力": 24.25, "战略决策体系": 25.0, "业务运行管控体系": 25.0, "组织架构": 25.0, "数字化文化": 37.5 } },
+        "新型能力": { "score": 32.18, "subCategories": { "新型能力模型可处理的数据": 39.7, "新型能力模型的算法与技术": 25.0, "新型能力模型的迭代优化": 29.25 } },
+        "业务创新转型": { "score": 14.85, "subCategories": { "业务数字化": 17.71, "数字业务发展": 12.0 } },
+        "系统性解决方案": { "score": 22.07, "subCategories": { "数据": 18.09, "技术": 25.0, "流程": 25.0, "组织": 20.0 } },
+        "detailedAnalysis": {
+            "发展战略": `优势：在价值模式策划方面（41.5分）有初步思考，略高于战略规划的执行层面。\n不足：整体战略水平低下（38.28分），缺乏清晰、系统、可执行的数字化转型战略，转型工作缺少顶层指引。`,
+            "治理体系": `优势：无明显优势。\n不足：治理体系建设严重滞后（27.60分），领导力、决策、管控、组织等核心机制均处于“尚未建立”的状态，转型工作缺乏组织保障。`,
+            "新型能力": `优势：无明显优势。\n不足：新型能力全面薄弱（32.18分）。数据处理能力有限，核心的算法技术能力和迭代优化能力基本为空白，不具备数据驱动运营的基础。`,
+            "业务创新转型": `优势：无明显优势。\n不足：业务创新转型得分在所有企业中垫底（14.85分），数字化与业务的融合度极低，无论是对内效率提升还是对外模式创新，都未见实质性进展。`,
+            "系统性解决方案": `优势：无明显优势。\n不足：系统性解决方案全面缺失（22.07分）。数据基础（18.09分）尤为薄弱，技术、流程、组织等也处于最低水平。公司需要从最基础的信息化补课开始。`
+        }
+    },
+    "有色置业": {
+        "score": 24.67,
+        "发展战略": { "score": 31.2, "subCategories": { "战略规划": 39.38, "价值模式": 19.75 } },
+        "治理体系": { "score": 28.18, "subCategories": { "数字化领导力": 27.25, "战略决策体系": 25.0, "业务运行管控体系": 25.0, "组织架构": 25.0, "数字化文化": 37.5 } },
+        "新型能力": { "score": 29.68, "subCategories": { "新型能力模型可处理的数据": 33.7, "新型能力模型的算法与技术": 25.0, "新型能力模型的迭代优化": 29.25 } },
+        "业务创新转型": { "score": 14.18, "subCategories": { "业务数字化": 16.36, "数字业务发展": 12.0 } },
+        "系统性解决方案": { "score": 20.11, "subCategories": { "数据": 21.84, "技术": 25.0, "流程": 25.0, "组织": 5.0 } },
+        "detailedAnalysis": {
+            "发展战略": `优势：无明显优势。\n不足：发展战略维度得分极低（31.2分），尤其是在价值模式策划上（19.75分），表明公司对数字化转型的商业价值和实现路径认知严重不足，转型缺乏方向感。`,
+            "治理体系": `优势：无明显优势。\n不足：治理体系全面缺失（28.18分），与北京金色锑业情况类似，各项关键治理机制均未建立，无法为转型提供组织和管理支持。`,
+            "新型能力": `优势：无明显优势。\n不足：新型能力建设处于初始阶段（29.68分），数据处理、算法技术、迭代优化等核心能力均未形成，不具备开展深度数字化应用的基础。`,
+            "业务创新转型": `优势：无明显优势。\n不足：业务创新转型得分在所有企业中处于末位（14.18分），数字化与业务基本“两张皮”，未产生任何实质性的业务变革和价值创造。`,
+            "系统性解决方案": `优势：无明显优势。\n不足：系统性解决方案（20.11分）是除黄沙坪外得分最低的。与五矿铍业类似，“组织”维度得分仅为5分，在系统上线和流程优化后，未能进行配套的组织和人员调整，这是转型失败的重大风险信号。`
+        }
+    },
+    "湖南有色本部": {
+        "score": 54.27,
+        "发展战略": { "score": 69.7, "subCategories": { "战略规划": 62.13, "价值模式": 81.5 } },
+        "治理体系": { "score": 60.56, "subCategories": { "数字化领导力": 64.65, "战略决策体系": 45.0, "业务运行管控体系": 60.0, "组织架构": 60.0, "数字化文化": 71.25 } },
+        "新型能力": { "score": 57.49, "subCategories": { "新型能力模型可处理的数据": 58.2, "新型能力模型的算法与技术": 60.0, "新型能力模型的迭代优化": 55.5 } },
+        "业务创新转型": { "score": 22.97, "subCategories": { "业务数字化": 12.57, "数字业务发展": 37.5 } },
+        "系统性解决方案": { "score": 60.62, "subCategories": { "数据": 70.22, "技术": 45.0, "流程": 60.0, "组织": 65.0 } },
+        "detailedAnalysis": null
+    },
+    "郴州氟化学": {
+        "score": 31.5,
+        "发展战略": { "score": 35.0, "subCategories": { "战略规划": 40.0, "价值模式": 30.0 } },
+        "治理体系": { "score": 30.0, "subCategories": { "数字化领导力": 35.0, "战略决策体系": 25.0, "业务运行管控体系": 25.0, "组织架构": 30.0, "数字化文化": 35.0 } },
+        "新型能力": { "score": 32.0, "subCategories": { "新型能力模型可处理的数据": 35.0, "新型能力模型的算法与技术": 25.0, "新型能力模型的迭代优化": 36.0 } },
+        "业务创新转型": { "score": 28.0, "subCategories": { "业务数字化": 35.0, "数字业务发展": 21.0 } },
+        "系统性解决方案": { "score": 32.5, "subCategories": { "数据": 35.0, "技术": 25.0, "流程": 30.0, "组织": 40.0 } },
+        "detailedAnalysis": {
+            "发展战略": "优势：企业对数字化转型有基础认知，并开始进行初步的战略规划。\n不足：战略规划与价值创造模式脱节，缺乏清晰的商业目标和实现路径。转型更多是技术驱动而非价值驱动。",
+            "治理体系": "优势：在数字化文化和领导力方面有初步建设。\n不足：缺乏系统性的治理机制，决策、管控、组织架构等方面均未建立有效支撑体系。",
+            "新型能力": "优势：在数据采集方面有一定基础。\n不足：数据处理和分析能力薄弱，缺乏核心算法和模型，无法有效利用数据。",
+            "业务创新转型": "优势：在生产等核心环节进行了初步的数字化改造。\n不足：业务创新转型滞后，缺乏服务化延伸等新业务模式的探索。",
+            "系统性解决方案": "优势：在部分流程和组织调整上有初步尝试。\n不足：技术平台陈旧，数据、技术、流程、组织之间缺乏协同，未形成一体化的解决方案。"
+        }
+    },
+    "衡东氟化学": {
+        "score": 29.8,
+        "发展战略": { "score": 33.0, "subCategories": { "战略规划": 38.0, "价值模式": 28.0 } },
+        "治理体系": { "score": 28.0, "subCategories": { "数字化领导力": 30.0, "战略决策体系": 25.0, "业务运行管控体系": 25.0, "组织架构": 25.0, "数字化文化": 35.0 } },
+        "新型能力": { "score": 30.0, "subCategories": { "新型能力模型可处理的数据": 33.0, "新型能力模型的算法与技术": 25.0, "新型能力模型的迭代优化": 32.0 } },
+        "业务创新转型": { "score": 26.0, "subCategories": { "业务数字化": 32.0, "数字业务发展": 20.0 } },
+        "系统性解决方案": { "score": 32.0, "subCategories": { "数据": 30.0, "技术": 25.0, "流程": 33.0, "组织": 40.0 } },
+        "detailedAnalysis": {
+            "发展战略": "优势：已意识到数字化转型的重要性，并开始进行战略思考。\n不足：战略规划不清晰，价值模式模糊，缺乏明确的转型方向和目标。",
+            "治理体系": "优势：有初步的数字化文化氛围。\n不足：治理体系全面缺失，无法为转型提供有效的组织和管理保障。",
+            "新型能力": "优势：具备基础的数据采集能力。\n不足：数据资产管理和价值挖掘能力严重不足，技术和算法能力是短板。",
+            "业务创新转型": "优势：在部分业务环节实现了单点的信息化应用。\n不足：数字化与业务融合度低，未能通过数字化手段驱动业务创新。",
+            "系统性解决方案": "优势：对流程优化有初步认识。\n不足：缺乏系统性的解决方案，技术、数据、流程、组织之间相互脱节。"
+        }
+    }
+};
+
+const overallSummary = `
+    <h3>数字化转型总体情况分析</h3>
+    <p>本次对12家企业的全面评估揭示了集团数字化转型的共性特征与挑战。总体来看，各企业转型步伐不一，呈现出明显的“两级分化”和“知易行难”的局面。</p>
+    <h4>主要成绩与亮点：</h4>
+    <ul>
+        <li><strong>顶层设计普遍先行：</strong> 以株冶、水口山和湖南有色本部为代表的领先企业，在“发展战略”与“治理体系”上得分较高。这表明集团层面对数字化转型的战略认知清晰，顶层设计和组织保障工作已初步到位，尤其在价值模式创新思考上（如湖南有色本部得分高达81.5），展现了前瞻性。</li>
+        <li><strong>数据基础初步夯实：</strong> 部分领先企业（如株冶、湖南有色本部）在“系统性解决方案”的数据维度表现良好，已启动数据治理工作，为未来的数据驱动决策奠定了基础。</li>
+    </ul>
+    <h4>普遍性问题与核心挑战：</h4>
+    <ul>
+        <li><strong>业务创新转型严重滞后：</strong> 这是所有企业面临的最大、最普遍的短板。“业务创新转型”维度得分普遍处于最低水平，多家企业的“数字业务发展”项得分甚至为0或接近于0。这暴露出一个核心困境：企业虽有转型意愿和初步规划，但将数字化能力转化为新商业模式、新产品服务和新增长点的能力极度匮乏。转型多数停留在内部运营优化的浅层阶段。</li>
+        <li><strong>系统性能力建设不均衡：</strong> 多数企业在“系统性解决方案”和“新型能力”建设上存在明显短板。技术应用保守、核心算法能力缺失、流程与组织脱节等问题普遍存在。特别是黄沙坪、有色置业等企业在“组织”配套上得分接近于0，这是转型失败的重大风险点，意味着技术系统的投入无法通过组织变革产生实际效益。</li>
+        <li><strong>“知行鸿沟”巨大：</strong> 从评估数据看，战略的“知”与业务的“行”之间存在巨大鸿沟。例如，云天化氟化学战略规划得分尚可，但价值模式得分却是最低档，典型的“战略悬空”。这种脱节导致转型投入无法有效转化为商业价值。</li>
+    </ul>
+    <h4>结论与战略建议：</h4>
+    <p>集团整体的数字化转型已从“规划期”进入“攻坚期”。下一阶段的核心任务不再是“要不要转”，而是“如何有效转”。建议集团层面：<strong>1. 聚焦价值实现</strong>，推动各单位将战略规划与业务创新紧密结合，设立明确的数字业务增长目标。<strong>2. 强化能力建设</strong>，特别是补齐技术、算法和组织变革的短板，推广领先单位（如株冶、水口山）的最佳实践。<strong>3. 坚持分类施策</strong>，对处于起步阶段的企业（如黄沙坪、有色置业），应首先聚焦于夯实基础，补齐信息化“欠账”；对领先企业，则应鼓励其大胆探索业务创新，打造可复制的成功范例。</p>
+`;
+
+const companySummaries = {
+    "株冶": `<h3>株冶 - 数字化成熟度分析</h3><p>株冶在本次评估中总分<strong>57.75</strong>，位列第一梯队，展现了作为行业领先者的扎实数字化基础和全面的转型布局。公司整体发展均衡，在战略、治理和系统支撑方面表现突出。</p><h4>优势分析：</h4><ul><li><strong>治理体系完善 (68.93分)：</strong> 公司已建立起强大的自上而下的转型推动机制，在数字化领导力、战略决策和组织架构方面得分均为75分，为转型提供了坚实的组织保障。</li><li><strong>系统性解决方案扎实 (66.53分)：</strong> 技术应用（75分）和数据治理（64.76分）基础良好，已应用新兴技术并启动了系统性的数据管理工作。</li><li><strong>战略规划清晰 (68.35分)：</strong> 拥有完善的数字化转型战略规划，并与企业发展战略深度融合，转型方向明确。</li></ul><h4>短板与挑战：</h4><ul><li><strong>业务创新转型是最大短板 (35.38分)：</strong> 与其他领先企业类似，公司在利用数字技术开创如个性化定制、服务化延伸等新业务模式方面严重不足（数字业务发展仅15分）。数字化转型的价值主要体现在内部提质增效，尚未有效转化为新的市场增长点，存在明显的“能力-价值”转化鸿沟。</li></ul><h4>发展建议：</h4><p>建议株冶在巩固现有治理和技术优势的基础上，将战略重心向“价值创造”倾斜。应成立专门的业务创新团队，聚焦一两个有潜力的场景（如基于数据分析的设备预测性维护服务、产业链协同优化服务），进行新业务模式的试点和探索，力求打通从数字化能力到市场价值的“最后一公里”。</p>`,
+    "水口山": `<h3>水口山 - 数字化成熟度分析</h3><p>水口山在此次评估中总分<strong>53.53</strong>，同样位居第一梯队，其最大亮点在于对数字化商业价值的深刻理解和均衡的能力建设，是一家“懂战略、基础稳”的企业。</p><h4>优势分析：</h4><ul><li><strong>价值模式领先 (价值模式77分)：</strong> 在“发展战略”维度下的“价值模式”策划上得分全场最高，表明公司对如何通过数字化重塑商业模式、创造新价值有非常系统和深入的思考。</li><li><strong>各维度发展均衡：</strong> 公司没有明显的短板，治理、能力、系统解决方案等维度均在50分以上，为战略落地提供了全面的能力支撑。</li></ul><h4>短板与挑战：</h4><ul><li><strong>业务创新执行力不足 (32.07分)：</strong> 尽管拥有领先的价值理念，但将其转化为实际业务创新成果的能力依然不足。在“业务数字化”和“数字业务发展”两方面均有较大提升空间，先进的战略思想尚未完全转化为市场竞争力。</li></ul><h4>发展建议：</h4><p>水口山的核心任务是将领先的“价值构想”转化为实际的“业务增长”。建议公司采取“小步快跑”的策略，利用其均衡的能力基础，快速启动一两个创新业务试点，例如，将领先的生产管理能力包装成对外的技术服务，或探索基于数据分析的资源勘探新方法，将战略优势转化为实实在在的财务回报。</p>`,
+    "湖南有色本部": `<h3>湖南有色本部 - 数字化成熟度分析</h3><p>作为集团总部，湖南有色本部总分<strong>54.27</strong>，其角色定位清晰地体现在评估结果中：在顶层战略设计上高瞻远瞩，但在自身运营的数字化程度上存在明显不足。</p><h4>优势分析：</h4><ul><li><strong>战略与价值设计顶尖 (发展战略69.7分)：</strong> “价值模式”得分高达81.5分，冠绝所有单位，显示出集团在商业模式顶层设计上的卓越能力。</li><li><strong>治理体系与数据基础良好：</strong> 在治理体系和系统解决方案的数据维度得分均超过60分，为集团管控提供了较好的管理和数据基础。</li></ul><h4>短板与挑战：</h4><ul><li><strong>自身业务数字化严重滞后 (业务数字化12.57分)：</strong> 这是最核心的问题。“业务创新转型”维度总分仅22.97，主要是因为作为管理中枢，自身的规划管控、财务、人力等核心职能流程的数字化、线上化水平极低，导致先进的战略思想和管理意图无法高效、透明地在集团内部传导和执行。</li></ul><h4>发展建议：</h4><p>湖南有色本部亟需“刀刃向内”，将自身作为数字化转型的关键战场。应立刻启动总部职能部门的数字化提升工程，将先进的管理理念和价值模式固化到数字化的流程和系统中，打造一个透明、高效、数据驱动的“数字总部”。这不仅能提升自身的运营效率，更能为下属单位的转型提供有效的工具支持和最佳的实践示范。</p>`,
+    "锡矿山": `<h3>锡矿山 - 数字化成熟度分析</h3><p>锡矿山总分<strong>33.40</strong>，作为传统的矿山资源型企业，其数字化转型尚处于非常初级的“规范级”阶段，各项能力建设亟待加强。转型呈现出典型的“有想法，没办法，缺方法”的困境。</p><h4>优势分析：</h4><ul><li><strong>具备转型意识：</strong> “发展战略”（45.33分）和“数字化领导力”（49.33分）是相对得分较高的部分，说明企业管理层已经认识到数字化转型的重要性，并有推动变革的意愿，这是后续工作的基础。</li></ul><h4>短板与挑战：</h4><ul><li><strong>治理体系全面缺失 (32.63分)：</strong> 这是转型的核心障碍。除领导力外，战略决策、业务管控、组织架构等关键机制（均为25分）基本没有建立。这意味着转型工作“群龙无首”，缺乏系统性的管理保障和推动主体。</li><li><strong>技术与数据基础薄弱：</strong> “系统性解决方案”（32.58分）和“新型能力”（36.18分）得分低，尤其在数据治理和核心算法技术方面能力不足。数据虽有采集，但无法有效利用，仍是“沉睡的资产”。</li><li><strong>业务融合度极低 (20.63分)：</strong> “业务创新转型”得分是所有维度中最低的，数字化与主营业务的结合点尚未找到，无法创造实际价值。</li></ul><h4>发展建议：</h4><p>建议锡矿山现阶段应聚焦于<strong>“建机制、补基础”</strong>。<strong>首要任务是建立治理体系</strong>，必须由“一把手”挂帅，成立跨部门的数字化转型领导小组，明确职责、授权和考核机制，确保转型工作有人管、有流程。同时，应<strong>夯实数据基础</strong>，从关键生产环节（如采矿、选矿）的自动化数据采集入手，提升数据质量。在业务上，应选择一两个对安全生产或成本控制影响最大的痛点场景，进行单点应用的突破，以小见大，用实际效果来建立转型信心。</p>`,
+    "五矿铜业": `<h3>五矿铜业 - 数字化成熟度分析</h3><p>五矿铜业总分<strong>42.60</strong>，处于转型的中间梯队。其转型呈现“跛脚”状态：在部分领域有较好的认知和基础，但在关键的技术应用和业务创新上存在致命短板。</p><h4>优势分析：</h4><ul><li><strong>价值认知与数据基础尚可：</strong> 对价值模式有较好的理解（61.25分），且在数据采集与治理方面有一定积累（数据维度59.54分）。</li></ul><h4>短板与挑战：</h4><ul><li><strong>数字业务发展为零：</strong> 这是最严重的问题，“数字业务发展”得分为0，表明公司在利用数字化开拓新服务、新模式方面完全是空白。</li><li><strong>技术应用严重滞后：</strong> 技术维度得分仅为25分，显示公司技术架构陈旧，缺乏对云计算、大数据等新技术的应用，这使得其数据资产的价值难以被激活。</li></ul><h4>发展建议：</h4><p>五矿铜业应采取“扬长补短”的策略。一方面要<strong>加大技术投入</strong>，对现有IT架构进行现代化升级，引入必要的新技术平台，这是激活数据价值的前提。另一方面，应<strong>立刻启动从0到1的业务创新探索</strong>，可以基于现有的数据基础，选择一个低成本、见效快的场景（如设备预测性维护、能耗在线优化）进行试点，迈出数字业务创新的第一步。</p>`,
+    "五矿铍业": `<h3>五矿铍业 - 数字化成熟度分析</h3><p>五矿铍业总分<strong>30.80</strong>，数字化转型进程非常缓慢，整体处于起步阶段，问题全面且严重，尤其在治理和系统性解决方案上存在巨大鸿沟。</p><h4>优势分析：</h4><ul><li><strong>具备战略规划意图：</strong> “战略规划”得分（62.63分）是其唯一的亮点，表明公司高层对转型方向进行过思考。</li></ul><h4>短板与挑战：</h4><ul><li><strong>治理体系全面崩溃 (24.24分)：</strong> 公司完全缺乏有效的数字化转型组织保障、管控机制和文化氛围，是所有企业中最低的。</li><li><strong>系统性解决方案基础薄弱 (22.00分)：</strong> 尤其在“组织”配套上得分仅5分，说明流程与组织严重脱节。技术、数据、流程基础均亟待建设。</li><li><strong>业务价值创造能力极低 (13.19分)：</strong> 数字化与业务基本无关。</li></ul><h4>发展建议：</h4><p>五矿铍业的转型需要“推倒重来”，进行系统性重构。<strong>当务之急是建立治理体系</strong>，必须由“一把手”挂帅，成立跨部门的转型领导小组，明确授权和职责，这是所有工作的前提。在此基础上，应<strong>集中资源进行基础建设</strong>，优先解决数据采集自动化和核心业务系统的缺失问题，而不是追求高阶应用。必须首先解决“组织”和“管理”问题，否则任何技术投入都将是无效投资。</p>`,
+    "北京金色锑业": `<h3>北京金色锑业 - 数字化成熟度分析</h3><p>北京金色锑业总分<strong>27.00</strong>，整体水平在所有评估企业中处于末端，转型工作尚未有效启动，各方面均存在严重不足。</p><h4>优势分析：</h4><ul><li>无明显优势领域，各项得分均处于低位。</li></ul><h4>短板与挑战：</h4><ul><li><strong>全面落后：</strong> 所有五个维度的得分均在30分档或以下，转型工作存在系统性、全面性的缺失。</li><li><strong>基础能力缺失：</strong> “系统性解决方案”（22.07分）和“业务创新转型”（14.85分）得分最低，反映出公司在数据、技术、流程、组织等基础要素以及业务应用层面都存在“空心化”问题。</li></ul><h4>发展建议：</h4><p>对于北京金色锑业，建议将数字化转型提升到“生存战略”的高度。<strong>必须由最高管理层亲自领导</strong>，首先从制定一份系统、务实且可行的数字化转型“三年规划”开始。规划应聚焦于<strong>“信息化补课”</strong>，优先解决核心业务流程（如贸易、物流）的线上化和数据化问题，实现基础的业务可管、可视。同时，需要配套投入专项资源，并建立专门的团队来推动规划落地。</p>`,
+    "有色置业": `<h3>有色置业 - 数字化成熟度分析</h3><p>有色置业总分<strong>24.67</strong>，作为生产服务型企业，其数字化水平在本次评估中处于末位，转型之路任重道远。</p><h4>优势分析：</h4><ul><li>无明显优势领域，所有维度的得分均在30分左右或以下。</li></ul><h4>短板与挑战：</h4><ul><li><strong>价值认知严重不足：</strong> “发展战略”维度得分极低（31.2分），尤其是在价值模式策划上（19.75分），表明公司对数字化能带来什么、如何创造价值等根本性问题缺乏认知。</li><li><strong>组织配套严重缺失：</strong> “系统性解决方案”中的“组织”维度得分仅为5分，说明技术与管理严重脱节，这是转型失败的重大风险。</li></ul><h4>发展建议：</h4><p>有色置业的首要任务是<strong>“思想破冰”和“战略牵引”</strong>。建议公司高层组织专题学习和外部对标，从根本上提升对数字化转型紧迫性和重要性的认知。在此基础上，应聚焦核心业务（如资产管理、物业服务），寻找一两个最能提升客户体验或运营效率的痛点，作为单点突破口，通过解决实际问题来建立对数字化的信心和理解，避免全面铺开，集中资源办成一件“看得见的实事”。</p>`,
+    "黄沙坪": `<h3>黄沙坪 - 数字化成熟度分析</h3><p>黄沙坪总分<strong>29.04</strong>，作为矿山资源型企业，整体处于早期探索阶段，基础极为薄弱，尤其在系统性解决方案上问题突出。</p><h4>优势分析：</h4><ul><li><strong>具备初步的战略认知：</strong> “发展战略”得分（40.68分）相对最高，表明对转型方向有基本的认识和意愿。</li></ul><h4>短板与挑战：</h4><ul><li><strong>系统性解决方案全面崩溃 (18.59分)：</strong> 这是所有企业中得分最低的。尤其在“组织”和人员配置方面得分为0，这是一个巨大的警示信号，意味着转型工作完全没有组织和人员保障。</li><li><strong>业务创新停滞：</strong> “数字业务发展”为0分，转型完全停留在对内效率提升的浅层思考上。</li></ul><h4>发展建议：</h4><p>黄沙坪亟需解决数字化转型中的<strong>“无人、无体系”</strong>问题。<strong>首要且紧急的任务是“建组织、配人员”</strong>，必须立即成立由高层领导负责的数字化转型专班，并配备至少1-2名专职人员来推动工作。没有组织和人员保障，任何战略和技术都无法落地。在组织建立后，应立即着手进行基础数据采集和核心生产安全系统的建设，解决最紧迫的生产管理问题。</p>`,
+    "云天化氟化学": `<h3>云天化氟化学 - 数字化成熟度分析</h3><p>云天化氟化学总分<strong>30.01</strong>，其转型呈现出典型的“战略悬空”特征，即规划与实际价值创造严重脱节，制定的蓝图未能有效指导业务实践。</p><h4>优势分析：</h4><ul><li><strong>具备战略规划能力：</strong> 在“战略规划”层面得分较高（54.06分），显示公司能够制定出较为完善的转型规划文本。</li></ul><h4>短板与挑战：</h4><ul><li><strong>价值模式认知缺失：</strong> 最大的问题在于“价值模式”得分仅为12分，在所有企业中垫底。这说明公司的战略规划未能回答“为谁创造价值、如何创造价值”的核心商业问题。</li><li><strong>治理与能力基础薄弱：</strong> 除数字化文化外，治理体系的其他要素均处于最低水平。系统性解决方案和新型能力建设也全面滞后。</li></ul><h4>发展建议：</h4><p>建议公司<strong>重新审视并重构其数字化转型战略</strong>。新的战略必须以“业务价值”为核心导向，明确回答数字化要解决哪些业务痛点、带来哪些商业回报。应放弃“大而全”的规划，选择一两个具体的、有明确投入产出预期的业务场景（如危化品仓储的智能监管、特定生产线的能耗优化），从解决实际问题出发，反向驱动技术选型和能力建设，确保每一份投入都能对应到可衡量的业务价值上。</p>`,
+    "郴州氟化学": `<h3>郴州氟化学 - 数字化成熟度分析</h3><p>郴州氟化学总分<strong>31.50</strong>，处于数字化转型的起步阶段，具备一定的基础认知，但在系统性建设和深度应用方面存在全面挑战。</p><h4>优势分析：</h4><ul><li><strong>具备基础数字化应用：</strong> 在生产、运营等核心业务环节已经开始应用数字化工具，并对流程优化和组织调整有初步尝试。</li></ul><h4>短板与挑战：</h4><ul><li><strong>战略与价值脱节：</strong> 与云天化氟化学类似，对转型的商业价值认知不足，缺乏价值驱动的顶层设计。</li><li><strong>系统性建设全面薄弱：</strong> 治理体系、新型能力、系统性解决方案均处于较低水平，缺乏一体化的规划和建设，技术、数据、流程、组织之间协同性差。</li></ul><h4>发展建议：</h4><p>郴州氟化学应聚焦于<strong>“夯实基础，单点突破”</strong>。首先，需要开展系统性的流程梳理和优化工作，为数字化应用打好基础。其次，应集中资源解决最紧迫的问题，例如通过建设MES系统打通生产执行层的数据壁垒，实现生产过程的透明化管理。同时，必须建立有效的治理机制，确保转型工作有规划、有执行、有监督。</p>`,
+    "衡东氟化学": `<h3>衡东氟化学 - 数字化成熟度分析</h3><p>衡东氟化学总分<strong>29.80</strong>，与郴州氟化学情况类似，整体处于数字化转型的初始阶段，各项能力均有待加强。</p><h4>优势分析：</h4><ul><li><strong>具备转型意愿：</strong> 对数字化转型有基本的认知，并开始进行战略层面的思考。</li></ul><h4>短板与挑战：</h4><ul><li><strong>全面能力不足：</strong> 各个维度得分均处于低位，缺乏清晰的战略、有效的治理、扎实的技术和数据基础。</li><li><strong>缺乏价值导向：</strong> 对如何通过数字化创造商业价值认知模糊，转型缺乏明确的业务目标牵引。</li></ul><h4>发展建议：</h4><p>建议衡东氟化学积极<strong>利用集团资源，加速基础能力建设</strong>。应深度应用集团统建的“智慧运营管控平台”，借助平台赋能，低成本、高效率地实现核心业务的数字化。同时，公司内部必须加强对数字化转型的认知培训，明确转型首先要解决的业务痛点，选择1-2个关键场景进行试点，以点带面，逐步推进。</p>`
+};
+
+const companyOrder = ["株冶", "水口山", "湖南有色本部", "五矿铜业", "锡矿山", "郴州氟化学", "五矿铍业", "云天化氟化学", "衡东氟化学", "黄沙坪", "北京金色锑业", "有色置业"];
+
+const categories = ["发展战略", "治理体系", "新型能力", "业务创新转型", "系统性解决方案"];
+const companyNames = Object.keys(allData);
+const colors = [
+    '#38bdf8', '#fb923c', '#4ade80', '#f87171', '#a78bfa',
+    '#2dd4bf', '#facc15', '#fb7185', '#93c5fd', '#c084fc',
+    '#34d399', '#fde047'
+];
+
+let overviewChart, companyRadarChart, categoryBarChart;
+
+document.addEventListener('DOMContentLoaded', () => {
+    populateCompanyList();
+    createOverviewChart();
+    document.getElementById('overview-summary').innerHTML = overallSummary;
+});
+
+function populateCompanyList() {
+    const list = document.getElementById('company-list');
+    list.innerHTML = '';
+    
+    const overviewItem = document.createElement('li');
+    overviewItem.innerHTML = `<span id="nav-overview" class="nav-item active block">总体概览</span>`;
+    overviewItem.onclick = () => showOverview();
+    list.appendChild(overviewItem);
+
+    companyOrder.forEach(name => {
+        if(allData[name]) {
+            const item = document.createElement('li');
+            item.innerHTML = `<span id="nav-${name}" class="nav-item block">${name}</span>`;
+            item.onclick = () => showCompanyDetails(name);
+            list.appendChild(item);
+        }
+    });
+}
+
+function setActiveNavItem(selectedId) {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    const activeEl = document.getElementById(selectedId);
+    if(activeEl) activeEl.classList.add('active');
+}
+
+
+function createOverviewChart() {
+    const ctx = document.getElementById('overviewChart').getContext('2d');
+    const datasets = companyOrder.map((company, index) => {
+        if (!allData[company]) return null;
+        return {
+            label: company,
+            data: categories.map(cat => allData[company][cat] ? allData[company][cat].score : 0),
+            backgroundColor: colors[index % colors.length],
+            borderColor: colors[index % colors.length],
+            borderWidth: 1
+        };
+    }).filter(Boolean);
+
+    if (overviewChart) {
+        overviewChart.destroy();
+    }
+    overviewChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categories,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: '得分' } },
+                x: { ticks: { font: { size: 11 } } }
+            },
+            plugins: {
+                title: { display: false },
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function showOverview() {
+    setActiveNavItem('nav-overview');
+    document.getElementById('overview-section').classList.remove('hidden');
+    document.getElementById('detail-section').classList.add('hidden');
+}
+
+function showCompanyDetails(companyName) {
+    setActiveNavItem(`nav-${companyName}`);
+    document.getElementById('overview-section').classList.add('hidden');
+    document.getElementById('detail-section').classList.remove('hidden');
+
+    document.getElementById('company-name-title').innerText = `${companyName} - 数字化成熟度概览`;
+    document.getElementById('company-summary').innerHTML = companySummaries[companyName] || '<p>暂无该公司分析总结。</p>';
+    
+    populateTabs(companyName);
+    updateRadarChart(companyName);
+    updateBarChart(companyName, categories[0]);
+    populateDetailedAnalysis(companyName);
+    setActiveTab(categories[0]);
+}
+
+function populateTabs(companyName) {
+    const tabsContainer = document.getElementById('tabs-container');
+    tabsContainer.innerHTML = '';
+    categories.forEach(cat => {
+        if(allData[companyName] && allData[companyName][cat]) {
+            const tab = document.createElement('span');
+            tab.id = `tab-${cat}`;
+            tab.className = 'tab-item';
+            tab.innerText = cat;
+            tab.onclick = () => {
+                updateBarChart(companyName, cat);
+                setActiveTab(cat);
+            };
+            tabsContainer.appendChild(tab);
+        }
+    });
+}
+
+function populateDetailedAnalysis(companyName) {
+    const container = document.getElementById('detailed-analysis-section');
+    container.innerHTML = '';
+    const analysisData = allData[companyName]?.detailedAnalysis;
+
+    if (analysisData) {
+        categories.forEach(category => {
+            if (analysisData[category]) {
+                const details = document.createElement('details');
+                const summary = document.createElement('summary');
+                summary.textContent = category;
+                const content = document.createElement('div');
+                content.className = 'details-content';
+                content.textContent = analysisData[category];
+                
+                details.appendChild(summary);
+                details.appendChild(content);
+                container.appendChild(details);
+            }
+        });
+    } else {
+        container.innerHTML = `<p class="text-slate-500 p-4 text-center">该企业暂无详细评估报告文本。</p>`;
+    }
+}
+
+function setActiveTab(category) {
+    document.querySelectorAll('.tab-item').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    const activeTab = document.getElementById(`tab-${category}`);
+    if (activeTab) activeTab.classList.add('active');
+}
+
+function updateRadarChart(companyName) {
+    const ctx = document.getElementById('companyRadarChart').getContext('2d');
+    const companyData = allData[companyName];
+    if (!companyData) return;
+    const data = categories.map(cat => companyData[cat] ? companyData[cat].score : 0);
+
+    if (companyRadarChart) {
+        companyRadarChart.destroy();
+    }
+
+    companyRadarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: categories,
+            datasets: [{
+                label: `${companyName} (总分: ${companyData.score.toFixed(2)})`,
+                data: data,
+                fill: true,
+                backgroundColor: 'rgba(8, 145, 178, 0.2)',
+                borderColor: 'rgb(8, 145, 178)',
+                pointBackgroundColor: 'rgb(8, 145, 178)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(8, 145, 178)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { display: true },
+                    suggestedMin: 0,
+                    suggestedMax: 100,
+                    pointLabels: { font: { size: 12 } }
+                }
+            },
+            plugins: {
+                legend: { position: 'top' },
+                 tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+function updateBarChart(companyName, category) {
+    const ctx = document.getElementById('categoryBarChart').getContext('2d');
+    const categoryData = allData[companyName]?.[category];
+    if (!categoryData || !categoryData.subCategories) {
+        if(categoryBarChart) categoryBarChart.destroy();
+        return;
+    }
+    const labels = Object.keys(categoryData.subCategories);
+    const data = Object.values(categoryData.subCategories);
+
+    if (categoryBarChart) {
+        categoryBarChart.destroy();
+    }
+    
+    categoryBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '得分',
+                data: data,
+                backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                borderColor: 'rgba(8, 145, 178, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    suggestedMax: 100,
+                    title: { display: true, text: '得分' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: `${companyName} - ${category} 维度得分详情`,
+                    font: { size: 16 }
+                },
+                 tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.raw.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+</script>
+</body>
+</html>
+
