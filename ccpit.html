@@ -21,16 +21,8 @@
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
             margin-left: auto;
             margin-right: auto;
-            height: 40vh;
-            max-height: 500px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 50vh;
-            }
         }
         .nav-item {
             cursor: pointer;
@@ -49,10 +41,11 @@
         }
         .tab-item {
             cursor: pointer;
-            padding: 0.5rem 1.5rem;
+            padding: 0.5rem 1rem;
             border-bottom: 3px solid transparent;
             transition: border-color 0.2s, color 0.2s;
              color: #475569; /* slate-600 */
+             white-space: nowrap;
         }
         .tab-item:hover {
             color: #0e7490; /* cyan-700 */
@@ -65,14 +58,24 @@
         .summary-content {
             background-color: #f1f5f9; /* slate-100 */
             border-left: 4px solid #0891b2; /* cyan-600 */
-            padding: 1.25rem;
+            padding: 1rem;
             border-radius: 0.25rem;
             line-height: 1.75;
         }
+        @media (min-width: 640px) {
+            .summary-content {
+                padding: 1.25rem;
+            }
+        }
         .summary-content h3 {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: #1e293b; /* slate-800 */
+        }
+         @media (min-width: 640px) {
+            .summary-content h3 {
+                font-size: 1.25rem;
+            }
         }
          .summary-content p, .summary-content ul {
             margin-top: 0.75rem;
@@ -85,6 +88,7 @@
             border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
+            background-color: white;
         }
         summary {
             font-weight: 600;
@@ -101,73 +105,83 @@
             padding: 1rem;
             line-height: 1.75;
             white-space: pre-wrap;
-            background-color: white;
+            word-break: break-word;
+        }
+        .tabs-container-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tabs-container-inner {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0; /* slate-200 */
         }
     </style>
 </head>
 <body class="text-slate-700">
 
-    <div id="app" class="max-w-screen-2xl mx-auto p-4 md:p-8">
-        <header class="mb-8 flex justify-between items-center">
+    <div id="app" class="max-w-screen-2xl mx-auto p-4 md:p-6 lg:p-8">
+        <header class="mb-8 flex flex-col sm:flex-row sm:justify-between items-center text-center sm:text-left gap-6 sm:gap-2">
             <div>
-                <img src="https://globalbusinessinsight.github.io/picture/ccpitlogo.jpeg" alt="CCPIT Logo" class="w-40" onerror="this.style.display='none'">
+                <img src="https://globalbusinessinsight.github.io/picture/ccpitlogo.jpeg" alt="CCPIT Logo" class="w-32 md:w-40" onerror="this.style.display='none'">
             </div>
-            <div class="text-center px-4">
-                <h1 class="text-3xl md:text-4xl font-bold text-slate-800">企业数字化转型成熟度评估</h1>
-                <p class="mt-2 text-lg text-slate-500">交互式仪表板</p>
+            <div class="px-4">
+                <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-800">企业数字化转型成熟度评估</h1>
+                <p class="mt-2 text-base md:text-lg text-slate-500">交互式仪表板</p>
             </div>
             <div class="bg-blue-800 p-2 rounded-md">
-                 <img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="Inossem Logo" class="w-40" onerror="this.style.display='none'">
+                 <img src="https://globalbusinessinsight.github.io/picture/inossem_logo.svg" alt="Inossem Logo" class="w-32 md:w-40" onerror="this.style.display='none'">
             </div>
         </header>
 
         <main class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <nav class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg h-fit">
-                <h2 class="text-xl font-semibold mb-4 text-slate-800 border-b pb-2">企业列表</h2>
+            <nav class="lg:col-span-3 bg-white p-4 sm:p-6 rounded-xl shadow-lg h-fit">
+                <h2 class="text-lg sm:text-xl font-semibold mb-4 text-slate-800 border-b pb-2">企业列表</h2>
                 <ul id="company-list" class="space-y-2">
                     <!-- Company list will be populated by JS -->
                 </ul>
             </nav>
 
             <div id="content-area" class="lg:col-span-9 space-y-8">
-                <div id="overview-section" class="bg-white p-6 rounded-xl shadow-lg space-y-6">
+                <div id="overview-section" class="bg-white p-4 sm:p-6 rounded-xl shadow-lg space-y-6">
                     <div>
-                      <h2 class="text-2xl font-bold text-slate-800">总体得分概览</h2>
-                      <p class="mt-2 text-slate-500">此图表展示了所有参与评估企业在五个核心维度上的得分情况，您可以点击图例中的企业名称以在图表中显示或隐藏该企业的数据，从而进行灵活的对比分析。</p>
+                      <h2 class="text-xl sm:text-2xl font-bold text-slate-800">总体得分概览</h2>
+                      <p class="mt-2 text-sm sm:text-base text-slate-500">此图表展示了所有参与评估企业在五个核心维度上的得分情况，您可以点击图例中的企业名称以在图表中显示或隐藏该企业的数据，从而进行灵活的对比分析。</p>
                     </div>
                     <div id="overview-summary" class="summary-content">
                         <!-- Overall summary content will be populated by JS -->
                     </div>
-                    <div class="chart-container mt-4">
+                    <div class="chart-container mt-4 h-[60vh] md:h-[50vh] max-h-[400px] md:max-h-[500px]">
                         <canvas id="overviewChart"></canvas>
                     </div>
                 </div>
 
                 <div id="detail-section" class="hidden space-y-8">
-                    <div class="bg-white p-6 rounded-xl shadow-lg space-y-6">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg space-y-6">
                          <div>
-                            <h2 id="company-name-title" class="text-2xl font-bold text-slate-800"></h2>
-                            <p class="mt-2 text-slate-500">雷达图直观地展示了该企业在五个核心维度的成熟度概况。下方的标签页提供了各维度内部二级指标的详细得分情况。您还可以展开页面底部的“详细评估报告”部分，查阅完整的分析文本。</p>
+                            <h2 id="company-name-title" class="text-xl sm:text-2xl font-bold text-slate-800"></h2>
+                            <p class="mt-2 text-sm sm:text-base text-slate-500">雷达图直观地展示了该企业在五个核心维度的成熟度概况。下方的标签页提供了各维度内部二级指标的详细得分情况。您还可以展开页面底部的“详细评估报告”部分，查阅完整的分析文本。</p>
                         </div>
                         <div id="company-summary" class="summary-content">
                              <!-- Company-specific summary content will be populated by JS -->
                         </div>
-                        <div class="chart-container mt-4">
+                        <div class="chart-container mt-4 h-[45vh] sm:h-[40vh] md:h-[50vh] max-h-[500px]">
                             <canvas id="companyRadarChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <h3 class="text-xl font-bold text-slate-800 mb-4">各维度详情</h3>
-                        <div id="tabs-container" class="border-b border-slate-200">
-                            <!-- Tabs will be populated by JS -->
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-800 mb-4">各维度详情</h3>
+                        <div class="tabs-container-wrapper">
+                           <div id="tabs-container" class="tabs-container-inner">
+                                <!-- Tabs will be populated by JS -->
+                           </div>
                         </div>
-                        <div class="chart-container mt-4 !h-[50vh] max-h-[600px]">
+                        <div class="chart-container mt-4 h-[60vh] sm:h-[50vh] max-h-[600px]">
                             <canvas id="categoryBarChart"></canvas>
                         </div>
                     </div>
-                     <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <h3 class="text-xl font-bold text-slate-800 mb-4">详细评估报告</h3>
+                     <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-800 mb-4">详细评估报告</h3>
                         <div id="detailed-analysis-section">
                             <!-- Detailed analysis will be populated by JS -->
                         </div>
@@ -391,7 +405,6 @@ const companySummaries = {
 const companyOrder = ["株冶", "水口山", "湖南有色本部", "五矿铜业", "锡矿山", "郴州氟化学", "五矿铍业", "云天化氟化学", "衡东氟化学", "黄沙坪", "北京金色锑业", "有色置业"];
 
 const categories = ["发展战略", "治理体系", "新型能力", "业务创新转型", "系统性解决方案"];
-const companyNames = Object.keys(allData);
 const colors = [
     '#38bdf8', '#fb923c', '#4ade80', '#f87171', '#a78bfa',
     '#2dd4bf', '#facc15', '#fb7185', '#93c5fd', '#c084fc',
@@ -461,7 +474,7 @@ function createOverviewChart() {
             maintainAspectRatio: false,
             scales: {
                 y: { beginAtZero: true, title: { display: true, text: '得分' } },
-                x: { ticks: { font: { size: 11 } } }
+                x: { ticks: { font: { size: window.innerWidth < 768 ? 9 : 11 } } }
             },
             plugins: {
                 title: { display: false },
@@ -526,6 +539,7 @@ function populateDetailedAnalysis(companyName) {
         categories.forEach(category => {
             if (analysisData[category]) {
                 const details = document.createElement('details');
+                details.setAttribute('open', ''); // Default to open
                 const summary = document.createElement('summary');
                 summary.textContent = category;
                 const content = document.createElement('div');
@@ -584,7 +598,12 @@ function updateRadarChart(companyName) {
                     angleLines: { display: true },
                     suggestedMin: 0,
                     suggestedMax: 100,
-                    pointLabels: { font: { size: 12 } }
+                    pointLabels: { 
+                        font: { size: window.innerWidth < 768 ? 10 : 12 }
+                    },
+                    ticks: {
+                        backdropPadding: 0
+                    }
                 }
             },
             plugins: {
@@ -607,6 +626,7 @@ function updateBarChart(companyName, category) {
     const categoryData = allData[companyName]?.[category];
     if (!categoryData || !categoryData.subCategories) {
         if(categoryBarChart) categoryBarChart.destroy();
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         return;
     }
     const labels = Object.keys(categoryData.subCategories);
@@ -637,6 +657,11 @@ function updateBarChart(companyName, category) {
                     beginAtZero: true,
                     suggestedMax: 100,
                     title: { display: true, text: '得分' }
+                },
+                y: {
+                    ticks: {
+                         font: { size: window.innerWidth < 768 ? 10 : 12 }
+                    }
                 }
             },
             plugins: {
@@ -658,6 +683,25 @@ function updateBarChart(companyName, category) {
     });
 }
 
+// Handle chart resizing for responsive fonts
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        if (overviewChart) {
+            overviewChart.options.scales.x.ticks.font.size = window.innerWidth < 768 ? 9 : 11;
+            overviewChart.update();
+        }
+        if (companyRadarChart) {
+            companyRadarChart.options.scales.r.pointLabels.font.size = window.innerWidth < 768 ? 10 : 12;
+            companyRadarChart.update();
+        }
+        if (categoryBarChart) {
+            categoryBarChart.options.scales.y.ticks.font.size = window.innerWidth < 768 ? 10 : 12;
+            categoryBarChart.update();
+        }
+    }, 250);
+});
 </script>
 </body>
 </html>
