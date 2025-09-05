@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Management Process Poster</title>
+    <style>
+        body {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            background-color: #F7F3E8; /* Economist off-white/cream background */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="posterCanvas" width="840" height="1188"></canvas>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('posterCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // --- Style Configuration ---
+            const config = {
+                bgColor: '#F7F3E8',
+                redColor: '#E3120B',
+                blackColor: '#000000',
+                grayColor: '#555555',
+                lineWidth: 2,
+                fontTitle: 'bold 36px Georgia',
+                fontSubtitle: 'bold 22px Georgia',
+                fontHeader: 'bold 16px Georgia',
+                fontBody: '14px Georgia',
+                fontIcon: '12px Georgia',
+                a4_width: 840,
+                a4_height: 1188,
+                padding: 60
+            };
+
+            // --- Canvas Drawing Functions ---
+            function drawBackground() {
+                ctx.fillStyle = config.bgColor;
+                ctx.fillRect(0, 0, config.a4_width, config.a4_height);
+            }
+
+            function drawText(text, x, y, font, color, align = 'left', maxWidth = undefined) {
+                ctx.fillStyle = color;
+                ctx.font = font;
+                ctx.textAlign = align;
+                if (maxWidth) {
+                    const words = text.split(' ');
+                    let line = '';
+                    let currentY = y;
+                    for (let n = 0; n < words.length; n++) {
+                        const testLine = line + words[n] + ' ';
+                        const metrics = ctx.measureText(testLine);
+                        const testWidth = metrics.width;
+                        if (testWidth > maxWidth && n > 0) {
+                            ctx.fillText(line, x, currentY);
+                            line = words[n] + ' ';
+                            currentY += 18; // Line height
+                        } else {
+                            line = testLine;
+                        }
+                    }
+                    ctx.fillText(line, x, currentY);
+                } else {
+                    ctx.fillText(text, x, y);
+                }
+            }
+            
+            function drawIconBox(x, y, width, height, iconText, labelText) {
+                ctx.strokeStyle = config.blackColor;
+                ctx.lineWidth = config.lineWidth;
+                ctx.strokeRect(x, y, width, height);
+                drawText(iconText, x + width / 2, y + height / 2 - 5, 'bold 32px Georgia', config.blackColor, 'center');
+                drawText(labelText, x + width / 2, y + height - 15, config.fontIcon, config.blackColor, 'center');
+            }
+
+            function drawTextBox(x, y, width, header, body) {
+                 drawText(header, x, y, config.fontHeader, config.blackColor, 'left');
+                 drawText(body, x, y + 25, config.fontBody, config.grayColor, 'left', width);
+            }
+
+            function drawArrow(startX, startY, endX, endY) {
+                ctx.strokeStyle = config.blackColor;
+                ctx.lineWidth = config.lineWidth;
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+
+                const angle = Math.atan2(endY - startY, endX - startX);
+                ctx.save();
+                ctx.translate(endX, endY);
+                ctx.rotate(angle);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-10, -5);
+                ctx.lineTo(-10, 5);
+                ctx.closePath();
+                ctx.fillStyle = config.blackColor;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // --- Poster Content Drawing ---
+            drawBackground();
+
+            // Main Title
+            drawText('Production Management: A Process Dissected', config.padding, config.padding + 20, config.fontTitle, config.redColor);
+
+            // Subtitle 1
+            drawText('STAGE ONE: PLANNING & ISSUANCE', config.padding, 150, config.fontSubtitle, config.blackColor);
+
+            // Stage 1 Items
+            drawTextBox(config.padding, 190, 320, 'Production Plan Brain', 'The strategic core. Analyzes demand, capacity, and constraints to generate the Master Production Schedule (MPS). Ensures alignment with corporate objectives.');
+            drawArrow(config.padding + 160, 270, config.padding + 160, 300);
+            drawTextBox(config.padding, 310, 320, 'Production Management Center', 'The tactical hub. Translates the MPS into specific, actionable orders. Manages scheduling, resource coordination, and monitors overall progress.');
+            
+            // Order Types Section
+            const orderStartX = 450;
+            const orderY = 220;
+            const orderWidth = 100;
+            const orderHeight = 60;
+            const orderGap = 20;
+
+            drawIconBox(orderStartX, orderY, orderWidth, orderHeight, '⛏️', 'Mining');
+            drawIconBox(orderStartX + orderWidth + orderGap, orderY, orderWidth, orderHeight, '⚙️', 'Processing');
+            drawIconBox(orderStartX, orderY + orderHeight + orderGap, orderWidth, orderHeight, '🤝', 'Outsourcing');
+            drawIconBox(orderStartX + orderWidth + orderGap, orderY + orderHeight + orderGap, orderWidth, orderHeight, '🏭', 'Deep Process');
+
+            drawArrow(config.padding + 160, 390, config.padding + 160, 420);
+            drawArrow(config.padding + 160, 435, orderStartX - 20, 435);
+            drawArrow(orderStartX + (orderWidth*2+orderGap)/2, orderY + (orderHeight*2+orderGap) + 10, orderStartX + (orderWidth*2+orderGap)/2, 530);
+
+
+            // Subtitle 2
+            drawText('STAGE TWO: EXECUTION, TRACKING & ACCOUNTING', config.padding, 500, config.fontSubtitle, config.blackColor);
+            
+            // Stage 2 Columns
+            const col1X = config.padding;
+            const col2X = config.padding + 260;
+            const col3X = config.padding + 520;
+            const flowY_start = 550;
+            
+            // Column A
+            drawText('A: Material & Cost Flow', col1X, flowY_start, config.fontHeader, config.redColor, 'left');
+            drawIconBox(col1X + 50, flowY_start + 40, 100, 80, '📋', 'Material Requisition');
+            drawArrow(col1X + 100, flowY_start + 130, col1X + 100, flowY_start + 160);
+            drawIconBox(col1X + 50, flowY_start + 170, 100, 80, '🧾', 'Month-End Balancing');
+            drawTextBox(col1X, flowY_start + 280, 220, 'Function:', 'Manages the physical and financial flow of materials, from workshop request to final cost reconciliation, ensuring inventory and accounting accuracy.');
+
+            // Column B
+            drawText('B: Operations & Yield Flow', col2X, flowY_start, config.fontHeader, config.redColor, 'left');
+            drawIconBox(col2X + 50, flowY_start + 40, 100, 80, '📈', 'Work Reporting');
+            drawArrow(col2X + 100, flowY_start + 130, col2X + 100, flowY_start + 160);
+            drawIconBox(col2X + 50, flowY_start + 170, 100, 80, '⚖️', 'Metal Balancing');
+            drawTextBox(col2X, flowY_start + 280, 220, 'Function:', 'Tracks real-time production progress and, crucially, accounts for valuable material (e.g., metal) yield and loss throughout the process.');
+
+            // Column C
+            drawText('C: Service Management Flow', col3X, flowY_start, config.fontHeader, config.redColor, 'left');
+            drawIconBox(col3X + 50, flowY_start + 40, 100, 80, '✔️', 'Service Confirmation');
+            drawArrow(col3X + 100, flowY_start + 130, col3X + 100, flowY_start + 160);
+            drawIconBox(col3X + 50, flowY_start + 170, 100, 80, ' Stamp', 'Closing Orders'); // Using text as simple icon
+            drawTextBox(col3X, flowY_start + 280, 220, 'Function:', 'Oversees outsourced tasks, from quality verification of delivered services to the final administrative and financial closure of the order.');
+
+            // Footer
+            ctx.strokeStyle = config.blackColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(config.padding, config.a4_height - 50);
+            ctx.lineTo(config.a4_width - config.padding, config.a4_height - 50);
+            ctx.stroke();
+            drawText('A structured approach to complex production environments', config.a4_width - config.padding, config.a4_height - 30, '12px Georgia', config.blackColor, 'right');
+
+
+        });
+    </script>
+</body>
+</html>
