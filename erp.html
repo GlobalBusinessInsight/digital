@@ -1,0 +1,679 @@
+<!-- Chosen Palette: Earth & Energy Harmony -->
+<!-- Primary Background: Warm Neutral (#FDFCF8) -->
+<!-- Text: Slate Grey (#2D3748) -->
+<!-- Accents: Growth Green (#38A169), Solar Amber (#D69E2E), Wind Blue (#4299E1) -->
+
+<!-- Application Structure Plan: 
+     The design moves from macro to micro, facilitating a "Zoom-In" exploration flow.
+     1. Executive Dashboard (Hero): Immediate access to high-level KPIs (Capacity, Investment) to ground the user.
+     2. Temporal Trends (Line Chart): Contextualizes growth over time. Interaction allows toggling metrics to see different angles of progress.
+     3. Technology Deep Dive (Doughnut): Breaks down the "What". Clicking chart segments updates the descriptive text, linking data to qualitative insight.
+     4. Regional Dynamics (Bar Chart): Addresses the "Where". Filtering by technology allows comparative analysis across markets.
+     5. Strategic Barriers (Grid): The "Why" and "How". Text-heavy qualitative insights presented as interactive cards to reduce cognitive load, expanding only on demand.
+     Rationale: This structure separates dimensions (Time, Type, Location, Strategy) into distinct, digestible interactive views rather than a long linear document.
+-->
+
+<!-- Visualization & Content Choices:
+     1. Global Capacity Trend -> Goal: Change/Trend -> Viz: Interactive Line Chart (Chart.js) -> Interaction: Toggle Data Sets -> Justification: Best for showing continuous growth over years. NO SVG.
+     2. Energy Mix -> Goal: Proportions -> Viz: Doughnut Chart (Chart.js) -> Interaction: Click segment to show specific tech details -> Justification: Clear visual of market share. Canvas based.
+     3. Top Markets -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Filter by Tech Type -> Justification: Best for comparing magnitudes across categories. Canvas based.
+     4. Key Challenges -> Goal: Organize/Inform -> Viz: HTML Grid with JS Expand -> Interaction: Click to reveal details -> Justification: Clean typography over complex diagrams for qualitative text.
+     CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Renewable Energy Transition 2024: Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFCF8; 
+            color: #2D3748;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px; 
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        .nav-active {
+            border-bottom: 2px solid #38A169;
+            color: #2F855A;
+            font-weight: 600;
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F1F1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #A0AEC0;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-[#FDFCF8]/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-gray-800 tracking-tight">Eco<span class="text-green-600">Trends</span> <span class="text-gray-400 font-light">2024</span></span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8 items-center">
+                    <button onclick="scrollToSection('dashboard')" id="nav-dashboard" class="nav-btn nav-active px-1 pt-1 text-sm font-medium text-gray-900 focus:outline-none">Dashboard</button>
+                    <button onclick="scrollToSection('trends')" id="nav-trends" class="nav-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pt-1 border-b-2 text-sm font-medium focus:outline-none">Trends</button>
+                    <button onclick="scrollToSection('technology')" id="nav-technology" class="nav-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pt-1 border-b-2 text-sm font-medium focus:outline-none">Technology</button>
+                    <button onclick="scrollToSection('regions')" id="nav-regions" class="nav-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pt-1 border-b-2 text-sm font-medium focus:outline-none">Regions</button>
+                    <button onclick="scrollToSection('insights')" id="nav-insights" class="nav-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pt-1 border-b-2 text-sm font-medium focus:outline-none">Insights</button>
+                </div>
+                <!-- Mobile menu button placeholder (logic simplified for brevity) -->
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <span class="text-2xl">&#9776;</span> 
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        
+        <!-- Section 1: Executive Dashboard (Hero) -->
+        <section id="dashboard" class="pt-10 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                    <span class="block">Global Renewable Energy</span>
+                    <span class="block text-green-600">Transition Report 2024</span>
+                </h1>
+                <p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                    Executive summary of the rapid acceleration in clean energy deployment. Explore the data behind the record-breaking growth in solar, wind, and storage capacity.
+                </p>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Card 1 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg border-t-4 border-green-500 card-hover">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 truncate">Total Capacity Added</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-gray-900">510 GW</dd>
+                        <dd class="mt-2 text-sm text-green-600 flex items-center">
+                            <span>&#9650;</span> <span class="ml-1">50% YoY Increase</span>
+                        </dd>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg border-t-4 border-yellow-500 card-hover">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 truncate">Solar PV Share</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-gray-900">73%</dd>
+                        <dd class="mt-2 text-sm text-gray-500">of new renewables</dd>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg border-t-4 border-blue-500 card-hover">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 truncate">Global Investment</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-gray-900">$1.8 Trillion</dd>
+                        <dd class="mt-2 text-sm text-blue-600">Record High</dd>
+                    </div>
+                </div>
+                <!-- Card 4 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg border-t-4 border-purple-500 card-hover">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 truncate">Target Year</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-gray-900">2030</dd>
+                        <dd class="mt-2 text-sm text-gray-500">to triple capacity</dd>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-200 max-w-7xl mx-auto">
+
+        <!-- Section 2: Temporal Trends -->
+        <section id="trends" class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-white rounded-xl shadow-sm my-8">
+            <div class="md:flex md:items-center md:justify-between mb-6">
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">Global Capacity Trajectory</h2>
+                    <p class="mt-1 text-sm text-gray-500">Visualizing the acceleration of renewable energy adoption over the last decade.</p>
+                </div>
+                <div class="mt-4 flex md:mt-0 md:ml-4">
+                    <span class="relative z-0 inline-flex shadow-sm rounded-md">
+                        <button type="button" onclick="updateTrendChart('annual')" id="btn-annual" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-green-50 text-sm font-medium text-green-700 hover:bg-green-100 focus:z-10 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500">
+                            Annual Additions
+                        </button>
+                        <button type="button" onclick="updateTrendChart('cumulative')" id="btn-cumulative" class="relative -ml-px inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500">
+                            Cumulative Total
+                        </button>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Chart Container -->
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <p class="text-center text-xs text-gray-400 mt-2">Source: Generic Energy Agency (Simulated Data)</p>
+            </div>
+            
+            <div class="mt-6 prose prose-green prose-lg text-gray-500 mx-auto">
+                <p>
+                    <strong class="text-gray-900">Analysis:</strong> The growth curve has shifted from linear to exponential. While wind power has seen steady growth, solar PV has exploded due to a <span class="bg-yellow-100 px-1 rounded text-yellow-800">85% reduction in costs</span> since 2010. The 2023 spike represents a turning point, driven largely by China's massive deployment and policy incentives in the EU and US.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 3: Technology Deep Dive -->
+        <section id="technology" class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-gray-900 mb-4">The Generation Mix</h2>
+                    <p class="text-lg text-gray-500 mb-6">
+                        Renewables are not monolithic. Solar PV dominates new additions, but Wind and Hydropower remain critical baseload providers. Click the chart segments to explore each technology's role.
+                    </p>
+                    
+                    <!-- Interactive Detail Card -->
+                    <div id="tech-detail-card" class="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500 transition-colors duration-300">
+                        <h3 id="tech-title" class="text-xl font-bold text-gray-900 flex items-center">
+                            <span class="text-2xl mr-2">&#9728;</span> Solar PV
+                        </h3>
+                        <div class="mt-2 text-gray-600">
+                            <p id="tech-desc" class="mb-2">Solar Photovoltaic (PV) accounts for three-quarters of global renewable capacity additions worldwide.</p>
+                            <ul class="text-sm space-y-1 mt-3">
+                                <li id="tech-stat-1" class="flex justify-between border-b border-gray-100 pb-1"><span>Share of Additions:</span> <span class="font-semibold">73%</span></li>
+                                <li id="tech-stat-2" class="flex justify-between border-b border-gray-100 pb-1"><span>Key Driver:</span> <span class="font-semibold">Distributed Residential & Utility Scale</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 lg:mt-0">
+                    <div class="bg-white p-6 rounded-xl shadow-lg relative">
+                        <h4 class="text-center text-gray-400 text-sm uppercase tracking-wider mb-4">2024 Capacity Composition</h4>
+                        <div class="chart-container">
+                            <canvas id="techChart"></canvas>
+                        </div>
+                        <div class="text-center mt-4 text-sm text-gray-500">
+                            <span class="inline-block w-3 h-3 bg-yellow-400 rounded-full mr-1"></span> Click chart to filter insights
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Regional Dynamics -->
+        <section id="regions" class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-gray-50 rounded-xl my-8">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-extrabold text-gray-900">Regional Powerhouses</h2>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">Comparing the "Big Three" markets driving the transition.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+                <button onclick="updateRegionChart('all')" id="reg-btn-all" class="px-6 py-2 rounded-full bg-gray-800 text-white text-sm font-semibold shadow-md hover:bg-gray-700 focus:outline-none transition">All Renewables</button>
+                <button onclick="updateRegionChart('solar')" id="reg-btn-solar" class="px-6 py-2 rounded-full bg-white text-yellow-600 border border-yellow-500 text-sm font-semibold shadow-sm hover:bg-yellow-50 focus:outline-none transition">Solar Only</button>
+                <button onclick="updateRegionChart('wind')" id="reg-btn-wind" class="px-6 py-2 rounded-full bg-white text-blue-600 border border-blue-500 text-sm font-semibold shadow-sm hover:bg-blue-50 focus:outline-none transition">Wind Only</button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm p-4 md:p-8">
+                <div class="chart-container">
+                    <canvas id="regionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="p-4 bg-white rounded shadow-sm border-t-2 border-red-500">
+                    <h4 class="font-bold text-gray-900">China</h4>
+                    <p class="text-sm text-gray-600 mt-1">Commissioned as much solar PV in 2023 as the entire world did in 2022.</p>
+                </div>
+                <div class="p-4 bg-white rounded shadow-sm border-t-2 border-blue-500">
+                    <h4 class="font-bold text-gray-900">European Union</h4>
+                    <p class="text-sm text-gray-600 mt-1">Focus on diversifying supply chains and accelerating permitting via the Green Deal.</p>
+                </div>
+                <div class="p-4 bg-white rounded shadow-sm border-t-2 border-indigo-500">
+                    <h4 class="font-bold text-gray-900">United States</h4>
+                    <p class="text-sm text-gray-600 mt-1">Manufacturing boom driven by the Inflation Reduction Act (IRA) incentives.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Strategic Insights (Grid) -->
+        <section id="insights" class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-16">
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-8">Strategic Barriers & Enablers</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Insight Card 1 -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm card-hover cursor-pointer" onclick="toggleInsight(this)">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-3xl">&#9889;</span> <!-- Unicode High Voltage -->
+                        <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">Challenge</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Grid Bottlenecks</h3>
+                    <p class="text-gray-600 text-sm">Transmission and distribution networks are not expanding fast enough to accommodate new generation.</p>
+                    <div class="hidden mt-4 pt-4 border-t border-gray-100 text-sm text-gray-700">
+                        <p><strong>Impact:</strong> Over 3000 GW of projects are currently waiting in grid connection queues globally. Investment in grid infrastructure needs to double by 2030 to meet climate goals.</p>
+                    </div>
+                    <div class="mt-4 text-green-600 text-xs font-semibold uppercase tracking-wide">Click to expand</div>
+                </div>
+
+                <!-- Insight Card 2 -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm card-hover cursor-pointer" onclick="toggleInsight(this)">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-3xl">&#9878;</span> <!-- Unicode Scales -->
+                        <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">Enabler</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Policy Support</h3>
+                    <p class="text-gray-600 text-sm">The "Era of Green Industrial Policy" is unlocking trillions in private capital.</p>
+                    <div class="hidden mt-4 pt-4 border-t border-gray-100 text-sm text-gray-700">
+                        <p><strong>Impact:</strong> Mechanisms like the US IRA and EU Net-Zero Industry Act are providing long-term certainty, driving manufacturing onshoring and reducing project risk.</p>
+                    </div>
+                    <div class="mt-4 text-green-600 text-xs font-semibold uppercase tracking-wide">Click to expand</div>
+                </div>
+
+                <!-- Insight Card 3 -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm card-hover cursor-pointer" onclick="toggleInsight(this)">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-3xl">&#128267;</span> <!-- Unicode Battery -->
+                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">Trend</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Storage Symbiosis</h3>
+                    <p class="text-gray-600 text-sm">Renewables plus battery storage is becoming the new standard baseload competitor.</p>
+                    <div class="hidden mt-4 pt-4 border-t border-gray-100 text-sm text-gray-700">
+                        <p><strong>Impact:</strong> Battery costs fell another 14% in 2023. Co-located Solar+Storage projects are seeing 40% higher adoption rates, solving the intermittency problem.</p>
+                    </div>
+                    <div class="mt-4 text-green-600 text-xs font-semibold uppercase tracking-wide">Click to expand</div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-white text-lg font-bold mb-4">EcoTrends 2024</h3>
+                <p class="text-sm text-gray-400">Analysis based on the simulated "Global Renewable Energy Transition Report 2024". Data is representative of current global trends.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#dashboard" class="hover:text-white transition">Dashboard</a></li>
+                    <li><a href="#trends" class="hover:text-white transition">Trends</a></li>
+                    <li><a href="#technology" class="hover:text-white transition">Technology</a></li>
+                    <li><a href="#regions" class="hover:text-white transition">Regions</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Connect</h4>
+                <div class="flex space-x-4">
+                    <span class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-600">LN</span>
+                    <span class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-600">TW</span>
+                    <span class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-600">EM</span>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-gray-700 text-center text-xs text-gray-500">
+            &copy; 2024 Renewable Analysis Interactive. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State & Data Management ---
+        
+        // Data: Trend Chart
+        const trendData = {
+            years: ['2018', '2019', '2020', '2021', '2022', '2023', '2024 (Est)'],
+            annual: [180, 195, 260, 290, 340, 510, 580], // GW Added
+            cumulative: [2200, 2395, 2655, 2945, 3285, 3795, 4375] // Total GW
+        };
+
+        // Data: Technology Breakdown
+        const techData = {
+            labels: ['Solar PV', 'Wind (Onshore)', 'Wind (Offshore)', 'Hydro', 'Bioenergy/Other'],
+            data: [73, 19, 3, 3, 2], // Percentages
+            colors: ['#D69E2E', '#4299E1', '#2B6CB0', '#3182CE', '#A0AEC0'],
+            details: [
+                { title: 'Solar PV', desc: 'Dominates with modular deployment and plummeting costs.', stat1: '73%', stat2: 'Distributed & Utility' },
+                { title: 'Wind (Onshore)', desc: 'Mature technology facing supply chain headwinds but stable growth.', stat1: '19%', stat2: 'Utility Scale' },
+                { title: 'Wind (Offshore)', desc: 'High potential but high cost. Critical for coastal decarbonization.', stat1: '3%', stat2: 'Mega Projects' },
+                { title: 'Hydropower', desc: 'Growth has slowed, but remains the largest source of flexible clean electricity.', stat1: '3%', stat2: 'Baseload' },
+                { title: 'Bioenergy/Other', desc: 'Niche applications in industry and heating.', stat1: '2%', stat2: 'Specialized' }
+            ]
+        };
+
+        // Data: Regional
+        const regionData = {
+            labels: ['China', 'European Union', 'United States', 'India', 'Brazil'],
+            all: [240, 70, 45, 20, 15], // GW Added 2023
+            solar: [216, 55, 33, 16, 12],
+            wind: [24, 15, 8, 3, 3]
+        };
+
+        // --- Chart Initialization & Updates ---
+
+        let trendChartInstance = null;
+        let techChartInstance = null;
+        let regionChartInstance = null;
+
+        // 1. Trend Chart Logic
+        function initTrendChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendData.years,
+                    datasets: [{
+                        label: 'Annual Capacity Added (GW)',
+                        data: trendData.annual,
+                        borderColor: '#38A169',
+                        backgroundColor: 'rgba(56, 161, 105, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#38A169',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#2D3748',
+                            bodyColor: '#2D3748',
+                            borderColor: '#E2E8F0',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [2, 2], color: '#E2E8F0' },
+                            title: { display: true, text: 'Gigawatts (GW)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTrendChart(mode) {
+            // Update buttons
+            document.getElementById('btn-annual').className = mode === 'annual' ? 
+                'relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-green-50 text-sm font-medium text-green-700 focus:z-10 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500' : 
+                'relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500';
+            
+            document.getElementById('btn-cumulative').className = mode === 'cumulative' ? 
+                'relative -ml-px inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-green-50 text-sm font-medium text-green-700 focus:z-10 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500' : 
+                'relative -ml-px inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500';
+
+            // Update Chart
+            if (mode === 'annual') {
+                trendChartInstance.data.datasets[0].data = trendData.annual;
+                trendChartInstance.data.datasets[0].label = 'Annual Capacity Added (GW)';
+                trendChartInstance.data.datasets[0].borderColor = '#38A169'; // Green
+                trendChartInstance.data.datasets[0].backgroundColor = 'rgba(56, 161, 105, 0.1)';
+            } else {
+                trendChartInstance.data.datasets[0].data = trendData.cumulative;
+                trendChartInstance.data.datasets[0].label = 'Cumulative Capacity (GW)';
+                trendChartInstance.data.datasets[0].borderColor = '#2B6CB0'; // Blue
+                trendChartInstance.data.datasets[0].backgroundColor = 'rgba(43, 108, 176, 0.1)';
+            }
+            trendChartInstance.update();
+        }
+
+        // 2. Technology Chart Logic
+        function initTechChart() {
+            const ctx = document.getElementById('techChart').getContext('2d');
+            techChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: techData.labels,
+                    datasets: [{
+                        data: techData.data,
+                        backgroundColor: techData.colors,
+                        borderWidth: 2,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            updateTechCard(index);
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTechCard(index) {
+            const info = techData.details[index];
+            const color = techData.colors[index];
+            
+            const card = document.getElementById('tech-detail-card');
+            card.classList.remove('border-yellow-500', 'border-blue-500', 'border-gray-500');
+            card.style.borderLeftColor = color;
+            
+            // Fade out, swap text, fade in
+            card.style.opacity = '0.5';
+            setTimeout(() => {
+                document.getElementById('tech-title').innerHTML = `<span class="text-2xl mr-2" style="color:${color}">&#9679;</span> ${info.title}`;
+                document.getElementById('tech-desc').innerText = info.desc;
+                document.getElementById('tech-stat-1').innerHTML = `<span>Share of Additions:</span> <span class="font-semibold">${info.stat1}</span>`;
+                document.getElementById('tech-stat-2').innerHTML = `<span>Key Driver:</span> <span class="font-semibold">${info.stat2}</span>`;
+                card.style.opacity = '1';
+            }, 200);
+        }
+
+        // 3. Region Chart Logic
+        function initRegionChart() {
+            const ctx = document.getElementById('regionChart').getContext('2d');
+            regionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: regionData.labels,
+                    datasets: [{
+                        label: 'Gigawatts Added (2023)',
+                        data: regionData.all,
+                        backgroundColor: '#4A5568',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 10
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [4, 4], color: '#EDF2F7' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateRegionChart(type) {
+            let data, color, label;
+            
+            // Reset styles
+            const btnClasses = "px-6 py-2 rounded-full border text-sm font-semibold shadow-sm focus:outline-none transition";
+            const activeClass = "bg-gray-800 text-white border-transparent";
+            const inactiveClass = "bg-white text-gray-700 border-gray-300 hover:bg-gray-50";
+
+            document.getElementById('reg-btn-all').className = type === 'all' ? `px-6 py-2 rounded-full bg-gray-800 text-white text-sm font-semibold shadow-md` : `px-6 py-2 rounded-full bg-white text-gray-700 border border-gray-300 text-sm font-semibold hover:bg-gray-50`;
+            document.getElementById('reg-btn-solar').className = type === 'solar' ? `px-6 py-2 rounded-full bg-yellow-500 text-white text-sm font-semibold shadow-md` : `px-6 py-2 rounded-full bg-white text-yellow-600 border border-yellow-500 text-sm font-semibold hover:bg-yellow-50`;
+            document.getElementById('reg-btn-wind').className = type === 'wind' ? `px-6 py-2 rounded-full bg-blue-500 text-white text-sm font-semibold shadow-md` : `px-6 py-2 rounded-full bg-white text-blue-600 border border-blue-500 text-sm font-semibold hover:bg-blue-50`;
+
+            if (type === 'all') {
+                data = regionData.all;
+                color = '#4A5568';
+                label = 'Total Renewables (GW)';
+            } else if (type === 'solar') {
+                data = regionData.solar;
+                color = '#D69E2E';
+                label = 'Solar PV (GW)';
+            } else {
+                data = regionData.wind;
+                color = '#4299E1';
+                label = 'Wind Power (GW)';
+            }
+
+            regionChartInstance.data.datasets[0].data = data;
+            regionChartInstance.data.datasets[0].backgroundColor = color;
+            regionChartInstance.data.datasets[0].label = label;
+            regionChartInstance.update();
+        }
+
+        // --- UI Interactions ---
+
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            const offset = 80; // height of sticky nav + padding
+            const bodyRect = document.body.getBoundingClientRect().top;
+            const elementRect = element.getBoundingClientRect().top;
+            const elementPosition = elementRect - bodyRect;
+            const offsetPosition = elementPosition - offset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+
+            // Update Nav State
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active', 'text-green-800', 'border-b-2', 'border-green-500'));
+            const activeBtn = document.getElementById(`nav-${id}`);
+            if(activeBtn) activeBtn.classList.add('nav-active');
+        }
+
+        function toggleInsight(card) {
+            const detail = card.querySelector('div.hidden, div.block');
+            const prompt = card.querySelector('.tracking-wide');
+            
+            if (detail.classList.contains('hidden')) {
+                // Close others
+                document.querySelectorAll('#insights .block').forEach(el => {
+                   el.classList.replace('block', 'hidden'); 
+                });
+                document.querySelectorAll('#insights .tracking-wide').forEach(el => {
+                   el.innerText = 'Click to expand';
+                });
+
+                // Open current
+                detail.classList.remove('hidden');
+                detail.classList.add('block');
+                prompt.innerText = 'Click to collapse';
+                card.classList.add('ring-2', 'ring-green-500');
+            } else {
+                detail.classList.remove('block');
+                detail.classList.add('hidden');
+                prompt.innerText = 'Click to expand';
+                card.classList.remove('ring-2', 'ring-green-500');
+            }
+        }
+
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            initTrendChart();
+            initTechChart();
+            initRegionChart();
+            
+            // Navigation Scroll Spy
+            window.addEventListener('scroll', () => {
+                let current = '';
+                const sections = document.querySelectorAll('section');
+                const scrollY = window.pageYOffset;
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (scrollY >= (sectionTop - 200)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('nav-active');
+                    if (btn.id === `nav-${current}`) {
+                        btn.classList.add('nav-active');
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
