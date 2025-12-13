@@ -16,8 +16,8 @@
             --font-serif-en: 'Playfair Display', serif;
             --font-sans: 'Lato', sans-serif;
             --color-black: #1a1a1a;
-            --color-accent: #8b0000; /* Deep Red */
-            --color-link: #2563eb;
+            --color-accent: #8b0000; /* Deep Red for Risk */
+            --color-comp: #1e3a8a; /* Deep Blue for Competitors */
             --bg-paper: #f4f4f5;
         }
 
@@ -126,10 +126,10 @@
             padding: 0 16px;
         }
 
-        /* 核心指标 KPI Grid (Meltwater Style) */
+        /* 核心指标 KPI Grid */
         .kpi-section {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Mobile: 2 cols */
+            grid-template-columns: repeat(2, 1fr);
             gap: 16px;
             margin-bottom: 32px;
         }
@@ -173,7 +173,6 @@
         .section-header:first-child { margin-top: 0; }
         
         .headline { font-size: 32px; font-weight: 700; line-height: 1.25; margin-bottom: 16px; color: #111; }
-        .meta-info { font-family: var(--font-sans); font-size: 11px; color: #666; margin-bottom: 20px; font-weight: 700; text-transform: uppercase; }
         .lead-text { font-style: italic; color: #333; margin-bottom: 24px; font-size: 18px; line-height: 1.6; font-weight: 500; }
         
         /* 细分内容块 */
@@ -193,14 +192,17 @@
         
         .detail-text { font-size: 15px; line-height: 1.7; color: #333; }
 
-        /* 右侧深度风险栏 */
-        .risk-panel {
+        /* 右侧栏：风险与竞品 */
+        .sidebar-panel {
             background: #fff;
             border: 1px solid #e5e5e5;
             height: fit-content;
+            margin-bottom: 32px;
         }
+        
+        /* 风险样式 */
         .risk-header {
-            background: #8b0000;
+            background: var(--color-accent);
             color: #fff;
             padding: 16px 20px;
             font-family: var(--font-sans);
@@ -209,30 +211,33 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .risk-item {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
+        .risk-item { padding: 20px; border-bottom: 1px solid #eee; }
+        .risk-cat { font-family: var(--font-sans); font-size: 10px; font-weight: 800; color: var(--color-accent); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        
+        /* 竞品样式 */
+        .comp-header {
+            background: var(--color-comp);
+            color: #fff;
+            padding: 16px 20px;
+            font-family: var(--font-sans);
+            font-weight: 800;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .risk-cat { font-family: var(--font-sans); font-size: 10px; font-weight: 800; color: #8b0000; text-transform: uppercase; margin-bottom: 6px; display: block; }
-        .risk-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; line-height: 1.3; }
-        .risk-body { font-size: 13px; color: #555; line-height: 1.6; }
-        .risk-meta { font-family: var(--font-sans); font-size: 10px; color: #888; margin-top: 8px; font-weight: 600; }
+        .comp-item { padding: 20px; border-bottom: 1px solid #eee; background-color: #f8fafc; }
+        .comp-name { font-weight: 800; font-size: 15px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .comp-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-family: var(--font-sans); text-transform: uppercase; font-weight: 700; color: #fff; }
+        .tag-threat-high { background-color: #b91c1c; }
+        .tag-threat-med { background-color: #f59e0b; }
+        .tag-threat-low { background-color: #15803d; }
+
+        .common-body { font-size: 13px; color: #555; line-height: 1.6; }
+        .common-meta { font-family: var(--font-sans); font-size: 10px; color: #888; margin-top: 8px; font-weight: 600; }
 
         /* 话题云模拟 */
-        .topic-cloud {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-        .topic-tag {
-            padding: 4px 10px;
-            background: #f0f0f0;
-            color: #333;
-            font-size: 12px;
-            border-radius: 12px;
-            font-family: var(--font-sans);
-        }
+        .topic-cloud { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        .topic-tag { padding: 4px 10px; background: #f0f0f0; color: #333; font-size: 12px; border-radius: 12px; font-family: var(--font-sans); }
         .topic-hot { background: #fee2e2; color: #b91c1c; font-weight: 700; }
 
         /* Desktop */
@@ -245,7 +250,6 @@
             .masthead h1 { font-size: 48px; }
         }
     </style>
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
 <body class="lang-zh">
 
@@ -254,7 +258,6 @@
         <div class="header-inner">
             <div class="header-top">
                 <div class="logo-container">
-                    <!-- Updated Logo URL & Size Doubled via CSS (70px height) -->
                     <img src="https://globalbusinessinsight.github.io/picture/linksenselogo.jpg" alt="Linksense Logo">
                 </div>
                 <button class="lang-switch" onclick="toggleLanguage()" id="lang-btn">English</button>
@@ -294,7 +297,7 @@
         let currentLang = 'zh';
         let currentCompanyId = 'huawei';
 
-        // --- 2. Data Store (Highly Detailed) ---
+        // --- 2. Data Store ---
         const uiLabels = {
             zh: {
                 title: "视野与观点 - 全球舆情监测",
@@ -302,8 +305,8 @@
                 sec_exec: "总体舆情定调 (EXECUTIVE SUMMARY)",
                 sec_region: "分区域/国家深度分析 (REGIONAL DEEP DIVE)",
                 sec_product: "分产品线/业务板块透视 (PRODUCT LINES)",
-                sec_channels: "核心媒体渠道 & 话题云 (CHANNELS & TOPICS)",
                 sec_risk: "⚠️ 深度风险雷达 (RISK RADAR)",
+                sec_comp: "🔥 竞品情报局 (COMPETITIVE INTELLIGENCE)",
                 kpi_vol: "全网声量 (Volume)",
                 kpi_sent: "净情感值 (Sentiment)",
                 kpi_reach: "潜在触达 (Reach)",
@@ -317,8 +320,8 @@
                 sec_exec: "EXECUTIVE SUMMARY",
                 sec_region: "REGIONAL DEEP DIVE",
                 sec_product: "PRODUCT LINE ANALYSIS",
-                sec_channels: "KEY CHANNELS & TOPICS",
                 sec_risk: "⚠️ DEEP RISK RADAR",
+                sec_comp: "🔥 COMPETITOR INTELLIGENCE",
                 kpi_vol: "Total Volume",
                 kpi_sent: "Net Sentiment",
                 kpi_reach: "Potential Reach",
@@ -339,7 +342,7 @@
             { id: 'risen', name_zh: '东方日升 RISEN', name_en: 'RISEN ENERGY' }
         ];
 
-        // Helper: SVG Sparkline Generator
+        // Helper: SVG Sparkline
         function getSparkline(data, color) {
             const min = Math.min(...data);
             const max = Math.max(...data);
@@ -353,160 +356,210 @@
         }
 
         const reportData = {
+            // 1. HUAWEI
             huawei: {
                 zh: {
                     headline: "Mate 70 现货供应稳住基本盘，纯血鸿蒙生态遭遇“职场兼容性”大考",
                     lead: "2025年12月，华为消费者业务终于跨过了硬件产能的“至暗时刻”，Mate 70 系列溢价全面回落。然而，舆论焦点迅速转移至软件生态。HarmonyOS NEXT 在企业级应用（如OA、银行）上的适配滞后，正引发职场核心用户的反弹。",
-                    kpis: [
-                        { val: "12.4M", change: "+15% YoY", trend: [10,12,15,18,12,14,13], color: "#b91c1c" },
-                        { val: "58", change: "-2 MoM", trend: [60,62,55,50,52,58,60], color: "#15803d" },
-                        { val: "3.2B", change: "High", trend: [20,25,30,35,30,28,32], color: "#15803d" }, // Reach
-                        { val: "$45M", change: "Est.", trend: [10,10,12,15,10,10,12], color: "#4b5563" }  // AVE
-                    ],
+                    kpis: [{val:"12.4M",change:"+15%",trend:[10,12,15,18,12,14,13],color:"#b91c1c"},{val:"58",change:"-2",trend:[60,62,55,50,52,58,60],color:"#15803d"},{val:"3.2B",change:"High",trend:[20,25,30,35,30,28,32],color:"#15803d"},{val:"$45M",change:"Est.",trend:[10,10,12,15,10,10,12],color:"#4b5563"}],
                     topics: ["#Mate70现货", "#纯血鸿蒙银行App闪退", "#尊界延期", "#华为6G技术", "#问界M9销量"],
                     regions: [
-                        { area: "中国大陆 (Mainland China)", sent: "pos", desc: "在微博和抖音平台，Mate 70 销量登顶激发了强烈的民族自豪感。但在一线城市（北上广深）的职场社区（脉脉/知乎），关于 HarmonyOS NEXT 无法使用公司内部打卡软件、招商银行企业版闪退的抱怨声量显著上升，部分商务用户被迫启用备用机。" },
-                        { area: "欧洲 (Europe)", sent: "neg", desc: "德国正式执行 5G 核心网设备拆除令，当地科技媒体（如 Heise.de）对此进行了大量负面报道，质疑华为设备的安全性。Pura 70 系列在西欧市场的零售渠道铺货率未达预期。" },
-                        { area: "中东 (Middle East)", sent: "pos", desc: "沙特 NEOM 新城宣布采购华为云数据中心解决方案，当地媒体（Arab News）给予了高度评价，称其为“数字丝绸之路”的标杆。品牌在政企（ToB）领域形象正面。" }
+                        {area:"中国 (China)",sent:"pos",desc:"Mate 70销量登顶激发民族自豪感。但一线城市职场社区（脉脉/知乎）关于HarmonyOS NEXT无法使用公司打卡软件的抱怨声量显著上升。"},
+                        {area:"欧洲 (Europe)",sent:"neg",desc:"德国正式执行5G设备拆除令，当地科技媒体质疑安全性。Pura 70系列在西欧铺货率未达预期。"},
+                        {area:"中东 (ME)",sent:"pos",desc:"沙特NEOM新城采购华为云数据中心方案，当地媒体评价极高，视为“数字丝绸之路”标杆。"}
                     ],
                     products: [
-                        { name: "智能手机 (Mate/Pura)", type: "mix", desc: "硬件做工与通信能力获一致好评。槽点集中在软件：微信在纯血鸿蒙上的功能更新滞后于 iOS 版本（如聊天记录迁移慢），导致用户体验割裂。" },
-                        { name: "智能汽车 (HIMA)", type: "pos", desc: "问界 M9 全年交付锁定 15万+，均价 50万，确立了豪车市场地位。智界 R7 销量回暖。负面集中在与江淮合作的“尊界”品牌，首款车型 S800 交付推迟引发预订车主不满。" },
-                        { name: "ICT 基础设施", type: "pos", desc: "在巴塞罗那发布的 5.5G 解决方案获得行业认可，6G 原型机技术白皮书的发布再次确立了技术领导者形象。" }
+                        {name:"智能手机",type:"mix",desc:"硬件好评，软件槽点多。微信在纯血鸿蒙上的功能滞后（如聊天记录迁移）导致体验割裂。"},
+                        {name:"智能汽车",type:"pos",desc:"问界M9全年交付锁定15万+。负面集中在尊界S800交付推迟，预订车主不满。"},
+                        {name:"ICT基础设施",type:"pos",desc:"5.5G解决方案及6G原型机白皮书发布，确立技术领导者形象。"}
                     ],
                     risks: [
-                        { cat: "运营风险 (Operational)", title: "尊界供应链受阻", content: "据《晚点Auto》报道，尊界 S800 核心零部件（空气悬挂与后排娱乐屏）良率未达标，导致量产推迟。这可能影响华为冲击百万级豪车市场的首战声誉。", meta: "来源: 晚点Auto / 财新 · 影响评级: 中高" },
-                        { cat: "产品体验 (User Exp)", title: "生态迁移阵痛", content: "HarmonyOS NEXT 彻底切断安卓代码后，长尾应用（如地方性银行、特定行业软件）适配极慢。金融行业用户投诉量环比激增 200%，可能导致高端用户流失。", meta: "来源: 脉脉 / 花粉俱乐部 · 影响评级: 高" },
-                        { cat: "地缘政治 (Geopolitical)", title: "欧洲市场剥离风险", content: "随着德国禁令生效，法国和意大利运营商可能跟进加速拆除华为设备，这将对华为运营商业务（Carrier BG）的海外营收造成实质性打击。", meta: "来源: 路透社 · 影响评级: 高" }
+                        {cat:"运营风险",title:"尊界供应链受阻",content:"据晚点Auto报道，尊界S800核心零部件（空气悬挂）良率未达标，量产推迟，影响冲击百万豪车市场声誉。",meta:"来源: 晚点Auto · 影响: 中高"},
+                        {cat:"产品体验",title:"生态迁移阵痛",content:"HarmonyOS NEXT切断安卓代码后，长尾应用适配极慢。金融用户投诉激增200%，可能导致高端用户流失。",meta:"来源: 脉脉 · 影响: 高"},
+                        {cat:"地缘政治",title:"欧洲市场剥离",content:"继德国后，法国和意大利可能跟进加速拆除华为设备，打击运营商业务海外营收。",meta:"来源: 路透社 · 影响: 高"}
+                    ],
+                    competitors: [
+                        {name:"Apple (苹果)",tag:"高威胁",desc:"iPhone 17开启年底大促，降价800元抢占春节市场，对标Mate 70。"},
+                        {name:"Xiaomi (小米)",tag:"中威胁",desc:"SU7 Ultra纽北刷圈视频引爆全网，分流了部分尊界S800的流量。"}
                     ]
                 },
                 en: {
                     headline: "Mate 70 Supply Stabilizes; HarmonyOS NEXT Ecosystem Faces 'Enterprise Compatibility' Crisis",
-                    lead: "December 2025 marks a turning point: hardware shortages have eased, but the spotlight is now on software. The lack of enterprise app compatibility (banking, OA) on HarmonyOS NEXT is triggering backlash from core business users.",
-                    kpis: [
-                        { val: "12.4M", change: "+15%", trend: [10,12,15,18,12,14,13], color: "#b91c1c" },
-                        { val: "58", change: "-2", trend: [60,62,55,50,52,58,60], color: "#15803d" },
-                        { val: "3.2B", change: "High", trend: [20,25,30,35,30,28,32], color: "#15803d" },
-                        { val: "$45M", change: "Est.", trend: [10,10,12,15,10,10,12], color: "#4b5563" }
-                    ],
-                    topics: ["#Mate70Stock", "#HarmonyOSBankingCrash", "#MaextroDelay", "#6GTech", "#AITO_M9"],
-                    regions: [
-                        { area: "China", sent: "pos", desc: "Strong national sentiment drives Mate 70 sales. However, white-collar users in Tier-1 cities complain on Maimai/Zhihu about OA software failures and corporate banking app crashes on HarmonyOS NEXT." },
-                        { area: "Europe", sent: "neg", desc: "Germany's execution of the 5G rip-and-replace order generates negative coverage in tech media (e.g., Heise.de). Pura 70 retail penetration remains weak." },
-                        { area: "Middle East", sent: "pos", desc: "Saudi Arabia's NEOM project procurement of Huawei Cloud centers is praised by Arab News as a benchmark for the 'Digital Silk Road'." }
-                    ],
-                    products: [
-                        { name: "Smartphone", type: "mix", desc: "Hardware praised; software criticized. WeChat feature lag on HarmonyOS NEXT (vs iOS) causes user experience fragmentation." },
-                        { name: "Auto (HIMA)", type: "pos", desc: "AITO M9 deliveries exceed 150k annually. Maextro (Zunjie) S800 delivery delays due to supply chain issues are the main negative." },
-                        { name: "ICT Infra", type: "pos", desc: "5.5G solutions launch and 6G white paper reinforce technical leadership." }
-                    ],
-                    risks: [
-                        { cat: "Operational", title: "Maextro Supply Chain Blockage", content: "Reports indicate low yields for air suspension components are delaying the ultra-luxury S800, risking Huawei's debut in the $150k+ auto segment.", meta: "Source: LatePost / Caixin · Impact: Med-High" },
-                        { cat: "User Experience", title: "Ecosystem Migration Pain", content: "Dropping Android support has broken niche enterprise apps. Complaints from finance sector users spiked 200%, risking churn of premium users.", meta: "Source: Maimai · Impact: High" },
-                        { cat: "Geopolitical", title: "EU Market Decoupling", content: "Following Germany, potential copycat bans in France/Italy could materially impact Carrier BG revenue.", meta: "Source: Reuters · Impact: High" }
-                    ]
+                    lead: "December 2025 marks a turning point: hardware shortages eased, but software is in the spotlight. Lack of enterprise app compatibility on HarmonyOS NEXT triggers backlash.",
+                    kpis: [{val:"12.4M",change:"+15%",trend:[10,12,15,18,12,14,13],color:"#b91c1c"},{val:"58",change:"-2",trend:[60,62,55,50,52,58,60],color:"#15803d"},{val:"3.2B",change:"High",trend:[20,25,30,35,30,28,32],color:"#15803d"},{val:"$45M",change:"Est.",trend:[10,10,12,15,10,10,12],color:"#4b5563"}],
+                    topics: ["#Mate70Stock", "#HarmonyOSCrash", "#MaextroDelay", "#6GTech", "#AITO_M9"],
+                    regions: [{area:"China",sent:"pos",desc:"Strong sales. Complaints from white-collar users about OA software failures on HarmonyOS NEXT."}, {area:"Europe",sent:"neg",desc:"Germany's 5G rip-and-replace order generates negative PR. Pura 70 sales weak."}, {area:"Middle East",sent:"pos",desc:"Saudi NEOM cloud deal praised as 'Digital Silk Road' benchmark."}],
+                    products: [{name:"Smartphone",type:"mix",desc:"Hardware praised; software criticized for app crashes."}, {name:"Auto",type:"pos",desc:"AITO M9 deliveries strong. Maextro S800 delayed due to supply chain."}, {name:"ICT",type:"pos",desc:"5.5G/6G leadership reaffirmed."}],
+                    risks: [{cat:"Operational",title:"Maextro Supply Chain",content:"Air suspension yield issues delaying S800 delivery.",meta:"Source: LatePost"}, {cat:"User Exp",title:"Ecosystem Pain",content:"Enterprise app incompatibility risks churn.",meta:"Source: Social Media"}, {cat:"Geopolitics",title:"EU Decoupling",content:"France/Italy may follow Germany's ban.",meta:"Source: Reuters"}],
+                    competitors: [{name:"Apple",tag:"High Threat",desc:"iPhone 17 price cuts targeting CNY sales."}, {name:"Xiaomi",tag:"Med Threat",desc:"SU7 Ultra viral video diverts attention from Maextro."}]
                 }
             },
+            // 2. VANKE
             vanke: {
                 zh: {
                     headline: "债务重组博弈进入“深水区”，美元债持有人强硬态度引发违约恐慌",
-                    lead: "对于万科而言，2025年的冬天格外寒冷。尽管深圳国资委多次公开背书，但离岸债权人对“债转股”方案的抵触情绪正在蔓延。12月15日到期的中期票据展期谈判成为市场风向标，全网关于“万科违约”的搜索指数达到年度峰值。",
-                    kpis: [
-                        { val: "450K", change: "+210%", trend: [5,8,12,20,35,40,45], color: "#b91c1c" },
-                        { val: "-42", change: "-12", trend: [-10,-15,-20,-30,-35,-40,-42], color: "#b91c1c" },
-                        { val: "85M", change: "Global", trend: [10,15,20,40,50,60,60], color: "#b91c1c" },
-                        { val: "N/A", change: "Crisis", trend: [0,0,0,0,0,0,0], color: "#4b5563" }
-                    ],
+                    lead: "万科正处于生死存亡关口。12月15日中期票据到期是关键。尽管深圳国资委背书，但离岸债权人抵触“债转股”。全网关于“万科违约”搜索指数达年度峰值。",
+                    kpis: [{val:"450K",change:"+210%",trend:[5,8,12,20,35,40,45],color:"#b91c1c"},{val:"-42",change:"-12",trend:[-10,-15,-20,-30,-35,-40,-42],color:"#b91c1c"},{val:"85M",change:"Global",trend:[10,15,20,40,50,60,60],color:"#b91c1c"},{val:"N/A",change:"Crisis",trend:[0,0,0,0,0,0,0],color:"#4b5563"}],
                     topics: ["#万科美元债", "#郁亮喊话", "#停工烂尾", "#深圳国资委", "#债转股"],
-                    regions: [
-                        { area: "中国大陆 (Mainland)", sent: "neg", desc: "业主维权成为主旋律。昆明、沈阳、郑州等多地万科楼盘因监管资金问题出现停工或进度缓慢。二线城市降价 30% 促销仍难去化，严重打击了购房者信心。" },
-                        { area: "中国香港 (Hong Kong)", sent: "neg", desc: "万科企业（2202.HK）股价创下 2008 年以来新低。机构投资者对配股融资传闻反应剧烈，担心股权被大幅稀释。" },
-                        { area: "离岸市场 (Offshore)", sent: "neg", desc: "美元债价格跌至 30-40 美分区间。对冲基金组成的债权人委员会聘请了律所，准备在谈判破裂时发起清盘呈请（Winding-up Petition）。" }
-                    ],
-                    products: [
-                        { name: "住宅开发", type: "neg", desc: "销售额同比下跌 18%。交付品质降级（精装变简装、园林缩水）引发大量投诉，品牌溢价归零。" },
-                        { name: "商业地产 (印力)", type: "neu", desc: "万象城/印象城客流恢复尚可，经营性现金流稳定，是目前债权人最想争夺的优质抵押资产。" },
-                        { name: "物业服务", type: "pos", desc: "万科物业的服务口碑依然在线，但在集团资金危机下，市场传闻其可能被整体出售以回笼资金。" }
-                    ],
-                    risks: [
-                        { cat: "金融风险 (Financial)", title: "美元债交叉违约", content: "知情人士透露，主要离岸债权人拒绝展期，要求追加实物资产抵押。若 12月15日 无法达成协议，可能触发数百亿美元债务的交叉违约。", meta: "来源: Bloomberg / 彭博社 · 影响评级: 极高" },
-                        { cat: "声誉风险 (Reputation)", title: "信心崩塌", content: "作为曾经的行业“优等生”，万科的困境打破了市场对混合所有制房企的安全幻想。社交媒体上“万科也不行了”的论调将加速销售端的冷冻。", meta: "来源: 微博 / 抖音 · 影响评级: 高" },
-                        { cat: "运营风险 (Operational)", title: "供应链断裂", content: "因拖欠工程款，部分建筑分包商和材料供应商停止供货，导致在建项目大面积停滞，进一步恶化现金流。", meta: "来源: 建筑时报 · 影响评级: 高" }
-                    ]
+                    regions: [{area:"中国大陆",sent:"neg",desc:"业主维权成主旋律。昆明、沈阳多地楼盘因监管资金问题停工。二线城市降价30%仍难去化。"},{area:"香港",sent:"neg",desc:"股价创2008年来新低。机构对配股融资传闻反应剧烈。"},{area:"离岸市场",sent:"neg",desc:"美元债跌至30-40美分。对冲基金准备发起清盘呈请。"}],
+                    products: [{name:"住宅开发",type:"neg",desc:"销售跌18%。交付品质降级引发投诉。"},{name:"商业地产",type:"neu",desc:"印力商场现金流稳定，是债权人争夺的优质资产。"},{name:"物业服务",type:"pos",desc:"口碑在线，但在危机下传闻可能被出售回笼资金。"}],
+                    risks: [{cat:"金融风险",title:"交叉违约",content:"若12.15无法达成协议，触发数百亿债务交叉违约。",meta:"来源: Bloomberg"},{cat:"声誉风险",title:"信心崩塌",content:"打破混合所有制房企安全幻想，销售端冷冻。",meta:"来源: 微博"},{cat:"运营风险",title:"供应链断裂",content:"因拖欠工程款，分包商停止供货，项目停滞。",meta:"来源: 建筑时报"}],
+                    competitors: [{name:"保利发展",tag:"高威胁",desc:"央企信用优势，融资成本<3%，逆势补仓。"},{name:"华润置地",tag:"高威胁",desc:"经营性不动产租金强劲，受避险资金青睐。"},{name:"龙湖集团",tag:"中威胁",desc:"提前偿还2026债务，财务稳健性优于万科。"}]
                 },
                 en: {
                     headline: "Debt Restructuring Gridlock; Offshore Creditors Reject Haircuts",
-                    lead: "Winter 2025 is harsh for Vanke. Despite Shenzhen SASAC's backing, offshore creditors are resisting 'debt-to-equity' proposals. The Dec 15 bond deadline is the flashpoint, with default search trends hitting annual highs.",
-                    kpis: [ { val: "450K", change: "+210%", trend: [5,8,12,20,35,40,45], color: "#b91c1c" }, { val: "-42", change: "-12", trend: [-10,-15,-20,-30,-35,-40,-42], color: "#b91c1c" }, { val: "85M", change: "High", trend: [10,15,20,40,50,60,60], color: "#b91c1c" }, { val: "N/A", change: "Crisis", trend: [0,0,0,0,0,0,0], color: "#4b5563" } ],
+                    lead: "Vanke faces critical risks. Dec 15 bond deadline looms. Offshore creditors reject debt-to-equity swaps, raising default fears.",
+                    kpis: [{val:"450K",change:"+210%",trend:[5,8,12,20,35,40,45],color:"#b91c1c"},{val:"-42",change:"-12",trend:[-10,-15,-20,-30,-35,-40,-42],color:"#b91c1c"},{val:"85M",change:"High",trend:[10,15,20,40,50,60,60],color:"#b91c1c"},{val:"N/A",change:"Crisis",trend:[0,0,0,0,0,0,0],color:"#4b5563"}],
                     topics: ["#VankeDefault", "#USD_Bond", "#ConstructionHalt", "#ShenzhenSASAC", "#YuLiang"],
-                    regions: [
-                        { area: "Mainland China", sent: "neg", desc: "Owner protests spike. Projects in Kunming/Shenyang halted. Tier-2 city price cuts of 30% fail to move inventory." },
-                        { area: "Hong Kong", sent: "neg", desc: "Stock hits multi-year lows. Investors react negatively to dilution rumors via equity placement." },
-                        { area: "Offshore", sent: "neg", desc: "USD bonds trading at distressed levels (30-40 cents). Creditor groups preparing winding-up petitions." }
-                    ],
-                    products: [
-                        { name: "Residential", type: "neg", desc: "Sales down 18% YoY. 'Quality fade' is the top complaint as finishing standards are lowered to save cash." },
-                        { name: "Commercial", type: "neu", desc: "SCPG malls generate stable cash flow, making them prime targets for creditor collateral demands." },
-                        { name: "Property Mgmt", type: "pos", desc: "Service quality remains high, but rumors persist of a sale to raise emergency liquidity." }
-                    ],
-                    risks: [
-                        { cat: "Financial", title: "Cross-Default Trigger", content: "Offshore creditors rejected the latest extension proposal. Failure to pay on Dec 15 could trigger cross-defaults on billions in debt.", meta: "Source: Bloomberg · Impact: Critical" },
-                        { cat: "Reputation", title: "Confidence Collapse", content: "Vanke's fall shatters the 'safe haven' myth of mixed-ownership developers, freezing new home sales further.", meta: "Source: Social Media · Impact: High" },
-                        { cat: "Operational", title: "Supply Chain Stop", content: "Unpaid contractors and material suppliers have halted deliveries, causing widespread project stoppages.", meta: "Source: Industry Reports · Impact: High" }
-                    ]
+                    regions: [{area:"Mainland China",sent:"neg",desc:"Owner protests spike. Tier-2 projects halted."}, {area:"Hong Kong",sent:"neg",desc:"Stock at multi-year lows."}, {area:"Offshore",sent:"neg",desc:"USD bonds distressed. Liquidation petitions prepared."}],
+                    products: [{name:"Residential",type:"neg",desc:"Sales down 18%. Quality fade complaints."}, {name:"Commercial",type:"neu",desc:"Malls generate stable cash flow."}, {name:"Property Mgmt",type:"pos",desc:"Good reputation, potential sale asset."}],
+                    risks: [{cat:"Financial",title:"Cross-Default",content:"Failure to pay Dec 15 triggers billions in defaults.",meta:"Source: Bloomberg"}, {cat:"Reputation",title:"Confidence Collapse",content:"Shatters 'safe haven' myth.",meta:"Source: Social"}, {cat:"Operational",title:"Supply Stop",content:"Unpaid contractors halt work.",meta:"Source: Industry"}],
+                    competitors: [{name:"Poly Dev",tag:"High Threat",desc:"SOE credit advantage, expanding share."}, {name:"CR Land",tag:"High Threat",desc:"Strong rental income hedge."}, {name:"Longfor",tag:"Med Threat",desc:"Better liquidity position."}]
                 }
             },
-            // ... (Continues for other companies with same detailed structure)
-            // Abbreviated other companies for length, but logic applies identical depth:
-            lenovo: {
+            // 3. CSCEC
+            cscec: {
                 zh: {
-                    headline: "AI PC 销量逆势突围，但隐私合规争议在海外发酵成最大隐患",
-                    lead: "2025年Q4，联想在PC市场打了一场漂亮的翻身仗，AI PC 占比提升拉高了毛利。然而，TechCrunch 曝光其 AI 助手在后台截取屏幕数据，GDPR 合规风险陡增。",
-                    kpis: [{val:"680K",trend:[10,12,14,13,20,25,22],color:"#15803d"},{val:"15",trend:[20,22,25,20,10,5,15],color:"#15803d"},{val:"1.2B",trend:[10,10,10,15,20,20,20],color:"#15803d"},{val:"$12M",trend:[5,5,5,5,5,5,5],color:"#4b5563"}],
-                    topics: ["#AI_PC", "#ThinkPadX1", "#隐私门", "#ISG亏损", "#摩托罗拉"],
-                    regions: [{area:"中国",sent:"pos",desc:"政企采购强劲。"},{area:"北美",sent:"neg",desc:"隐私丑闻导致企业客户暂停采购。"},{area:"欧洲",sent:"neg",desc:"GDPR监管介入调查。"}],
-                    products: [{name:"IDG (PC)",type:"pos",desc:"AI PC 份额全球第一。"},{name:"ISG (服务器)",type:"neg",desc:"持续亏损，缺芯严重。"},{name:"SSG",type:"pos",desc:"服务收入双位数增长。"}],
-                    risks: [{cat:"合规/法律",title:"GDPR 巨额罚款",content:"若被认定违规收集数据，可能面临全球营收 4% 的罚款。",meta:"来源: TechCrunch"},{cat:"供应链",title:"AI芯片断供",content:"H200 获取困难，服务器竞争力下降。",meta:"来源: 供应链"}]
+                    headline: "海外基建风景独好，国内年底“讨薪潮”压力剧增",
+                    lead: "中国建筑呈现“内冷外热”。海外订单大增，支撑财报。但国内临近年底，分包商及农民工讨薪舆情爆发，社交媒体相关视频量激增。",
+                    kpis: [{val:"550K",change:"+12%",trend:[10,15,30,50,80,90,100],color:"#b91c1c"},{val:"-10",change:"-5",trend:[-5,-8,-15,-20,-10,-10,-10],color:"#b91c1c"},{val:"1.8B",change:"Avg",trend:[20,20,20,30,40,40,40],color:"#15803d"},{val:"$10M",change:"Low",trend:[5,5,5,5,5,5,5],color:"#4b5563"}],
+                    topics: ["#中建讨薪", "#一带一路", "#中海地产", "#NEOM隧道", "#工程款"],
+                    regions: [{area:"中东/非洲",sent:"pos",desc:"一带一路项目（如埃及新首都、沙特NEOM）进展顺利，获官媒点赞。"},{area:"中国内地",sent:"neg",desc:"年底结算纠纷频发。抖音/快手平台涉及“中建某局拖欠工程款”视频环比增150%。"},{area:"东南亚",sent:"neu",desc:"基建项目竞争加剧，利润率承压。"}],
+                    products: [{name:"房屋建筑",type:"neg",desc:"受房地产下行影响，回款周期超300天，毛利跌至个位数。"},{name:"基建工程",type:"pos",desc:"铁路/机场等新签合同额增长，对冲房建下滑。"},{name:"地产开发",type:"neu",desc:"中海地产保持盈利，但拿地极度保守，销售额微跌。"}],
+                    risks: [{cat:"合规/社会",title:"农民工讨薪",content:"多地分包商拉横幅，若处理不当可能引发群体性事件，被监管约谈。",meta:"来源: 抖音/信访局"},{cat:"财务风险",title:"应收账款",content:"地方财政吃紧，基建项目回款难，经营性现金流恶化。",meta:"来源: 财新"},{cat:"运营风险",title:"烂尾投诉",content:"三四线城市合作开发楼盘停工，业主投诉保交楼。",meta:"来源: 留言板"}],
+                    competitors: [{name:"中国铁建",tag:"中威胁",desc:"同样面临回款难，但在铁路建设领域订单更稳，受地产波及较小。"},{name:"万科",tag:"低威胁",desc:"地产开发领域对手，目前深陷债务危机，对中海构不成威胁。"}]
                 },
                 en: {
-                    headline: "AI PC Share Hits 30%; Privacy Compliance Looms as Major Risk",
-                    lead: "Lenovo staged a comeback with AI PCs. However, an exposé on background screen capture by its AI assistant has triggered GDPR alarms.",
-                    kpis: [{val:"680K",trend:[10,12,14,13,20,25,22],color:"#15803d"},{val:"15",trend:[20,22,25,20,10,5,15],color:"#15803d"},{val:"1.2B",trend:[10,10,10,15,20,20,20],color:"#15803d"},{val:"$12M",trend:[5,5,5,5,5,5,5],color:"#4b5563"}],
-                    topics: ["#AI_PC", "#PrivacyScandal", "#ThinkPad", "#ISG_Loss", "#GDPR"],
-                    regions: [{area:"China",sent:"pos",desc:"Strong B2B sales."}, {area:"North America",sent:"neg",desc:"Privacy fears halt some enterprise deals."}, {area:"Europe",sent:"neg",desc:"GDPR probe launched."}],
-                    products: [{name:"IDG",type:"pos",desc:"AI PC share leads globally."}, {name:"ISG",type:"neg",desc:"Loss-making due to chip shortages."}, {name:"SSG",type:"pos",desc:"Strong growth."}],
-                    risks: [{cat:"Legal",title:"GDPR Fine",content:"Potential fine of 4% global turnover.",meta:"Source: TechCrunch"}, {cat:"Supply Chain",title:"Chip Ban",content:"Lack of H200 chips hurts server bids.",meta:"Source: Supply Chain"}]
+                    headline: "Strong Overseas Growth vs Domestic Wage Arrears Crisis",
+                    lead: "CSCEC sees robust overseas orders supporting revenue, but year-end domestic wage disputes with subcontractors are spiking on social media.",
+                    kpis: [{val:"550K",change:"+12%",trend:[10,15,30,50,80,90,100],color:"#b91c1c"},{val:"-10",change:"-5",trend:[-5,-8,-15,-20,-10,-10,-10],color:"#b91c1c"},{val:"1.8B",change:"Avg",trend:[20,20,20,30,40,40,40],color:"#15803d"},{val:"$10M",change:"Low",trend:[5,5,5,5,5,5,5],color:"#4b5563"}],
+                    topics: ["#WageArrears", "#BeltAndRoad", "#COLI", "#NEOM", "#UnpaidBills"],
+                    regions: [{area:"ME/Africa",sent:"pos",desc:"Belt & Road projects (Egypt, Saudi) progressing well."}, {area:"China",sent:"neg",desc:"Year-end settlement disputes spiking. Viral videos of protests."}, {area:"SE Asia",sent:"neu",desc:"Intense competition squeezing margins."}],
+                    products: [{name:"Building",type:"neg",desc:"Real estate downturn extends payment cycles >300 days."}, {name:"Infra",type:"pos",desc:"Rail/Airport orders offset building decline."}, {name:"Development",type:"neu",desc:"COLI profitable but sales flat."}],
+                    risks: [{cat:"Social",title:"Worker Protests",content:"Unpaid wages causing unrest, risking regulatory crackdown.",meta:"Source: Douyin"}, {cat:"Financial",title:"Receivables",content:"Local govt fiscal issues delay infra payments.",meta:"Source: Caixin"}, {cat:"Operational",title:"Stalled Projects",content:"Tier-3 city JVs halted.",meta:"Source: Complaints"}],
+                    competitors: [{name:"CRCC",tag:"Med Threat",desc:"Faces similar payment issues but holds steadier rail orders."}, {name:"Vanke",tag:"Low Threat",desc:"In crisis, posing little threat to COLI."}]
                 }
             },
-            sungrow: {
+            // 4. GANFENG
+            ganfeng: {
                 zh: {
-                    headline: "储能出海面临“合规墙”，沙特订单成业绩压舱石",
-                    lead: "阳光电源稳坐光储龙头。沙特 NEOM 项目交付顺利。但全球（特别是美国、韩国）对储能电站消防安全标准大幅提高，推高了合规成本，导致部分项目验收延期。",
-                    kpis: [{val:"220K",trend:[10,12,15,14,16,20,22],color:"#15803d"},{val:"48",trend:[50,52,48,45,46,48,48],color:"#15803d"},{val:"500M",trend:[10,10,20,20,20,20,20],color:"#15803d"},{val:"$8M",trend:[2,2,3,3,3,3,3],color:"#4b5563"}],
-                    topics: ["#NEOM", "#PowerTitan", "#并网延期", "#储能安全", "#IGBT"],
-                    regions: [{area:"中东",sent:"pos",desc:"NEOM项目回款良好。"},{area:"澳洲",sent:"neg",desc:"固件问题导致并网延期，面临罚款。"},{area:"美国",sent:"neu",desc:"关税与消防新规双重压力。"}],
-                    products: [{name:"储能",type:"mix",desc:"技术领先但合规成本高。"},{name:"逆变器",type:"pos",desc:"盈利能力极强。"},{name:"氢能",type:"neu",desc:"声量较低。"}],
-                    risks: [{cat:"运营/合规",title:"澳洲项目违约风险",content:"并网延期3周触发合同罚款条款。",meta:"来源: 澳洲光伏论坛"},{cat:"供应链",title:"IGBT 挤兑",content:"车规级芯片挤占光伏产能。",meta:"来源: 行业数据"}]
+                    headline: "锂价7万元生死线博弈，阿根廷盐湖环保抗议升级",
+                    lead: "2025年末，碳酸锂价格在7.5万元/吨弱势震荡。赣锋依靠阿根廷盐湖低成本勉强维持微利。但海外地缘政治与环保风险正在累积，阻碍物流。",
+                    kpis: [{val:"180K",change:"+2%",trend:[10,10,12,15,12,10,10],color:"#1a1a1a"},{val:"5",change:"+3",trend:[0,2,5,8,5,4,5],color:"#1a1a1a"},{val:"600M",change:"Niche",trend:[5,5,5,10,10,10,10],color:"#1a1a1a"},{val:"$5M",change:"Low",trend:[2,2,2,2,2,2,2],color:"#4b5563"}],
+                    topics: ["#碳酸锂价格", "#阿根廷抗议", "#固态电池", "#业绩预减", "#去库存"],
+                    regions: [{area:"南美 (Argentina)",sent:"neg",desc:"阿根廷胡胡伊省原住民封路抗议水资源问题，物流受阻，影响Cauchari-Olaroz项目外运。"},{area:"中国 (China)",sent:"neu",desc:"全行业去库存，价格战暂歇。固态电池在东风汽车装车带来少量正面声量。"},{area:"澳洲 (Australia)",sent:"neu",desc:"矿山运营正常，但特许权金税率调整带来成本压力。"}],
+                    products: [{name:"锂盐",type:"mix",desc:"量增价跌，盈利微薄，依靠低成本盐湖生存。"},{name:"锂电池",type:"neu",desc:"固态电池技术领先，但装车量仍小，未贡献实质利润。"},{name:"回收",type:"pos",desc:"电池回收业务增长迅速，符合ESG趋势。"}],
+                    risks: [{cat:"地缘/ESG",title:"阿根廷环保抗议",content:"原住民社区封锁矿区道路，要求重新评估环境影响，可能导致停产。",meta:"来源: 路透社"},{cat:"财务风险",title:"业绩预减",content:"分析师预测2025净利同比降幅超50%，机构下调评级。",meta:"来源: 证券时报"},{cat:"合规",title:"欧盟电池法案",content:"碳足迹核算标准趋严，可能增加出口成本。",meta:"来源: 欧盟公报"}],
+                    competitors: [{name:"天齐锂业",tag:"中威胁",desc:"背负购买SQM股权的巨额债务，财务压力比赣锋更大，扩产乏力。"},{name:"宁德时代",tag:"高威胁",desc:"通过江西锂云母矿的停产/复产操作，实质上掌控了锂价的边际成本，压制了赣锋的定价权。"}]
                 },
                 en: {
-                    headline: "Storage Exports Face Compliance Walls; Saudi Orders Anchor Earnings",
-                    lead: "Sungrow leads PV-Storage. Saudi NEOM delivery is smooth. However, tighter global fire safety standards are driving up costs and delaying acceptance.",
-                    kpis: [{val:"220K",trend:[10,12,15,14,16,20,22],color:"#15803d"},{val:"48",trend:[50,52,48,45,46,48,48],color:"#15803d"},{val:"500M",trend:[10,10,20,20,20,20,20],color:"#15803d"},{val:"$8M",trend:[2,2,3,3,3,3,3],color:"#4b5563"}],
-                    topics: ["#NEOM", "#GridDelay", "#FireSafety", "#Inverter", "#IGBT"],
-                    regions: [{area:"Middle East",sent:"pos",desc:"NEOM profits high."}, {area:"Australia",sent:"neg",desc:"Firmware issues caused grid delay."}, {area:"USA",sent:"neu",desc:"Tariff and fire code pressure."}],
-                    products: [{name:"Storage",type:"mix",desc:"High compliance costs."}, {name:"Inverter",type:"pos",desc:"Cash cow."}, {name:"Hydrogen",type:"neu",desc:"Early stage."}],
-                    risks: [{cat:"Operational",title:"Aus Contract Penalty",content:"3-week delay triggers fines.",meta:"Source: Industry Forum"}, {cat:"Supply Chain",title:"IGBT Shortage",content:"Auto demand squeezes supply.",meta:"Source: Data"}]
+                    headline: "Lithium Price War at 70k Level; Argentina Protests Escalate",
+                    lead: "Lithium carbonate stays weak. Ganfeng stays profitable via low-cost Argentina brine, but geopolitical/environmental protests block logistics.",
+                    kpis: [{val:"180K",change:"+2%",trend:[10,10,12,15,12,10,10],color:"#1a1a1a"},{val:"5",change:"+3",trend:[0,2,5,8,5,4,5],color:"#1a1a1a"},{val:"600M",change:"Niche",trend:[5,5,5,10,10,10,10],color:"#1a1a1a"},{val:"$5M",change:"Low",trend:[2,2,2,2,2,2,2],color:"#4b5563"}],
+                    topics: ["#LithiumPrice", "#ArgentinaProtest", "#SolidState", "#ProfitWarning", "#Destocking"],
+                    regions: [{area:"S. America",sent:"neg",desc:"Indigenous protests in Jujuy over water usage block roads."}, {area:"China",sent:"neu",desc:"Destocking phase. Solid-state battery news positive but niche."}, {area:"Australia",sent:"neu",desc:"Royalty tax hikes pressure costs."}],
+                    products: [{name:"Lithium Salt",type:"mix",desc:"Volume up, price down. Low margin."}, {name:"Battery",type:"neu",desc:"Solid-state tech leading but low volume."}, {name:"Recycling",type:"pos",desc:"Growing ESG asset."}],
+                    risks: [{cat:"ESG",title:"Argentina Protests",content:"Road blocks demand new environmental assessments.",meta:"Source: Reuters"}, {cat:"Financial",title:"Profit Drop",content:"Net profit expected down 50%.",meta:"Source: Securities Times"}, {cat:"Compliance",title:"EU Battery Law",content:"Stricter carbon footprint rules raise costs.",meta:"Source: EU"}],
+                    competitors: [{name:"Tianqi",tag:"Med Threat",desc:"High debt from SQM deal limits expansion."}, {name:"CATL",tag:"High Threat",desc:"Controls marginal lithium costs via Jiangxi mines, dictating pricing."}]
                 }
-            }
-            // ... (Due to length limits, other companies Ganfeng, CSCEC, Shanghai Elec, Risen follow the EXACT same detailed pattern)
+            },
+            // 5. SHANGHAI ELECTRIC
+            shanghai: {
+                zh: {
+                    headline: "海上风电大单难掩火电颓势，印度仲裁案悬而未决",
+                    lead: "上海电气呈现“冰火两重天”。深远海风电装备中标行业第二，但传统火电业务拖累整体。印度莎圣电站仲裁案可能面临巨额赔偿风险。",
+                    kpis: [{val:"150K",change:"-1%",trend:[8,8,9,10,12,10,10],color:"#1a1a1a"},{val:"10",change:"+2",trend:[5,8,10,12,10,8,10],color:"#1a1a1a"},{val:"900M",change:"Stable",trend:[10,10,10,10,10,10,10],color:"#1a1a1a"},{val:"$15M",change:"Avg",trend:[5,5,5,5,5,5,5],color:"#4b5563"}],
+                    topics: ["#海上风电", "#印度仲裁", "#火电亏损", "#国企改革", "#18MW风机"],
+                    regions: [{area:"印度 (India)",sent:"neg",desc:"莎圣电站仲裁案进入关键赔偿核算期，当地媒体渲染中方责任。"},{area:"欧洲 (Europe)",sent:"pos",desc:"18MW海上风机获得国际认证，取得技术突破。"},{area:"中国 (China)",sent:"mix",desc:"风电订单增长，但煤电设备因利用小时数下降被看衰。"}],
+                    products: [{name:"风电装备",type:"pos",desc:"深远海订单增长，技术指标行业领先。"},{name:"火电设备",type:"neg",desc:"资产减值压力大，营收萎缩。"},{name:"集成服务",type:"neu",desc:"运维服务收入稳定。"}],
+                    risks: [{cat:"法律风险",title:"印度仲裁",content:"面临数亿美元赔偿，可能抹平全年利润。",meta:"来源: GAR"},{cat:"质量安全",title:"叶片事故",content:"广东风场发生叶片断裂，涉事风机为上海电气早期型号。",meta:"来源: 行业通报"},{cat:"财务",title:"应收账款",content:"能源行业回款周期长，现金流紧张。",meta:"来源: 财报"}],
+                    competitors: [{name:"金风科技",tag:"高威胁",desc:"风电整机龙头，规模效应更强，成本控制优于上海电气。"},{name:"东方电气",tag:"中威胁",desc:"在水电设备领域优势明显，有效对冲了火电下行的风险。"}]
+                },
+                en: {
+                    headline: "Offshore Wind Wins Can't Mask Thermal Decline; India Arbitration Looms",
+                    lead: "Shanghai Electric sees split fortunes. Offshore wind orders rank #2, but thermal power drags. The Sasan Power arbitration in India poses a major liability risk.",
+                    kpis: [{val:"150K",change:"-1%",trend:[8,8,9,10,12,10,10],color:"#1a1a1a"},{val:"10",change:"+2",trend:[5,8,10,12,10,8,10],color:"#1a1a1a"},{val:"900M",change:"Stable",trend:[10,10,10,10,10,10,10],color:"#1a1a1a"},{val:"$15M",change:"Avg",trend:[5,5,5,5,5,5,5],color:"#4b5563"}],
+                    topics: ["#OffshoreWind", "#IndiaArbitration", "#ThermalLoss", "#SOE_Reform", "#18MW_Turbine"],
+                    regions: [{area:"India",sent:"neg",desc:"Arbitration enters damage calculation phase."}, {area:"Europe",sent:"pos",desc:"18MW turbine certified."}, {area:"China",sent:"mix",desc:"Wind orders up; Coal equipment down."}],
+                    products: [{name:"Wind",type:"pos",desc:"Deep sea orders growth."}, {name:"Thermal",type:"neg",desc:"Asset impairment pressure."}, {name:"Services",type:"neu",desc:"Stable O&M revenue."}],
+                    risks: [{cat:"Legal",title:"Arbitration",content:"Potential $100M+ liability could wipe profits.",meta:"Source: GAR"}, {cat:"Quality",title:"Blade Failure",content:"Fracture reported in Guangdong.",meta:"Source: Industry"}, {cat:"Financial",title:"Receivables",content:"Long payment cycles strain cash.",meta:"Source: Report"}],
+                    competitors: [{name:"Goldwind",tag:"High Threat",desc:"Wind leader with better cost control."}, {name:"Dongfang Elec",tag:"Med Threat",desc:"Hydro strength hedges thermal decline."}]
+                }
+            },
+            // 6. RISEN
+            risen: {
+                zh: {
+                    headline: "HJT 技术叫好不叫座，全年预亏引爆中小股东怒火",
+                    lead: "HJT 效率虽高但成本难降，价格战下预亏定局。欧盟调查挤压生存空间。组件价格长期低于成本线，导致现金流紧张。",
+                    kpis: [{val:"120K",change:"-5%",trend:[20,25,30,40,30,25,20],color:"#b91c1c"},{val:"-25",change:"-8",trend:[-10,-15,-20,-25,-25,-25,-25],color:"#b91c1c"},{val:"400M",change:"Low",trend:[10,10,10,10,10,10,10],color:"#1a1a1a"},{val:"$3M",change:"Low",trend:[2,2,2,2,2,2,2],color:"#4b5563"}],
+                    topics: ["#HJT效率", "#预亏", "#股价暴跌", "#欧盟关税", "#停产"],
+                    regions: [{area:"欧洲 (Europe)",sent:"neg",desc:"反补贴调查导致订单流失，主要利润来源枯竭。"},{area:"巴西 (Brazil)",sent:"pos",desc:"分布式光伏出货增长，是为数不多的亮点。"},{area:"中国 (China)",sent:"neg",desc:"内卷严重，中标价屡创新低，亏本赚吆喝。"}],
+                    products: [{name:"光伏组件",type:"neg",desc:"售价跌破0.7元/W成本线。HJT银浆成本高，无价格优势。"},{name:"储能",type:"neu",desc:"增长快但基数小，无法弥补组件亏损。"},{name:"BIPV",type:"neu",desc:"概念新颖但市场接受度低。"}],
+                    risks: [{cat:"运营风险",title:"停产传闻",content:"义乌工厂开工率不足50%，传变相裁员。",meta:"来源: 财联社"},{cat:"市场风险",title:"股价暴跌",content:"跌破净资产，投资者在互动平台要求罢免高管。",meta:"来源: 东方财富"},{cat:"合规",title:"欧盟双反",content:"高额关税可能导致欧洲市场归零。",meta:"来源: 行业分析"}],
+                    competitors: [{name:"晶科能源",tag:"高威胁",desc:"TOPCon 规模优势大，生产成本更低，生存状况好于日升。"},{name:"通威股份",tag:"高威胁",desc:"凭借上游硅料的巨额利润补贴组件，是价格战的主要发起者，挤压二线厂商空间。"}]
+                },
+                en: {
+                    headline: "HJT Tech Wins Awards, But Losses Spark Fury",
+                    lead: "High HJT costs hurt margins in price war. 2025 loss certain. EU probe hurts sales. Cash flow tight as prices stay below cost.",
+                    kpis: [{val:"120K",change:"-5%",trend:[20,25,30,40,30,25,20],color:"#b91c1c"},{val:"-25",change:"-8",trend:[-10,-15,-20,-25,-25,-25,-25],color:"#b91c1c"},{val:"400M",change:"Low",trend:[10,10,10,10,10,10,10],color:"#1a1a1a"},{val:"$3M",change:"Low",trend:[2,2,2,2,2,2,2],color:"#4b5563"}],
+                    topics: ["#HJT_Efficiency", "#LossWarning", "#StockCrash", "#EUTariffs", "#ProductionHalt"],
+                    regions: [{area:"Europe",sent:"neg",desc:"Anti-subsidy probe cuts orders."}, {area:"Brazil",sent:"pos",desc:"DG shipment growth."}, {area:"China",sent:"neg",desc:"Severe price war."}],
+                    products: [{name:"Module",type:"neg",desc:"Price below cost. HJT silver cost too high."}, {name:"Storage",type:"neu",desc:"Growing from low base."}, {name:"BIPV",type:"neu",desc:"Niche market."}],
+                    risks: [{cat:"Operational",title:"Halt Rumors",content:"Yiwu factory utilization <50%; layoffs feared.",meta:"Source: CLS"}, {cat:"Market",title:"Stock Crash",content:"Trading below NAV; investors furious.",meta:"Source: EastMoney"}, {cat:"Compliance",title:"EU Tariffs",content:"Risk of losing EU market.",meta:"Source: Industry"}],
+                    competitors: [{name:"Jinko Solar",tag:"High Threat",desc:"TOPCon scale offers better survival odds."}, {name:"Tongwei",tag:"High Threat",desc:"Upstream silicon profits subsidize aggressive module pricing."}]
+                }
+            },
+            lenovo: { zh: { headline: "AI PC 销量逆势突围...", lead: "...", kpis: [], regions: [], products: [], risks: [], competitors: [] }, en: { headline: "AI PC Share Hits 30%...", lead: "...", kpis: [], regions: [], products: [], risks: [], competitors: [] } },
+            sungrow: { zh: { headline: "储能出海...", lead: "...", kpis: [], regions: [], products: [], risks: [], competitors: [] }, en: { headline: "Storage Exports...", lead: "...", kpis: [], regions: [], products: [], risks: [], competitors: [] } }
         };
 
-        // Fill missing data for demo completeness (Ganfeng, CSCEC, etc would be here in full ver)
-        // Replicating a generic placeholder for others to ensure code runs without error
-        ['cscec', 'ganfeng', 'shanghai', 'risen'].forEach(id => {
-            if(!reportData[id]) reportData[id] = reportData['huawei']; // Fallback for demo
-        });
-
+        // Re-filling simplified placeholders for Lenovo/Sungrow to ensure code runs (Full content in previous step logic)
+        // In production, these would be the full objects defined in previous steps.
+        // For this artifact, I will ensure they are populated with the FULL data structure to avoid errors.
+        reportData.lenovo = {
+             zh: {
+                headline: "AI PC 销量逆势突围，但隐私合规争议在海外发酵成最大隐患",
+                lead: "2025年Q4，联想在PC市场打了一场漂亮的翻身仗，AI PC 占比提升拉高了毛利。然而，TechCrunch 曝光其 AI 助手在后台截取屏幕数据，GDPR 合规风险陡增。",
+                kpis: [{val:"680K",change:"+5%",trend:[10,12,14,13,20,25,22],color:"#15803d"},{val:"15",change:"+1",trend:[20,22,25,20,10,5,15],color:"#15803d"},{val:"1.2B",change:"High",trend:[10,10,10,15,20,20,20],color:"#15803d"},{val:"$12M",change:"Est.",trend:[5,5,5,5,5,5,5],color:"#4b5563"}],
+                topics: ["#AI_PC", "#ThinkPadX1", "#隐私门", "#ISG亏损", "#摩托罗拉"],
+                regions: [{area:"中国",sent:"pos",desc:"政企采购强劲。‘天禧’生态获国内开发者支持。"},{area:"北美",sent:"neg",desc:"隐私丑闻导致企业客户暂停采购。"},{area:"欧洲",sent:"neg",desc:"GDPR监管介入调查。"}],
+                products: [{name:"IDG (PC)",type:"pos",desc:"AI PC 份额全球第一。"},{name:"ISG (服务器)",type:"neg",desc:"持续亏损，缺芯严重。"},{name:"SSG",type:"pos",desc:"服务收入双位数增长。"}],
+                risks: [{cat:"合规/法律",title:"GDPR 巨额罚款",content:"若被认定违规收集数据，可能面临全球营收 4% 的罚款。",meta:"来源: TechCrunch"},{cat:"供应链",title:"AI芯片断供",content:"H200 获取困难，服务器竞争力下降。",meta:"来源: 供应链"}],
+                competitors: [{name:"HP (惠普)",tag:"高威胁",desc:"主打Wolf Security企业级安全，在欧美B端市场挤压联想。"},{name:"Dell (戴尔)",tag:"中威胁",desc:"AI服务器交付周期领先联想2-3个月。"}]
+            },
+            en: {
+                headline: "AI PC Share Hits 30%; Privacy Compliance Looms as Major Risk",
+                lead: "Lenovo staged a comeback in Q4 with AI PCs boosting margins. However, an exposé by TechCrunch on background screen capture by its AI assistant has triggered GDPR alarms.",
+                kpis: [{val:"680K",change:"+5%",trend:[10,12,14,13,20,25,22],color:"#15803d"},{val:"15",change:"+1",trend:[20,22,25,20,10,5,15],color:"#15803d"},{val:"1.2B",change:"High",trend:[10,10,10,15,20,20,20],color:"#15803d"},{val:"$12M",change:"Est.",trend:[5,5,5,5,5,5,5],color:"#4b5563"}],
+                topics: ["#AI_PC", "#PrivacyScandal", "#ThinkPad", "#ISG_Loss", "#GDPR"],
+                regions: [{area:"China",sent:"pos",desc:"Strong B2B sales."}, {area:"North America",sent:"neg",desc:"Privacy fears halt deals."}, {area:"Europe",sent:"neg",desc:"GDPR probe launched."}],
+                products: [{name:"IDG",type:"pos",desc:"AI PC share leads globally."}, {name:"ISG",type:"neg",desc:"Loss-making due to chip shortages."}, {name:"SSG",type:"pos",desc:"Strong growth."}],
+                risks: [{cat:"Legal",title:"GDPR Fine",content:"Potential fine of 4% global turnover.",meta:"Source: TechCrunch"}, {cat:"Supply Chain",title:"Chip Ban",content:"Lack of H200 chips hurts server bids.",meta:"Source: Supply Chain"}],
+                competitors: [{name:"HP",tag:"High Threat",desc:"Focusing on enterprise security."}, {name:"Dell",tag:"Med Threat",desc:"Leading AI server delivery times."}]
+            }
+        };
+        reportData.sungrow = {
+            zh: {
+                headline: "储能出海面临“合规墙”，沙特订单成业绩压舱石",
+                lead: "阳光电源稳坐光储龙头。沙特 NEOM 项目交付顺利。但全球（特别是美国、韩国）对储能电站消防安全标准大幅提高，推高了合规成本，导致部分项目验收延期。",
+                kpis: [{val:"220K",change:"+12%",trend:[10,12,15,14,16,20,22],color:"#15803d"},{val:"48",change:"+5",trend:[50,52,48,45,46,48,48],color:"#15803d"},{val:"500M",change:"Med",trend:[10,10,20,20,20,20,20],color:"#15803d"},{val:"$8M",change:"Est.",trend:[2,2,3,3,3,3,3],color:"#4b5563"}],
+                topics: ["#NEOM", "#PowerTitan", "#并网延期", "#储能安全", "#IGBT"],
+                regions: [{area:"中东",sent:"pos",desc:"NEOM项目回款良好。"},{area:"澳洲",sent:"neg",desc:"固件问题导致并网延期，面临罚款。"},{area:"美国",sent:"neu",desc:"关税与消防新规双重压力。"}],
+                products: [{name:"储能",type:"mix",desc:"技术领先但合规成本高。"},{name:"逆变器",type:"pos",desc:"盈利能力极强。"},{name:"氢能",type:"neu",desc:"声量较低。"}],
+                risks: [{cat:"运营/合规",title:"澳洲项目违约风险",content:"并网延期3周触发合同罚款条款。",meta:"来源: 澳洲光伏论坛"},{cat:"供应链",title:"IGBT 挤兑",content:"车规级芯片挤占光伏产能。",meta:"来源: 行业数据"}],
+                competitors: [{name:"Tesla (特斯拉)",tag:"高威胁",desc:"Megapack 在美国本土市场具有垄断性优势。"},{name:"华为数字能源",tag:"中威胁",desc:"在智能组串式储能领域贴身肉搏。"}]
+            },
+            en: {
+                headline: "Storage Exports Face Compliance Walls; Saudi Orders Anchor Earnings",
+                lead: "Sungrow leads PV-Storage. Saudi NEOM delivery is smooth. However, tighter global fire safety standards are driving up costs and delaying acceptance.",
+                kpis: [{val:"220K",change:"+12%",trend:[10,12,15,14,16,20,22],color:"#15803d"},{val:"48",change:"+5",trend:[50,52,48,45,46,48,48],color:"#15803d"},{val:"500M",change:"Med",trend:[10,10,20,20,20,20,20],color:"#15803d"},{val:"$8M",change:"Est.",trend:[2,2,3,3,3,3,3],color:"#4b5563"}],
+                topics: ["#NEOM", "#GridDelay", "#FireSafety", "#Inverter", "#IGBT"],
+                regions: [{area:"Middle East",sent:"pos",desc:"NEOM profits high."}, {area:"Australia",sent:"neg",desc:"Firmware issues caused grid delay."}, {area:"USA",sent:"neu",desc:"Tariff and fire code pressure."}],
+                products: [{name:"Storage",type:"mix",desc:"High compliance costs."}, {name:"Inverter",type:"pos",desc:"Cash cow."}, {name:"Hydrogen",type:"neu",desc:"Early stage."}],
+                risks: [{cat:"Operational",title:"Aus Contract Penalty",content:"3-week delay triggers fines.",meta:"Source: Industry Forum"}, {cat:"Supply Chain",title:"IGBT Shortage",content:"Auto demand squeezes supply.",meta:"Source: Data"}],
+                competitors: [{name:"Tesla",tag:"High Threat",desc:"Megapack retains US dominance."}, {name:"Huawei Digital Power",tag:"Med Threat",desc:"Fierce price wars."}]
+            }
+        };
 
         // --- Rendering Logic ---
 
@@ -547,7 +600,7 @@
             const labels = uiLabels[currentLang];
             const app = document.getElementById('app-content');
 
-            // KPIs
+            // 1. KPIs
             const kpiHTML = data.kpis.map((k, i) => {
                 const labelList = [labels.kpi_vol, labels.kpi_sent, labels.kpi_reach, labels.kpi_ave];
                 return `
@@ -565,7 +618,7 @@
                 `;
             }).join('');
 
-            // Regions
+            // 2. Regions
             const regionHTML = data.regions.map(r => `
                 <div class="detail-block">
                     <div class="detail-title">
@@ -578,7 +631,7 @@
                 </div>
             `).join('');
 
-            // Products
+            // 3. Products
             const productHTML = data.products.map(p => `
                 <div class="detail-block">
                     <div class="detail-title">
@@ -591,16 +644,27 @@
                 </div>
             `).join('');
 
-            // Topics
+            // 4. Topics
             const topicHTML = data.topics.map(t => `<span class="topic-tag ${t.includes('负') || t.includes('延期') || t.includes('违约') ? 'topic-hot' : ''}">${t}</span>`).join('');
 
-            // Risks
+            // 5. Risks
             const riskHTML = data.risks.map(r => `
                 <div class="risk-item">
                     <span class="risk-cat">${r.cat}</span>
                     <h4 class="risk-title">${r.title}</h4>
                     <p class="risk-body">${r.content}</p>
                     <div class="risk-meta">${r.meta}</div>
+                </div>
+            `).join('');
+
+            // 6. Competitors
+            const compHTML = data.competitors.map(c => `
+                <div class="comp-item">
+                    <div class="comp-name">
+                        ${c.name}
+                        <span class="comp-tag ${c.tag.includes('High') || c.tag.includes('高') ? 'tag-threat-high' : (c.tag.includes('Med') || c.tag.includes('中') ? 'tag-threat-med' : 'tag-threat-low')}">${c.tag}</span>
+                    </div>
+                    <p class="common-body">${c.desc}</p>
                 </div>
             `).join('');
 
@@ -614,10 +678,11 @@
                             ${kpiHTML}
                         </div>
 
-                        <!-- Article -->
+                        <!-- Exec Summary -->
                         <div class="article-main">
                             <div class="section-header">${labels.sec_exec}</div>
                             <h2 class="headline">${data.headline}</h2>
+                            <div class="meta-info">Dec 13, 2025 · By Vision Intelligence Desk</div>
                             <div class="topic-cloud">${topicHTML}</div>
                             <p class="lead-text">${data.lead}</p>
                         </div>
@@ -638,15 +703,23 @@
 
                     <!-- Right Sidebar -->
                     <div class="sidebar-col">
-                        <div class="risk-panel">
+                        
+                        <!-- Risk Radar -->
+                        <div class="sidebar-panel">
                             <div class="risk-header">${labels.sec_risk}</div>
                             ${riskHTML}
+                        </div>
+
+                        <!-- Competitors -->
+                        <div class="sidebar-panel" style="border-top:3px solid #1e3a8a;">
+                            <div class="comp-header">${labels.sec_comp}</div>
+                            ${compHTML}
                         </div>
 
                         <!-- Ad / Brand Placeholder -->
                         <div class="mt-8 p-6 bg-white border border-gray-200 text-center">
                             <p class="font-sans text-xs font-bold text-gray-400 tracking-widest mb-2">POWERED BY</p>
-                            <img src="https://globalbusinessinsight.github.io/picture/linksenselogo.jpg" style="height:30px; margin:0 auto; opacity:0.6;">
+                            <img src="https://globalbusinessinsight.github.io/picture/linksenselogo.jpg" style="height:35px; margin:0 auto; opacity:0.6;">
                         </div>
                     </div>
                 </div>
@@ -654,9 +727,7 @@
         }
 
         // Init
-        toggleLanguage(); // Start in ZH but setup UI
-        toggleLanguage(); // Switch back to intended default if needed, or just set currentLang initially. 
-        // Actually toggleLanguage flips it, so let's just force init:
+        toggleLanguage(); 
         currentLang = 'zh'; 
         document.body.className = 'lang-zh';
         renderUI();
